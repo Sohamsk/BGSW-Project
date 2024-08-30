@@ -1,0 +1,7 @@
+op.txt
+
+/parser/*.jar
+/parser/*.interp
+/parser/*.tokens
+/parser/*.go
+!/parser/generate.go
