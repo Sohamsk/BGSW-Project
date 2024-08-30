@@ -1,4 +1,5 @@
 op.txt
+/dist/
 
 /parser/*.jar
 /parser/*.interp
