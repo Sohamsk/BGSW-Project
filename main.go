@@ -17,9 +17,25 @@ func NewTreeShapeListener() *TreeShapeListener {
 	return new(TreeShapeListener)
 }
 
-func (treeShapeListener *TreeShapeListener) EnterEveryRule(ctx antlr.ParserRuleContext) {
-	fmt.Println(ctx.GetText())
+func (s *TreeShapeListener) VisitTerminal(node antlr.TerminalNode) {
+	fmt.Println(node.GetSymbol())
 }
+
+func (s *TreeShapeListener) ExitStartRule(ctx *parser.StartRuleContext) {
+	fmt.Println("Start Rule")
+}
+
+func (s *TreeShapeListener) EnterVariableStmt(ctx *parser.VariableStmtContext) {
+	fmt.Println("DIM")
+}
+
+// func (treeShapeListener *TreeShapeListener) EnterWhileWendStmt(ctx parser.VariableStmtContext) {
+// 	fmt.Println("Entered while")
+// }
+
+// func (s *TreeShapeListener) EnterEveryRule(ctx antlr.ParserRuleContext) {
+// 	fmt.Printf("NEWLINE: %s\n", ctx.)
+// }
 
 func main() {
 	input, _ := antlr.NewFileStream(os.Args[1])

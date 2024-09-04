@@ -1,16 +1,7 @@
-Private Sub cmdClear_Click()
-    txtHello.Text = ""
-End Sub
+Dim I
+I = 5
 
-Private Sub cmdExit_Click()
-    End
-End Sub
-
-Private Sub cmdHello_Click()
-    txtHello.Text = "Hello World!"
-    With txtHello
-        .Font = "Arial"
-        .FontSize = 16
-        .ForeColor = vbBlue
-    End With
-End Sub
+Do While Not I = 0
+	Beep
+	I -= 1
+Loop
