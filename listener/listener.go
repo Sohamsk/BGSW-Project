@@ -2,6 +2,7 @@ package listener
 
 import (
 	"bosch/parser"
+	"bufio"
 	"fmt"
 
 	"github.com/antlr4-go/antlr/v4"
@@ -9,13 +10,17 @@ import (
 
 type TreeShapeListener struct {
 	*parser.BaseVisualBasic6ParserListener
+	writer *bufio.Writer
 }
 
-func NewTreeShapeListener() *TreeShapeListener {
-	return new(TreeShapeListener)
+func NewTreeShapeListener(writer *bufio.Writer) *TreeShapeListener {
+	l := new(TreeShapeListener)
+	l.writer = writer
+	return l
 }
 
 func (s *TreeShapeListener) VisitTerminal(node antlr.TerminalNode) {
+	s.writer.WriteString(node.GetSymbol().String())
 	fmt.Println(node.GetSymbol())
 }
 
