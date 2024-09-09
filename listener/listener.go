@@ -20,8 +20,15 @@ func NewTreeShapeListener(writer *bufio.Writer) *TreeShapeListener {
 }
 
 func (s *TreeShapeListener) VisitTerminal(node antlr.TerminalNode) {
-	s.writer.WriteString(node.GetSymbol().String())
-	fmt.Println(node.GetSymbol())
+	// 218 token type is variable name
+	if node.GetSymbol().GetTokenType() == 218 {
+		fmt.Println(node.GetText())
+		// figure something out to place the variable name and their types somewhere
+		// i will figure something out to make the it so that the varibale declaration statement state is stored
+		// i am thinking of using a stack to save the state to use later while constructing the tree
+	}
+	// this lists out all the tokens in the code
+	s.writer.WriteString(node.GetSymbol().String() + "\n")
 }
 
 func (s *TreeShapeListener) EnterStartRule(ctx *parser.StartRuleContext) {
@@ -30,6 +37,17 @@ func (s *TreeShapeListener) EnterStartRule(ctx *parser.StartRuleContext) {
 
 func (s *TreeShapeListener) ExitStartRule(ctx *parser.StartRuleContext) {
 	fmt.Println("Exit Start Rule")
+}
+
+func (s *TreeShapeListener) EnterVariableStmt(ctx *parser.VariableStmtContext) {
+	// for _, v := range ctx.GetChildren() {
+	// 	fmt.Println(v)
+	// }
+	fmt.Println(ctx.GetStart().GetTokenType())
+}
+
+func (s *TreeShapeListener) ExitVariableStmt(ctx *parser.VariableStmtContext) {
+	fmt.Println("Exit DIM")
 }
 
 func (s *TreeShapeListener) EnterDoLoopStmt(ctx *parser.DoLoopStmtContext) {
