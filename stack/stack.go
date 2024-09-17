@@ -1,13 +1,11 @@
 package stack
 
-import "fmt"
-
 type Stack struct {
 	top         int
 	stack_slice []any
 }
 
-func initStack() *Stack {
+func InitStack() *Stack {
 	return &Stack{
 		stack_slice: make([]any, 0),
 		top:         -1,
@@ -39,15 +37,3 @@ func (st *Stack) Peek() any {
 	return st.stack_slice[st.top]
 }
 
-func main() {
-	mystack := initStack()
-	//mystack.Pop()
-	mystack.Push(150)
-	mystack.Push("foo")
-	fmt.Println("peeked value:", mystack.Peek())
-	fmt.Println(mystack.Pop())
-	fmt.Println("peeked value:", mystack.Peek())
-	fmt.Println(mystack.Pop())
-	fmt.Println("Stack empty?")
-	fmt.Println(mystack.IsEmpty())
-}
