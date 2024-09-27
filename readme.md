@@ -6,4 +6,4 @@ To use:
 3. Run ```make test``` to run a sanity test.
 4. Run ```make clean``` to clean.
 
-Grammer used from: https://github.com/antlr/grammars-v4/
+Grammar used from: https://github.com/antlr/grammars-v4/
