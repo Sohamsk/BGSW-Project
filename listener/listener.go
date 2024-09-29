@@ -29,33 +29,66 @@ func (s *TreeShapeListener) VisitTerminal(node antlr.TerminalNode) {
 		// figure something out to place the variable name and their types somewhere
 		// i will figure something out to make the it so that the varibale declaration statement state is stored
 		// i am thinking of using a stack to save the state to use later while constructing the tree
-
 //	}
-	// this lists out all the tokens in the code
-//	s.writer.WriteString(node.GetSymbol().String())
 	fmt.Println(node.GetSymbol().String())
 }
 
 func (s *TreeShapeListener) EnterStartRule(ctx *parser.StartRuleContext) {
-	s.writer.WriteString("{")
+	s.writer.WriteString("body: [")
 }
 
 func (s *TreeShapeListener) ExitStartRule(ctx *parser.StartRuleContext) {
-	s.writer.WriteString("}")
+	s.writer.WriteString("]")
 }
 
 func (s *TreeShapeListener) EnterVariableSubStmt(ctx *parser.VariableSubStmtContext) {
 	nodes := ctx.GetChildren()
-	s.writer.WriteString("\"DeclareVariable\": {")
+	s.writer.WriteString("{\"RuleType\": \"DeclareVariable\"")
 	s.writer.WriteString("\"Identifier\": \"" + nodes[0].(antlr.ParseTree).GetText() + "\",")
-	s.writer.WriteString("\"Type\": {")
 	if (len(nodes) == 3) {
-		s.writer.WriteString("\"Static\": true,")
-		s.writer.WriteString("\"type\": \"" + nodes[2].GetChild(2).(antlr.RuleNode).GetText() + "\"")
+		s.writer.WriteString("\"Type\": \"" + nodes[2].GetChild(2).(antlr.RuleNode).GetText() + "\"")
 	} else {
-		s.writer.WriteString("\"Static\": false")
+		s.writer.WriteString("\"Type\": VARIANT")
 	}
-	s.writer.WriteString("}}")
+	s.writer.WriteString("},")
+}
+
+
+func (s *TreeShapeListener) EnterLetStmt(ctx *parser.LetStmtContext) {
+	nodes := ctx.GetChildren()
+	flip := false
+	var lhs, rhs string
+	s.writer.WriteString("\"LetStatement\": {")
+	for _, node := range(nodes) {
+		switch node.(type) {		// we WILL have to handle function calls some how
+		case antlr.RuleNode:
+			fmt.Println(node.(antlr.RuleNode).GetText())
+			if (flip) {
+				lhs += node.(antlr.RuleNode).GetText()
+			} else {
+				rhs += node.(antlr.RuleNode).GetText()
+			}
+		case antlr.TerminalNode:
+			sym := node.(antlr.TerminalNode).GetText()
+			if (sym != " ") {
+				if (sym == "=" || sym == "+=" || sym == "-=" ) {
+					flip = !flip
+					fmt.Println("\"Operation\":\""+ sym +"\"")
+				} else {
+					if (flip) {
+						lhs += node.(antlr.RuleNode).GetText()
+					} else {
+						rhs += node.(antlr.RuleNode).GetText()
+					}
+				}
+			}else {
+				fmt.Println("ignore")
+			}
+		}
+	}
+	fmt.Println("\"left\":\"" + lhs + "\"")
+	fmt.Println("\"Right\":\""+ rhs + "\"")
+	s.writer.WriteString("},")
 }
 
 func (s *TreeShapeListener) EnterDoLoopStmt(ctx *parser.DoLoopStmtContext) {
@@ -66,10 +99,3 @@ func (s *TreeShapeListener) ExitDoLoopStmt(ctx *parser.DoLoopStmtContext) {
 	fmt.Println("Exit do statement")
 }
 
-// func (treeShapeListener *TreeShapeListener) EnterWhileWendStmt(ctx parser.VariableStmtContext) {
-// 	fmt.Println("Entered while")
-// }
-
-// func (s *TreeShapeListener) EnterEveryRule(ctx antlr.ParserRuleContext) {
-// 	fmt.Printf("NEWLINE: %s\n", ctx.)
-// }

@@ -24,15 +24,15 @@ func main() {
 	p.AddErrorListener(antlr.NewDiagnosticErrorListener(true))
 	tree := p.StartRule()
 
-	f, err := os.Create("op.txt")
+	f, err := os.Create("op.json")
 	if err != nil {
 		log.Panic(err)
 	}
 	f.Seek(0, 0)
 	w := bufio.NewWriter(f)
-
+	w.WriteString("{\"Name\":\"whatever\", \"ModuleType\": \"something\"")
 	antlr.ParseTreeWalkerDefault.Walk(listener.NewTreeShapeListener(w), tree)
-
+	w.WriteString("}")
 	w.Flush()
 	f.Close()
 }

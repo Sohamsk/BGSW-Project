@@ -11,4 +11,4 @@ test: build
 	./dist/main $(TARGET)
 
 clean:
-	rm -rf op.txt ./dist
+	rm -rf op.json ./dist
