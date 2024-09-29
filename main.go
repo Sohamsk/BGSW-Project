@@ -6,13 +6,20 @@ import (
 	"bufio"
 	"log"
 	"os"
+	"strings"
 
 	"github.com/antlr4-go/antlr/v4"
 )
 
 func main() {
-	input, err := antlr.NewFileStream(os.Args[1])
+	inputfileName := os.Args[1]
+	input, err := antlr.NewFileStream(inputfileName)
 
+	filePath := strings.Split(inputfileName, "/")
+	fileName := filePath[len(filePath)-1]
+
+	fileNameSlice := strings.Split(fileName, ".")
+	fileName, fileExtension := fileNameSlice[0], fileNameSlice[1]
 	if err != nil {
 		log.Panic("File error")
 	}
@@ -30,7 +37,7 @@ func main() {
 	}
 	f.Seek(0, 0)
 	w := bufio.NewWriter(f)
-	w.WriteString("{\"Name\":\"whatever\", \"ModuleType\": \"something\"")
+	w.WriteString("{\"FileName\":\"" + fileName + "\", \"FileType\": \"" + fileExtension + "\",")
 	antlr.ParseTreeWalkerDefault.Walk(listener.NewTreeShapeListener(w), tree)
 	w.WriteString("}")
 	w.Flush()
