@@ -34,21 +34,22 @@ func (s *TreeShapeListener) VisitTerminal(node antlr.TerminalNode) {
 }
 
 func (s *TreeShapeListener) EnterStartRule(ctx *parser.StartRuleContext) {
-	s.writer.WriteString("body: [")
+	s.writer.WriteString("\"body\": [")
 }
 
 func (s *TreeShapeListener) ExitStartRule(ctx *parser.StartRuleContext) {
+	s.writer.Flush()
 	s.writer.WriteString("]")
 }
 
 func (s *TreeShapeListener) EnterVariableSubStmt(ctx *parser.VariableSubStmtContext) {
 	nodes := ctx.GetChildren()
-	s.writer.WriteString("{\"RuleType\": \"DeclareVariable\"")
+	s.writer.WriteString("{\"RuleType\": \"DeclareVariable\",")
 	s.writer.WriteString("\"Identifier\": \"" + nodes[0].(antlr.ParseTree).GetText() + "\",")
 	if (len(nodes) == 3) {
 		s.writer.WriteString("\"Type\": \"" + nodes[2].GetChild(2).(antlr.RuleNode).GetText() + "\"")
 	} else {
-		s.writer.WriteString("\"Type\": VARIANT")
+		s.writer.WriteString("\"Type\": \"VARIANT\"")
 	}
 	s.writer.WriteString("},")
 }
@@ -58,12 +59,11 @@ func (s *TreeShapeListener) EnterLetStmt(ctx *parser.LetStmtContext) {
 	nodes := ctx.GetChildren()
 	flip := false
 	var lhs, rhs string
-	s.writer.WriteString("\"LetStatement\": {")
+	s.writer.WriteString("{\"RuleType\": \"LetStatement\",")
 	for _, node := range(nodes) {
 		switch node.(type) {		// we WILL have to handle function calls some how
 		case antlr.RuleNode:
-			fmt.Println(node.(antlr.RuleNode).GetText())
-			if (flip) {
+			if (!flip) {
 				lhs += node.(antlr.RuleNode).GetText()
 			} else {
 				rhs += node.(antlr.RuleNode).GetText()
@@ -73,21 +73,19 @@ func (s *TreeShapeListener) EnterLetStmt(ctx *parser.LetStmtContext) {
 			if (sym != " ") {
 				if (sym == "=" || sym == "+=" || sym == "-=" ) {
 					flip = !flip
-					fmt.Println("\"Operation\":\""+ sym +"\"")
+					s.writer.WriteString("\"Operation\":\""+ sym +"\",")
 				} else {
-					if (flip) {
-						lhs += node.(antlr.RuleNode).GetText()
+					if (!flip) {
+						lhs += sym
 					} else {
-						rhs += node.(antlr.RuleNode).GetText()
+						rhs += sym
 					}
 				}
-			}else {
-				fmt.Println("ignore")
 			}
 		}
 	}
-	fmt.Println("\"left\":\"" + lhs + "\"")
-	fmt.Println("\"Right\":\""+ rhs + "\"")
+	s.writer.WriteString("\"left\":\"" + lhs + "\",")
+	s.writer.WriteString("\"Right\":\""+ rhs + "\"")
 	s.writer.WriteString("},")
 }
 

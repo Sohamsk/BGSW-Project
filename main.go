@@ -39,7 +39,9 @@ func main() {
 	w := bufio.NewWriter(f)
 	w.WriteString("{\"FileName\":\"" + fileName + "\", \"FileType\": \"" + fileExtension + "\",")
 	antlr.ParseTreeWalkerDefault.Walk(listener.NewTreeShapeListener(w), tree)
+	f.Seek(-1, 2)
 	w.WriteString("}")
+
 	w.Flush()
 	f.Close()
 }
