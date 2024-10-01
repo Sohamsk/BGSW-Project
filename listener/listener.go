@@ -58,26 +58,32 @@ func handleLetExpression(nodes []antlr.Tree) {
 	if (len(nodes) == 0) {
 		return
 	}
+	fmt.Println("\"Left\": {")
 	outer:
 	for i, node := range(nodes) {
 		switch node.(type) {
 		case antlr.TerminalNode:
 			if (node.(antlr.TerminalNode).GetText() != " ") {
 				fmt.Println(node.(antlr.TerminalNode).GetText())
+				fmt.Println("}\"Right\": {")
+				fmt.Println("}")
 				handleLetExpression(nodes[i + 1:])
 				break outer
-			} else {
-				fmt.Println("ignore whitespace")
 			}
 		case antlr.RuleNode:
-			fmt.Println("Rule node", node.(antlr.RuleNode).GetText())
+			if (node.(antlr.RuleNode).GetChildCount() == 1) {
+				fmt.Println(node.(antlr.RuleNode).GetText())
+			} else {
+				handleLetExpression(node.(antlr.RuleNode).GetChildren())
+			}
 		}
 	}
-	fmt.Println("broken")
+	fmt.Println("}")
 }
 func (s *TreeShapeListener) EnterLetStmt(ctx *parser.LetStmtContext) {
-	fmt.Println(parser.VisualBasic6ParserParserStaticData.RuleNames[ctx.GetRuleIndex()])
+	//fmt.Println(parser.VisualBasic6ParserParserStaticData.RuleNames[ctx.GetRuleIndex()])
 	nodes := ctx.GetChildren()
+	fmt.Println("{")
 	handleLetExpression(nodes)
 	fmt.Println("__________")
 }
