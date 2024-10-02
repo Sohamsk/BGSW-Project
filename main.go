@@ -11,18 +11,25 @@ import (
 	"github.com/antlr4-go/antlr/v4"
 )
 
-func main() {
-	inputfileName := os.Args[1]
-	input, err := antlr.NewFileStream(inputfileName)
+func getFileDetails(inputFileName string) (string, string) {
 
-	filePath := strings.Split(inputfileName, "/")
+	filePath := strings.Split(inputFileName, "/")
 	fileName := filePath[len(filePath)-1]
 
 	fileNameSlice := strings.Split(fileName, ".")
 	fileName, fileExtension := fileNameSlice[0], fileNameSlice[1]
+	return fileName, fileExtension
+}
+
+func main() {
+	inputfileName := os.Args[1]
+
+	input, err := antlr.NewFileStream(inputfileName)
 	if err != nil {
 		log.Panic("File error")
 	}
+
+	fileName, fileExtension := getFileDetails(inputfileName)
 
 	lexer := parser.NewVisualBasic6Lexer(input)
 	stream := antlr.NewCommonTokenStream(lexer, 0)

@@ -7,6 +7,8 @@ import (
 	"bytes"
 	"fmt"
 	"strings"
+	"reflect"
+	"strconv"
 
 	"github.com/antlr4-go/antlr/v4"
 )
@@ -14,7 +16,7 @@ import (
 type TreeShapeListener struct {
 	*parser.BaseVisualBasic6ParserListener
 	writer *bufio.Writer
-	stack stack.Stack
+	stack  stack.Stack
 }
 
 func NewTreeShapeListener(writer *bufio.Writer) *TreeShapeListener {
@@ -48,7 +50,7 @@ func (s *TreeShapeListener) EnterVariableSubStmt(ctx *parser.VariableSubStmtCont
 	nodes := ctx.GetChildren()
 	s.writer.WriteString("{\"RuleType\": \"DeclareVariable\",")
 	s.writer.WriteString("\"Identifier\": \"" + nodes[0].(antlr.ParseTree).GetText() + "\",")
-	if (len(nodes) == 3) {
+	if len(nodes) == 3 {
 		s.writer.WriteString("\"Type\": \"" + nodes[2].GetChild(2).(antlr.RuleNode).GetText() + "\"")
 	} else {
 		s.writer.WriteString("\"Type\": \"VARIANT\"")
@@ -93,11 +95,56 @@ func (s *TreeShapeListener) EnterLetStmt(ctx *parser.LetStmtContext) {
 	s.writer.WriteString(str + "]},")
 }
 
+func (s *TreeShapeListener) EnterSubStmt(ctx *parser.SubStmtContext) {
+	nodes := ctx.GetChildren()
+	s.writer.WriteString("{\"SubStatement\": {")
+	s.writer.WriteString("\"SubName\": \"" + nodes[2].(antlr.ParseTree).GetText() + "\",")
+	s.writer.WriteString("\"arguments\": [")
+	// handling arguments of a Sub
+	index := 1
+	for _, child := range nodes[3].GetChildren() {
+		if reflect.TypeOf(child) == reflect.TypeOf(new(parser.ArgContext)) {
+			for _, grandchild := range child.GetChildren() {
+				switch grandchild.(type) {
+				case *parser.AmbiguousIdentifierContext:
+					s.writer.WriteString("{")
+					s.writer.WriteString("\"ArgumentName" + strconv.Itoa(index) + "\": \"" + grandchild.(antlr.ParseTree).GetText() + "\",")
+					index += 1
+				case *parser.AsTypeClauseContext:
+					s.writer.WriteString("\"ArgumentType\": \"" + grandchild.GetChild(2).(antlr.ParseTree).GetText() + "\"")
+				}
+				//				fmt.Printf("arguments is: %T\n", grandchild)
+			}
+			s.writer.WriteString("},") // Figure out a way to avoid the trailing comma
+		}
+		//		fmt.Printf("arguments is: %T\n", child)
+	}
+	s.writer.WriteString("],")
+	s.writer.WriteString("\"SubBody\": [")
+	//	block := nodes[5].GetChildren() // discuss the array accessing
+	//	handleSubBody(block)
+}
+func (s *TreeShapeListener) ExitSubStmt(ctx *parser.SubStmtContext) {
+	s.writer.WriteString("]}} ")
+}
+
+//func handleSubBody(blockTree []antlr.Tree) {
+//	nodes := blockTree
+//	for _, child := range nodes {
+//		if reflect.TypeOf(child) == reflect.TypeOf(new(parser.BlockStmtContext)) {
+//			//			fmt.Println(child.(antlr.ParseTree).GetText())
+//		}
+//		//		fmt.Printf("arguments is: %T\n", child)
+//
+//	}
+//
+//}
+
 func (s *TreeShapeListener) EnterDoLoopStmt(ctx *parser.DoLoopStmtContext) {
 	fmt.Println("Enter do statement")
+
 }
 
 func (s *TreeShapeListener) ExitDoLoopStmt(ctx *parser.DoLoopStmtContext) {
 	fmt.Println("Exit do statement")
 }
-
