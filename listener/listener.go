@@ -92,26 +92,48 @@ func (s *TreeShapeListener) EnterLetStmt(ctx *parser.LetStmtContext) {
 
 func (s *TreeShapeListener) EnterSubStmt(ctx *parser.SubStmtContext) {
 	nodes := ctx.GetChildren()
-	s.writer.WriteString("\"SubStatement\": {")
+	s.writer.WriteString("{\"SubStatement\": {")
 	s.writer.WriteString("\"SubName\": \"" + nodes[2].(antlr.ParseTree).GetText() + "\",")
 	s.writer.WriteString("\"arguments\": [")
+	// handling arguments of a Sub
 	index := 1
 	for _, child := range nodes[3].GetChildren() {
 		if reflect.TypeOf(child) == reflect.TypeOf(new(parser.ArgContext)) {
 			for _, grandchild := range child.GetChildren() {
-				if reflect.TypeOf(grandchild) == reflect.TypeOf(new(parser.AmbiguousIdentifierContext)) {
+				switch grandchild.(type) {
+				case *parser.AmbiguousIdentifierContext:
+					s.writer.WriteString("{")
 					s.writer.WriteString("\"ArgumentName" + strconv.Itoa(index) + "\": \"" + grandchild.(antlr.ParseTree).GetText() + "\",")
 					index += 1
+				case *parser.AsTypeClauseContext:
+					s.writer.WriteString("\"ArgumentType\": \"" + grandchild.GetChild(2).(antlr.ParseTree).GetText() + "\"")
 				}
-				//	fmt.Println(child.(antlr.ParseTree).GetText())
-				fmt.Printf("arguments is: %T\n", grandchild)
+				//				fmt.Printf("arguments is: %T\n", grandchild)
 			}
+			s.writer.WriteString("},") // Figure out a way to avoid the trailing comma
 		}
-		//		fmt.Printf("arguments is: %T", child)
-
+		//		fmt.Printf("arguments is: %T\n", child)
 	}
-
+	s.writer.WriteString("],")
+	s.writer.WriteString("\"SubBody\": [")
+	//	block := nodes[5].GetChildren() // discuss the array accessing
+	//	handleSubBody(block)
 }
+func (s *TreeShapeListener) ExitSubStmt(ctx *parser.SubStmtContext) {
+	s.writer.WriteString("]}} ")
+}
+
+//func handleSubBody(blockTree []antlr.Tree) {
+//	nodes := blockTree
+//	for _, child := range nodes {
+//		if reflect.TypeOf(child) == reflect.TypeOf(new(parser.BlockStmtContext)) {
+//			//			fmt.Println(child.(antlr.ParseTree).GetText())
+//		}
+//		//		fmt.Printf("arguments is: %T\n", child)
+//
+//	}
+//
+//}
 
 func (s *TreeShapeListener) EnterDoLoopStmt(ctx *parser.DoLoopStmtContext) {
 	fmt.Println("Enter do statement")
