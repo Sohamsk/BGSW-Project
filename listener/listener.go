@@ -68,9 +68,15 @@ func handleLetExpression(nodes []antlr.Tree, w *bufio.Writer, first bool) {
 	for _, node := range(nodes) {
 		switch node.(type) {
 		case antlr.TerminalNode:
-			if (node.(antlr.TerminalNode).GetText() != " ") {
-				w.WriteString("{\"Operator\": \"" + node.(antlr.TerminalNode).GetText() + "\"},")
+			sym := node.(antlr.TerminalNode).GetText()
+			if (sym == " ") {
+				continue
+			} else if (sym == "(" || sym == ")") {
+				w.WriteString("{\"Type\": \"Parenthesis\",")
+			} else {
+				w.WriteString("{\"Type\":\"Operator\",")
 			}
+			w.WriteString("\"Symbol\": \"" + sym + "\"},")
 		case antlr.RuleNode:
 			if (node.(antlr.RuleNode).GetChildCount() == 1) {
 				w.WriteString("{\"Identifier\": \"" + node.(antlr.RuleNode).GetText() + "\"},")
@@ -80,6 +86,8 @@ func handleLetExpression(nodes []antlr.Tree, w *bufio.Writer, first bool) {
 		}
 	}
 }
+
+// to do ternary *Functions and procedures, operators ,
 func (s *TreeShapeListener) EnterLetStmt(ctx *parser.LetStmtContext) {
 	fmt.Println(parser.VisualBasic6ParserParserStaticData.RuleNames[ctx.GetRuleIndex()])
 	nodes := ctx.GetChildren()
@@ -127,6 +135,8 @@ func (s *TreeShapeListener) EnterSubStmt(ctx *parser.SubStmtContext) {
 func (s *TreeShapeListener) ExitSubStmt(ctx *parser.SubStmtContext) {
 	s.writer.WriteString("]}} ")
 }
+
+//func (s *TreeShapeListener)  f
 
 //func handleSubBody(blockTree []antlr.Tree) {
 //	nodes := blockTree

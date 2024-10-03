@@ -12,13 +12,21 @@ import (
 )
 
 func getFileDetails(inputFileName string) (string, string) {
-
 	filePath := strings.Split(inputFileName, "/")
 	fileName := filePath[len(filePath)-1]
 
 	fileNameSlice := strings.Split(fileName, ".")
 	fileName, fileExtension := fileNameSlice[0], fileNameSlice[1]
 	return fileName, fileExtension
+}
+
+func writeToOutput(file *os.File, fileName string, fileExtension string, tree parser.IStartRuleContext) {
+	w := bufio.NewWriter(file)
+	w.WriteString("{\"FileName\":\"" + fileName + "\", \"FileType\": \"" + fileExtension + "\",")
+	antlr.ParseTreeWalkerDefault.Walk(listener.NewTreeShapeListener(w), tree)
+	file.Seek(-1, 2)
+	w.WriteString("}")
+	w.Flush()
 }
 
 func main() {
@@ -43,12 +51,6 @@ func main() {
 		log.Panic(err)
 	}
 	f.Seek(0, 0)
-	w := bufio.NewWriter(f)
-	w.WriteString("{\"FileName\":\"" + fileName + "\", \"FileType\": \"" + fileExtension + "\",")
-	antlr.ParseTreeWalkerDefault.Walk(listener.NewTreeShapeListener(w), tree)
-	f.Seek(-1, 2)
-	w.WriteString("}")
-
-	w.Flush()
+	writeToOutput(f, fileName, fileExtension, tree)
 	f.Close()
 }
