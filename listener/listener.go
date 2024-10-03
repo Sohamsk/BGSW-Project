@@ -77,17 +77,24 @@ func handleLetExpression(nodes []antlr.Tree, w *bufio.Writer, first bool) {
 				w.WriteString("{\"Type\":\"Operator\",")
 			}
 			w.WriteString("\"Symbol\": \"" + sym + "\"},")
+//			fmt.Println(sym)
 		case antlr.RuleNode:
 			if (node.(antlr.RuleNode).GetChildCount() == 1) {
 				w.WriteString("{\"Identifier\": \"" + node.(antlr.RuleNode).GetText() + "\"},")
+				if (parser.VisualBasic6ParserParserStaticData.RuleNames[node.GetChild(0).GetChild(0).(antlr.RuleContext).GetRuleIndex()] == "iCS_S_ProcedureOrArrayCall") {
+					fmt.Println("this is either an array or a function call")
+				}
+				fmt.Println(node.(antlr.RuleNode).GetText())
 			} else {
+//				fmt.Println("nest")
 				handleLetExpression(node.(antlr.RuleNode).GetChildren(), w, false)
+//				fmt.Println("nested")
 			}
 		}
 	}
 }
 
-// to do ternary *Functions and procedures, operators ,
+// to do ternary operators, *Functions and procedures ,
 func (s *TreeShapeListener) EnterLetStmt(ctx *parser.LetStmtContext) {
 	fmt.Println(parser.VisualBasic6ParserParserStaticData.RuleNames[ctx.GetRuleIndex()])
 	nodes := ctx.GetChildren()
