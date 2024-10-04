@@ -58,6 +58,37 @@ func (s *TreeShapeListener) EnterVariableSubStmt(ctx *parser.VariableSubStmtCont
 	s.writer.WriteString("},")
 }
 
+// the arg call may also be a function so we may need to something there too
+func handleFuncCalls(single antlr.Tree) (string) {
+    rules := parser.VisualBasic6ParserParserStaticData.RuleNames
+    var buf bytes.Buffer
+    w := bufio.NewWriter(&buf)
+    w.WriteString("{\"Type\": \"functioncall\",")
+    for _, child := range(single.(antlr.RuleNode).GetChildren()) {
+        switch val := child.(type) {
+        case antlr.TerminalNode:
+            continue
+        case antlr.RuleNode:
+            if (rules[val.(antlr.RuleContext).GetRuleIndex()] == "argsCall") {
+                for _, node := range(val.GetChildren()) {
+                    switch node := node.(type) {
+                    case antlr.TerminalNode:
+                        break
+                    case antlr.RuleNode:
+                        w.WriteString("{\"type\": \"something\", \"sym\": \"" + node.GetText() + "\"},")
+                    }
+                }
+            } else {
+                w.WriteString("\"Identifier\": \"" + val.GetText() + "\", \"Arguments\": [")
+            }
+        }
+    }
+    w.Flush()
+    str := buf.String()
+    str = strings.TrimRight(str, ",") + "]}"
+    return str;
+}
+
 func handleLetExpression(nodes []antlr.Tree, w *bufio.Writer, first bool) {
 	if (len(nodes) == 0) {
 		return
@@ -66,9 +97,9 @@ func handleLetExpression(nodes []antlr.Tree, w *bufio.Writer, first bool) {
 		fmt.Print(",")
 	}
 	for _, node := range(nodes) {
-		switch node.(type) {
+        switch node := node.(type) {
 		case antlr.TerminalNode:
-			sym := node.(antlr.TerminalNode).GetText()
+			sym := node.GetText()
 			if (sym == " ") {
 				continue
 			} else if (sym == "(" || sym == ")") {
@@ -79,15 +110,16 @@ func handleLetExpression(nodes []antlr.Tree, w *bufio.Writer, first bool) {
 			w.WriteString("\"Symbol\": \"" + sym + "\"},")
 //			fmt.Println(sym)
 		case antlr.RuleNode:
-			if (node.(antlr.RuleNode).GetChildCount() == 1) {
-				w.WriteString("{\"Identifier\": \"" + node.(antlr.RuleNode).GetText() + "\"},")
-				if (parser.VisualBasic6ParserParserStaticData.RuleNames[node.GetChild(0).GetChild(0).(antlr.RuleContext).GetRuleIndex()] == "iCS_S_ProcedureOrArrayCall") {
-					fmt.Println("this is either an array or a function call")
-				}
-				fmt.Println(node.(antlr.RuleNode).GetText())
+            if (node.GetChildCount() == 1) {
+                single := node.GetChild(0).GetChild(0)
+                if (parser.VisualBasic6ParserParserStaticData.RuleNames[single.(antlr.RuleContext).GetRuleIndex()] == "iCS_S_ProcedureOrArrayCall") {
+                   w.WriteString(handleFuncCalls(single) + ",")
+                } else {
+                    w.WriteString("{\"Identifier\": \"" + node.GetText() + "\"},")
+                }
 			} else {
 //				fmt.Println("nest")
-				handleLetExpression(node.(antlr.RuleNode).GetChildren(), w, false)
+				handleLetExpression(node.GetChildren(), w, false)
 //				fmt.Println("nested")
 			}
 		}
