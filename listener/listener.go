@@ -75,11 +75,26 @@ func handleFuncCalls(single antlr.Tree) (string) {
                     case antlr.TerminalNode:
                         break
                     case antlr.RuleNode:
-                        fmt.Println(rules[node.GetChild(0).GetChild(0).GetChild(0).(antlr.RuleContext).GetRuleIndex()])
-                        if (rules [node.GetChild(0).GetChild(0).GetChild(0).(antlr.RuleContext).GetRuleIndex()]== "iCS_S_ProcedureOrArrayCall") {
+                        var some antlr.Tree
+                        proc := false
+                        some = node.GetChild(0)
+                        outer:
+                        for (!proc) {
+                            some = some.GetChild(0)
+                            switch some := some.(type) {
+                            case antlr.TerminalNode:
+                                break outer
+                            case antlr.RuleContext:
+                                fmt.Println(rules[some.GetRuleIndex()])
+                                if (rules[some.GetRuleIndex()] == "iCS_S_ProcedureOrArrayCall") {
+                                    proc = true
+                                }
+                            }
+                        }
+                        if (proc) {
                             w.WriteString(handleFuncCalls(node.GetChild(0).GetChild(0).GetChild(0)) + ",")
                         } else {
-                            w.WriteString("{\"type\": \"something\", \"sym\": \"" + node.GetText() + "\"},")
+                            w.WriteString("{\"type\": \"something\", \"sym\": \"" + strings.Trim(node.GetText(), "\"") + "\"},")
                         }
                     }
                 }
