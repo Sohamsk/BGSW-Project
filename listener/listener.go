@@ -75,7 +75,12 @@ func handleFuncCalls(single antlr.Tree) (string) {
                     case antlr.TerminalNode:
                         break
                     case antlr.RuleNode:
-                        w.WriteString("{\"type\": \"something\", \"sym\": \"" + node.GetText() + "\"},")
+                        fmt.Println(rules[node.GetChild(0).GetChild(0).GetChild(0).(antlr.RuleContext).GetRuleIndex()])
+                        if (rules [node.GetChild(0).GetChild(0).GetChild(0).(antlr.RuleContext).GetRuleIndex()]== "iCS_S_ProcedureOrArrayCall") {
+                            w.WriteString(handleFuncCalls(node.GetChild(0).GetChild(0).GetChild(0)) + ",")
+                        } else {
+                            w.WriteString("{\"type\": \"something\", \"sym\": \"" + node.GetText() + "\"},")
+                        }
                     }
                 }
             } else {
@@ -112,6 +117,7 @@ func handleLetExpression(nodes []antlr.Tree, w *bufio.Writer, first bool) {
 		case antlr.RuleNode:
             if (node.GetChildCount() == 1) {
                 single := node.GetChild(0).GetChild(0)
+fmt.Println(parser.VisualBasic6ParserParserStaticData.RuleNames[single.(antlr.RuleContext).GetRuleIndex()])
                 if (parser.VisualBasic6ParserParserStaticData.RuleNames[single.(antlr.RuleContext).GetRuleIndex()] == "iCS_S_ProcedureOrArrayCall") {
                    w.WriteString(handleFuncCalls(single) + ",")
                 } else {
