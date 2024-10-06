@@ -96,56 +96,56 @@ func fetchParentOfTerminal(someRuleNode antlr.RuleNode, someRuleNodeName string)
 
 // the arg call may also be a function so we may need to something there too
 func handleFuncCalls(single antlr.Tree) string {
-	rules := parser.VisualBasic6ParserParserStaticData.RuleNames
-	var buf bytes.Buffer
-	w := bufio.NewWriter(&buf)
-	w.WriteString("{\"Type\": \"functioncall\",")
-	for _, child := range single.(antlr.RuleNode).GetChildren() {
-		switch val := child.(type) {
-		case antlr.TerminalNode:
-			continue
-		case antlr.RuleNode:
-			if rules[val.(antlr.RuleContext).GetRuleIndex()] == "argsCall" {
-				fmt.Println("YO TYPE IS :" + fetchParentOfTerminal(val, "iCS_S_ProcedureOrArrayCall"))
-				//			for _, node := range val.GetChildren() {
-				//				switch node := node.(type) {
-				//				case antlr.TerminalNode:
-				//					break
-				//				case antlr.RuleNode:
-				//					var some antlr.Tree
-				//					var parent antlr.Tree
-				//					proc := false
-				//					some = node.GetChild(0)
-				//				outer:
-				//					for !proc {
-				//						some = some.GetChild(0)
-				//						switch some := some.(type) {
-				//						case antlr.TerminalNode:
-				//							parent = some.GetParent()
-				//							break outer
-				//						case antlr.RuleContext:
-				//							fmt.Println(rules[some.GetRuleIndex()])
-				//							if rules[some.GetRuleIndex()] == "iCS_S_ProcedureOrArrayCall" {
-				//								proc = true
-				//							}
-				//						}
-				//					}
-				//					if proc {
-				//						w.WriteString(handleFuncCalls(node.GetChild(0).GetChild(0).GetChild(0)) + ",")
-				//					} else {
-				//						w.WriteString("{\"type\":\"" + rules[parent.(antlr.RuleContext).GetRuleIndex()] + "\", \"sym\": \"" + strings.Trim(node.GetText(), "\"") + "\"},")
-				//					}
-				//				}
-				//			}
-				//		} else {
-				//			w.WriteString("\"Identifier\": \"" + val.GetText() + "\", \"Arguments\": [")
-			}
-		}
-	}
-	w.Flush()
-	str := buf.String()
-	str = strings.TrimRight(str, ",") + "]}"
-	return str
+    rules := parser.VisualBasic6ParserParserStaticData.RuleNames
+    var buf bytes.Buffer
+    w := bufio.NewWriter(&buf)
+    w.WriteString("{\"Type\": \"functioncall\",")
+    for _, child := range single.(antlr.RuleNode).GetChildren() {
+        switch val := child.(type) {
+        case antlr.TerminalNode:
+            continue
+        case antlr.RuleNode:
+            if rules[val.(antlr.RuleContext).GetRuleIndex()] == "argsCall" {
+                //fmt.Println("YO TYPE IS :" + fetchParentOfTerminal(val, "iCS_S_ProcedureOrArrayCall"))
+                for _, node := range val.GetChildren() {
+                    switch node := node.(type) {
+                    case antlr.TerminalNode:
+                        break
+                    case antlr.RuleNode:
+                        var some antlr.Tree
+                        var parent antlr.Tree
+                        proc := false
+                        some = node.GetChild(0)
+                        outer:
+                        for !proc {
+                            some = some.GetChild(0)
+                            switch some := some.(type) {
+                            case antlr.TerminalNode:
+                                parent = some.GetParent()
+                                break outer
+                            case antlr.RuleContext:
+                                fmt.Println(rules[some.GetRuleIndex()])
+                                if rules[some.GetRuleIndex()] == "iCS_S_ProcedureOrArrayCall" {
+                                    proc = true
+                                }
+                            }
+                        }
+                        if proc {
+                            w.WriteString(handleFuncCalls(node.GetChild(0).GetChild(0).GetChild(0)) + ",")
+                        } else {
+                            w.WriteString("{\"type\":\"" + rules[parent.(antlr.RuleContext).GetRuleIndex()] + "\", \"sym\": \"" + strings.Trim(node.GetText(), "\"") + "\"},")
+                        }
+                    }
+                }
+            } else {
+                w.WriteString("\"Identifier\": \"" + val.GetText() + "\", \"Arguments\": [")
+            }
+        }
+    }
+    w.Flush()
+    str := buf.String()
+    str = strings.TrimRight(str, ",") + "]}"
+    return str
 }
 
 func handleLetExpression(nodes []antlr.Tree, w *bufio.Writer, first bool) {
@@ -171,6 +171,7 @@ func handleLetExpression(nodes []antlr.Tree, w *bufio.Writer, first bool) {
 				if parser.VisualBasic6ParserParserStaticData.RuleNames[single.(antlr.RuleContext).GetRuleIndex()] == "iCS_S_ProcedureOrArrayCall" {
 					w.WriteString(handleFuncCalls(single) + ",")
 				} else {
+                    // find type of a node that is not a func call or and expression
 					w.WriteString("{\"Identifier\": \"" + node.GetText() + "\"},")
 				}
 			} else {
