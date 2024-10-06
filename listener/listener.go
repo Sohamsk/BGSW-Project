@@ -87,7 +87,7 @@ func handleFuncCalls(single antlr.Tree) string {
 								parent = some.GetParent()
 								break outer
 							case antlr.RuleContext:
-								fmt.Println(rules[some.GetRuleIndex()])
+								//fmt.Println(rules[some.GetRuleIndex()])
 								if rules[some.GetRuleIndex()] == "iCS_S_ProcedureOrArrayCall" {
 									proc = true
 								}
@@ -115,9 +115,6 @@ func handleLetExpression(nodes []antlr.Tree, w *bufio.Writer, first bool) {
 	if len(nodes) == 0 {
 		return
 	}
-	if !first && len(nodes) == 1 {
-		fmt.Print(",")
-	}
 	for _, node := range nodes {
 		switch node := node.(type) {
 		case antlr.TerminalNode:
@@ -130,11 +127,10 @@ func handleLetExpression(nodes []antlr.Tree, w *bufio.Writer, first bool) {
 				w.WriteString("{\"Type\":\"Operator\",")
 			}
 			w.WriteString("\"Symbol\": \"" + sym + "\"},")
-			//			fmt.Println(sym)
 		case antlr.RuleNode:
 			if node.GetChildCount() == 1 {
 				single := node.GetChild(0).GetChild(0)
-				fmt.Println(parser.VisualBasic6ParserParserStaticData.RuleNames[single.(antlr.RuleContext).GetRuleIndex()])
+			//	fmt.Println(parser.VisualBasic6ParserParserStaticData.RuleNames[single.(antlr.RuleContext).GetRuleIndex()])
 				if parser.VisualBasic6ParserParserStaticData.RuleNames[single.(antlr.RuleContext).GetRuleIndex()] == "iCS_S_ProcedureOrArrayCall" {
 					w.WriteString(handleFuncCalls(single) + ",")
 				} else {
@@ -151,7 +147,7 @@ func handleLetExpression(nodes []antlr.Tree, w *bufio.Writer, first bool) {
 
 // to do ternary operators, *Functions and procedures ,
 func (s *TreeShapeListener) EnterLetStmt(ctx *parser.LetStmtContext) {
-	fmt.Println(parser.VisualBasic6ParserParserStaticData.RuleNames[ctx.GetRuleIndex()])
+	// fmt.Println(parser.VisualBasic6ParserParserStaticData.RuleNames[ctx.GetRuleIndex()])
 	nodes := ctx.GetChildren()
 	var buffer bytes.Buffer
 	writer := bufio.NewWriter(&buffer)
