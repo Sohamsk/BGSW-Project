@@ -58,6 +58,42 @@ func (s *TreeShapeListener) EnterVariableSubStmt(ctx *parser.VariableSubStmtCont
 	s.writer.WriteString("},")
 }
 
+func fetchParentOfTerminal(someRuleNode antlr.RuleNode, someRuleNodeName string) string {
+	rules := parser.VisualBasic6ParserParserStaticData.RuleNames
+
+	for _, node := range someRuleNode.GetChildren() {
+		switch node := node.(type) {
+		case antlr.TerminalNode:
+			break
+		case antlr.RuleNode:
+			var some antlr.Tree
+			var parent antlr.Tree
+			flag := false
+			some = node.GetChild(0)
+		outer:
+			for !flag {
+				some = some.GetChild(0)
+				switch some := some.(type) {
+				case antlr.TerminalNode:
+					parent = some.GetParent()
+					break outer
+				case antlr.RuleContext:
+					fmt.Println(rules[some.GetRuleIndex()])
+					if rules[some.GetRuleIndex()] == someRuleNodeName {
+						flag = true
+					}
+				}
+			}
+			if !flag {
+				return rules[parent.(antlr.RuleContext).GetRuleIndex()]
+			} else {
+				return ""
+			}
+		}
+	}
+	return ""
+}
+
 // the arg call may also be a function so we may need to something there too
 func handleFuncCalls(single antlr.Tree) string {
 	rules := parser.VisualBasic6ParserParserStaticData.RuleNames
@@ -70,38 +106,39 @@ func handleFuncCalls(single antlr.Tree) string {
 			continue
 		case antlr.RuleNode:
 			if rules[val.(antlr.RuleContext).GetRuleIndex()] == "argsCall" {
-				for _, node := range val.GetChildren() {
-					switch node := node.(type) {
-					case antlr.TerminalNode:
-						break
-					case antlr.RuleNode:
-						var some antlr.Tree
-						var parent antlr.Tree
-						proc := false
-						some = node.GetChild(0)
-					outer:
-						for !proc {
-							some = some.GetChild(0)
-							switch some := some.(type) {
-							case antlr.TerminalNode:
-								parent = some.GetParent()
-								break outer
-							case antlr.RuleContext:
-								//fmt.Println(rules[some.GetRuleIndex()])
-								if rules[some.GetRuleIndex()] == "iCS_S_ProcedureOrArrayCall" {
-									proc = true
-								}
-							}
-						}
-						if proc {
-							w.WriteString(handleFuncCalls(node.GetChild(0).GetChild(0).GetChild(0)) + ",")
-						} else {
-							w.WriteString("{\"type\":\"" + rules[parent.(antlr.RuleContext).GetRuleIndex()] + "\", \"sym\": \"" + strings.Trim(node.GetText(), "\"") + "\"},")
-						}
-					}
-				}
-			} else {
-				w.WriteString("\"Identifier\": \"" + val.GetText() + "\", \"Arguments\": [")
+				fmt.Println("YO TYPE IS :" + fetchParentOfTerminal(val, "iCS_S_ProcedureOrArrayCall"))
+				//			for _, node := range val.GetChildren() {
+				//				switch node := node.(type) {
+				//				case antlr.TerminalNode:
+				//					break
+				//				case antlr.RuleNode:
+				//					var some antlr.Tree
+				//					var parent antlr.Tree
+				//					proc := false
+				//					some = node.GetChild(0)
+				//				outer:
+				//					for !proc {
+				//						some = some.GetChild(0)
+				//						switch some := some.(type) {
+				//						case antlr.TerminalNode:
+				//							parent = some.GetParent()
+				//							break outer
+				//						case antlr.RuleContext:
+				//							fmt.Println(rules[some.GetRuleIndex()])
+				//							if rules[some.GetRuleIndex()] == "iCS_S_ProcedureOrArrayCall" {
+				//								proc = true
+				//							}
+				//						}
+				//					}
+				//					if proc {
+				//						w.WriteString(handleFuncCalls(node.GetChild(0).GetChild(0).GetChild(0)) + ",")
+				//					} else {
+				//						w.WriteString("{\"type\":\"" + rules[parent.(antlr.RuleContext).GetRuleIndex()] + "\", \"sym\": \"" + strings.Trim(node.GetText(), "\"") + "\"},")
+				//					}
+				//				}
+				//			}
+				//		} else {
+				//			w.WriteString("\"Identifier\": \"" + val.GetText() + "\", \"Arguments\": [")
 			}
 		}
 	}
@@ -169,15 +206,22 @@ func (s *TreeShapeListener) EnterSubStmt(ctx *parser.SubStmtContext) {
 	// handling arguments of a Sub
 	index := 1
 	for _, child := range nodes[3].GetChildren() {
+		passedByRef := true
 		if reflect.TypeOf(child) == reflect.TypeOf(new(parser.ArgContext)) {
 			for _, grandchild := range child.GetChildren() {
 				switch grandchild.(type) {
+				case antlr.TerminalNode:
+					if grandchild.(antlr.ParseTree).GetText() == "ByVal" {
+						passedByRef = false
+					}
+
 				case *parser.AmbiguousIdentifierContext:
 					s.writer.WriteString("{")
 					s.writer.WriteString("\"ArgumentName" + strconv.Itoa(index) + "\": \"" + grandchild.(antlr.ParseTree).GetText() + "\",")
 					index += 1
 				case *parser.AsTypeClauseContext:
-					s.writer.WriteString("\"ArgumentType\": \"" + grandchild.GetChild(2).(antlr.ParseTree).GetText() + "\"")
+					s.writer.WriteString("\"ArgumentType\": \"" + grandchild.GetChild(2).(antlr.ParseTree).GetText() + "\",")
+					s.writer.WriteString("\"IsPassedByRef\": \"" + strconv.FormatBool(passedByRef) + "\"")
 				}
 				//				fmt.Printf("arguments is: %T\n", grandchild)
 			}
