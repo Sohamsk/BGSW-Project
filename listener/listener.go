@@ -106,7 +106,6 @@ func handleFuncCalls(single antlr.Tree) string {
             continue
         case antlr.RuleNode:
             if rules[val.(antlr.RuleContext).GetRuleIndex()] == "argsCall" {
-                //fmt.Println("YO TYPE IS :" + fetchParentOfTerminal(val, "iCS_S_ProcedureOrArrayCall"))
                 for _, node := range val.GetChildren() {
                     switch node := node.(type) {
                     case antlr.TerminalNode:
@@ -124,7 +123,6 @@ func handleFuncCalls(single antlr.Tree) string {
                                 parent = some.GetParent()
                                 break outer
                             case antlr.RuleContext:
-                                fmt.Println(rules[some.GetRuleIndex()])
                                 if rules[some.GetRuleIndex()] == "iCS_S_ProcedureOrArrayCall" {
                                     proc = true
                                 }
@@ -148,7 +146,7 @@ func handleFuncCalls(single antlr.Tree) string {
     return str
 }
 
-func handleLetExpression(nodes []antlr.Tree, w *bufio.Writer, first bool) {
+func handleLetExpression(nodes []antlr.Tree, w *bufio.Writer) {
 	if len(nodes) == 0 {
 		return
 	}
@@ -176,7 +174,7 @@ func handleLetExpression(nodes []antlr.Tree, w *bufio.Writer, first bool) {
 				}
 			} else {
 				//				fmt.Println("nest")
-				handleLetExpression(node.GetChildren(), w, false)
+				handleLetExpression(node.GetChildren(), w)
 				//				fmt.Println("nested")
 			}
 		}
@@ -192,7 +190,7 @@ func (s *TreeShapeListener) EnterLetStmt(ctx *parser.LetStmtContext) {
 
 	s.writer.WriteString("{\"RuleType\": \"expression\", \"Body\": ")
 	writer.WriteString("[")
-	handleLetExpression(nodes, writer, true)
+	handleLetExpression(nodes, writer)
 	writer.Flush()
 	str := buffer.String()
 	str = strings.TrimRight(str, ",")
@@ -239,7 +237,14 @@ func (s *TreeShapeListener) ExitSubStmt(ctx *parser.SubStmtContext) {
 	s.writer.WriteString("]}} ")
 }
 
-//func (s *TreeShapeListener)  f
+func (s *TreeShapeListener) EnterICS_B_ProcedureCall(ctx *parser.ICS_B_ProcedureCallContext) {
+    s.writer.WriteString(handleFuncCalls(ctx) + ",")
+}
+
+
+func (s *TreeShapeListener) EnterECS_ProcedureCall(ctx *parser.ECS_ProcedureCallContext){
+    s.writer.WriteString(handleFuncCalls(ctx) + ",")
+}
 
 //func handleSubBody(blockTree []antlr.Tree) {
 //	nodes := blockTree
