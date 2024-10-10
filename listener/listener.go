@@ -7,7 +7,6 @@ import (
 	"bytes"
 	"fmt"
 	"reflect"
-	"strconv"
 	"strings"
 
 	"github.com/antlr4-go/antlr/v4"
@@ -58,92 +57,95 @@ func (s *TreeShapeListener) EnterVariableSubStmt(ctx *parser.VariableSubStmtCont
 	s.writer.WriteString("},")
 }
 
-func fetchParentOfTerminal(someRuleNode antlr.RuleNode, someRuleNodeName string) string {
+func fetchParentOfTerminal(someTree antlr.RuleNode) string {
 	rules := parser.VisualBasic6ParserParserStaticData.RuleNames
-
-	for _, node := range someRuleNode.GetChildren() {
-		switch node := node.(type) {
-		case antlr.TerminalNode:
-			break
-		case antlr.RuleNode:
-			var some antlr.Tree
-			var parent antlr.Tree
-			flag := false
-			some = node.GetChild(0)
-		outer:
-			for !flag {
-				some = some.GetChild(0)
-				switch some := some.(type) {
-				case antlr.TerminalNode:
-					parent = some.GetParent()
-					break outer
-				case antlr.RuleContext:
-					fmt.Println(rules[some.GetRuleIndex()])
-					if rules[some.GetRuleIndex()] == someRuleNodeName {
-						flag = true
-					}
-				}
-			}
-			if !flag {
-				return rules[parent.(antlr.RuleContext).GetRuleIndex()]
-			} else {
-				return ""
-			}
+	if reflect.TypeOf(someTree) == reflect.TypeOf(new(antlr.TerminalNode)) {
+		return rules[someTree.GetParent().(antlr.RuleContext).GetRuleIndex()]
+	} else {
+		if someTree.GetChildCount() > 1 {
+			//			fetchParentOfTerminal(someTree.GetChild(0))
 		}
 	}
-	return ""
+
+	//	for _, node := range someTree.GetChildren() {
+	//		switch node := node.(type) {
+	//		case antlr.TerminalNode:
+	//			break
+	//		case antlr.RuleNode:
+	//			var some antlr.Tree
+	//			flag := false
+	//			some = node.GetChild(0)
+	//		outer:
+	//			for !flag {
+	//				some = some.GetChild(0)
+	//				switch some := some.(type) {
+	//				case antlr.TerminalNode:
+	//					parent = some.GetParent()
+	//					break outer
+	//				case antlr.RuleContext:
+	//					fmt.Println(rules[some.GetRuleIndex()])
+	//
+	//				}
+	//			}
+	//			if !flag {
+	//			} else {
+	//				return ""
+	//			}
+	//		}
+	//	}
+	return "kahitri gandlay "
 }
 
 // the arg call may also be a function so we may need to something there too
 func handleFuncCalls(single antlr.Tree) string {
-    rules := parser.VisualBasic6ParserParserStaticData.RuleNames
-    var buf bytes.Buffer
-    w := bufio.NewWriter(&buf)
-    w.WriteString("{\"Type\": \"functioncall\",")
-    for _, child := range single.(antlr.RuleNode).GetChildren() {
-        switch val := child.(type) {
-        case antlr.TerminalNode:
-            continue
-        case antlr.RuleNode:
-            if rules[val.(antlr.RuleContext).GetRuleIndex()] == "argsCall" {
-                for _, node := range val.GetChildren() {
-                    switch node := node.(type) {
-                    case antlr.TerminalNode:
-                        break
-                    case antlr.RuleNode:
-                        var some antlr.Tree
-                        var parent antlr.Tree
-                        proc := false
-                        some = node.GetChild(0)
-                        outer:
-                        for !proc {
-                            some = some.GetChild(0)
-                            switch some := some.(type) {
-                            case antlr.TerminalNode:
-                                parent = some.GetParent()
-                                break outer
-                            case antlr.RuleContext:
-                                if rules[some.GetRuleIndex()] == "iCS_S_ProcedureOrArrayCall" {
-                                    proc = true
-                                }
-                            }
-                        }
-                        if proc {
-                            w.WriteString(handleFuncCalls(node.GetChild(0).GetChild(0).GetChild(0)) + ",")
-                        } else {
-                            w.WriteString("{\"type\":\"" + rules[parent.(antlr.RuleContext).GetRuleIndex()] + "\", \"sym\": \"" + strings.Trim(node.GetText(), "\"") + "\"},")
-                        }
-                    }
-                }
-            } else {
-                w.WriteString("\"Identifier\": \"" + val.GetText() + "\", \"Arguments\": [")
-            }
-        }
-    }
-    w.Flush()
-    str := buf.String()
-    str = strings.TrimRight(str, ",") + "]}"
-    return str
+	rules := parser.VisualBasic6ParserParserStaticData.RuleNames
+	var buf bytes.Buffer
+	w := bufio.NewWriter(&buf)
+	w.WriteString("{\"Type\": \"functioncall\",")
+	for _, child := range single.(antlr.RuleNode).GetChildren() {
+		switch val := child.(type) {
+		case antlr.TerminalNode:
+			continue
+		case antlr.RuleNode:
+			if rules[val.(antlr.RuleContext).GetRuleIndex()] == "argsCall" {
+				for _, node := range val.GetChildren() {
+					switch node := node.(type) {
+					case antlr.TerminalNode:
+						break
+					case antlr.RuleNode:
+						var some antlr.Tree
+						var parent antlr.Tree
+						proc := false
+						some = node.GetChild(0)
+					outer:
+						for !proc {
+							some = some.GetChild(0)
+							switch some := some.(type) {
+							case antlr.TerminalNode:
+								parent = some.GetParent()
+								break outer
+							case antlr.RuleContext:
+								if rules[some.GetRuleIndex()] == "iCS_S_ProcedureOrArrayCall" {
+									proc = true
+								}
+							}
+						}
+						if proc {
+							w.WriteString(handleFuncCalls(node.GetChild(0).GetChild(0).GetChild(0)) + ",")
+						} else {
+							w.WriteString("{\"type\":\"" + rules[parent.(antlr.RuleContext).GetRuleIndex()] + "\", \"sym\": \"" + strings.Trim(node.GetText(), "\"") + "\"},")
+						}
+					}
+				}
+			} else {
+				w.WriteString("\"Identifier\": \"" + val.GetText() + "\", \"Arguments\": [")
+			}
+		}
+	}
+	w.Flush()
+	str := buf.String()
+	str = strings.TrimRight(str, ",") + "]}"
+	return str
 }
 
 func handleLetExpression(nodes []antlr.Tree, w *bufio.Writer) {
@@ -165,11 +167,12 @@ func handleLetExpression(nodes []antlr.Tree, w *bufio.Writer) {
 		case antlr.RuleNode:
 			if node.GetChildCount() == 1 {
 				single := node.GetChild(0).GetChild(0)
-			//	fmt.Println(parser.VisualBasic6ParserParserStaticData.RuleNames[single.(antlr.RuleContext).GetRuleIndex()])
+				//	fmt.Println(parser.VisualBasic6ParserParserStaticData.RuleNames[single.(antlr.RuleContext).GetRuleIndex()])
 				if parser.VisualBasic6ParserParserStaticData.RuleNames[single.(antlr.RuleContext).GetRuleIndex()] == "iCS_S_ProcedureOrArrayCall" {
 					w.WriteString(handleFuncCalls(single) + ",")
 				} else {
-                    // find type of a node that is not a func call or and expression
+					// find type of a node that is not a func call or and expression
+					fmt.Println(fetchParentOfTerminal(node))
 					w.WriteString("{\"Identifier\": \"" + node.GetText() + "\"},")
 				}
 			} else {
@@ -200,33 +203,50 @@ func (s *TreeShapeListener) EnterLetStmt(ctx *parser.LetStmtContext) {
 func (s *TreeShapeListener) EnterSubStmt(ctx *parser.SubStmtContext) {
 	nodes := ctx.GetChildren()
 	s.writer.WriteString("{\"SubStatement\": {")
-	s.writer.WriteString("\"SubName\": \"" + nodes[2].(antlr.ParseTree).GetText() + "\",")
-	s.writer.WriteString("\"arguments\": [")
 	// handling arguments of a Sub
 	index := 1
-	for _, child := range nodes[3].GetChildren() {
-		passedByRef := true
-		if reflect.TypeOf(child) == reflect.TypeOf(new(parser.ArgContext)) {
+	Visibility := "Public"
+	var arguments []string
+	for _, child := range nodes {
+		switch child.(type) {
+		case *parser.VisibilityContext:
+			Visibility = child.(antlr.ParseTree).GetText()
+		case *parser.AmbiguousIdentifierContext:
+			s.writer.WriteString("\"SubName\": \"" + child.(antlr.ParseTree).GetText() + "\",")
+			s.writer.WriteString("\"Visibility\": \"" + Visibility + "\",")
+			s.writer.WriteString("\"arguments\": [")
+		case *parser.ArgListContext:
+			passedByRef := true
 			for _, grandchild := range child.GetChildren() {
-				switch grandchild.(type) {
-				case antlr.TerminalNode:
-					if grandchild.(antlr.ParseTree).GetText() == "ByVal" {
-						passedByRef = false
-					}
+				fmt.Printf("arguments is: %T\n", grandchild)
+				if reflect.TypeOf(grandchild) == reflect.TypeOf(new(parser.ArgContext)) {
+					for _, greatGrandchild := range grandchild.GetChildren() {
+						switch greatGrandchild.(type) {
+						case antlr.TerminalNode:
+							if greatGrandchild.(antlr.ParseTree).GetText() == "ByVal" {
+								passedByRef = false
+							}
 
-				case *parser.AmbiguousIdentifierContext:
-					s.writer.WriteString("{")
-					s.writer.WriteString("\"ArgumentName" + strconv.Itoa(index) + "\": \"" + grandchild.(antlr.ParseTree).GetText() + "\",")
-					index += 1
-				case *parser.AsTypeClauseContext:
-					s.writer.WriteString("\"ArgumentType\": \"" + grandchild.GetChild(2).(antlr.ParseTree).GetText() + "\",")
-					s.writer.WriteString("\"IsPassedByRef\": \"" + strconv.FormatBool(passedByRef) + "\"")
+						case *parser.AmbiguousIdentifierContext:
+							arguments = append(arguments, fmt.Sprintf("{\"ArgumentName%d\":\"%s\",", index, greatGrandchild.(antlr.ParseTree).GetText()))
+							index++
+						case *parser.AsTypeClauseContext:
+							argType := greatGrandchild.GetChild(2).(antlr.ParseTree).GetText()
+							arguments[len(arguments)-1] += fmt.Sprintf("\"ArgumentType\": \"%s\",", argType)
+							arguments[len(arguments)-1] += fmt.Sprintf("\"IsPassedByRef\": \"%t\"}", passedByRef)
+						case *parser.TypeHintContext:
+							arguments[len(arguments)-1] += fmt.Sprintf("\"ArgumentTypeHint\": \"%s\",", greatGrandchild.(antlr.ParseTree).GetText())
+							arguments[len(arguments)-1] += fmt.Sprintf("\"IsPassedByRef\": \"%t\"}", passedByRef)
+						}
+
+					}
 				}
-				//				fmt.Printf("arguments is: %T\n", grandchild)
 			}
-			s.writer.WriteString("},") // Figure out a way to avoid the trailing comma
 		}
 		//		fmt.Printf("arguments is: %T\n", child)
+	}
+	if len(arguments) > 0 {
+		s.writer.WriteString(strings.Join(arguments, ","))
 	}
 	s.writer.WriteString("],")
 	s.writer.WriteString("\"SubBody\": [")
@@ -238,12 +258,11 @@ func (s *TreeShapeListener) ExitSubStmt(ctx *parser.SubStmtContext) {
 }
 
 func (s *TreeShapeListener) EnterICS_B_ProcedureCall(ctx *parser.ICS_B_ProcedureCallContext) {
-    s.writer.WriteString(handleFuncCalls(ctx) + ",")
+	s.writer.WriteString(handleFuncCalls(ctx) + ",")
 }
 
-
-func (s *TreeShapeListener) EnterECS_ProcedureCall(ctx *parser.ECS_ProcedureCallContext){
-    s.writer.WriteString(handleFuncCalls(ctx) + ",")
+func (s *TreeShapeListener) EnterECS_ProcedureCall(ctx *parser.ECS_ProcedureCallContext) {
+	s.writer.WriteString(handleFuncCalls(ctx) + ",")
 }
 
 //func handleSubBody(blockTree []antlr.Tree) {
