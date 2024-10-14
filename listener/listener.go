@@ -213,31 +213,11 @@ func (s *TreeShapeListener) ExitSubStmt(ctx *parser.SubStmtContext) {
 //}
 
 func (s *TreeShapeListener) EnterDoLoopStmt(ctx *parser.DoLoopStmtContext) {
-    nodes := ctx.GetChildren()
     s.writer.WriteString("{\"RuleType\":\"DoLoopStatement\",")
     s.writer.WriteString("\"Body\": [")
-    
-    for i, node := range nodes {
-        
-        terminalNode, ok := node.(antlr.TerminalNode)
-        if ok && (terminalNode.GetText() == "While" || terminalNode.GetText() == "Until") && i+1 < len(nodes) {
-            condition := nodes[i+2].(antlr.ParseTree).GetChildren()
-            var buffer bytes.Buffer
-            writer := bufio.NewWriter(&buffer)
-            s.writer.WriteString("{\"RuleType\": \"expression\", \"Condition\": [")
-            handleLetExpression(condition, writer, true)
-            writer.Flush()
-            str := buffer.String()
-            str = strings.TrimRight(str, ",") 
-            s.writer.WriteString(str + "]},") 
-            break
-        }
-    }
-
-    s.writer.WriteString("]},") 
 }
 func (s *TreeShapeListener) ExitDoLoopStmt(ctx *parser.DoLoopStmtContext) {
-    s.writer.WriteString("}") // Close the DoLoopStatement object
+    s.writer.WriteString("]}") // Close the DoLoopStatement object
 }
 
 
