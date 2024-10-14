@@ -275,12 +275,24 @@ func (s *TreeShapeListener) EnterECS_ProcedureCall(ctx *parser.ECS_ProcedureCall
 }
 
 func (s *TreeShapeListener) EnterDoLoopStmt(ctx *parser.DoLoopStmtContext) {
-	fmt.Println("Enter do statement")
-
+    s.writer.WriteString("{\"RuleType\":\"DoLoopStatement\",")
+    s.writer.WriteString("\"Body\": [")
+}
+func (s *TreeShapeListener) ExitDoLoopStmt(ctx *parser.DoLoopStmtContext) {
+    s.writer.WriteString("]}") // Close the DoLoopStatement object
 }
 
-func (s *TreeShapeListener) ExitDoLoopStmt(ctx *parser.DoLoopStmtContext) {
-	fmt.Println("Exit do statement")
+
+func (s *TreeShapeListener) EnterPrintStmt(ctx *parser.PrintStmtContext) {
+	nodes := ctx.GetChildren()
+	//    s.writer.WriteString("{\"CommentedUI\":\"" + ctx.GetText() + "\"},")
+	for _, node := range nodes {
+		switch node := node.(type) {
+		case antlr.RuleNode:
+			text := node.GetText()
+			s.writer.WriteString("{\"RuleType\":\"PrintStmt\", \"Data\": \"" + text + "\"},")
+		}
+	}
 }
 
 func (s *TreeShapeListener) EnterDeftypeStmt(ctx *parser.DeftypeStmtContext) {
