@@ -14,13 +14,15 @@ import (
 
 type TreeShapeListener struct {
 	*parser.BaseVisualBasic6ParserListener
+    buf *bytes.Buffer
 	writer *bufio.Writer
 	stack  stack.Stack
 }
 
-func NewTreeShapeListener(writer *bufio.Writer) *TreeShapeListener {
+func NewTreeShapeListener(writer *bufio.Writer, buf *bytes.Buffer) *TreeShapeListener {
 	l := new(TreeShapeListener)
 	l.writer = writer
+    l.buf = buf
 	l.stack = *stack.InitStack()
 	return l
 }
@@ -36,13 +38,21 @@ func NewTreeShapeListener(writer *bufio.Writer) *TreeShapeListener {
 //	//fmt.Println(node.GetSymbol().String())
 //}
 
+func (s *TreeShapeListener) exitContext() {
+    s.writer.Flush()
+    string := s.buf.String()
+    string = strings.Trim(string, ",") + "]"
+    fmt.Println(string)
+    s.buf.Reset()
+    s.writer.WriteString(string)
+}
+
 func (s *TreeShapeListener) EnterStartRule(ctx *parser.StartRuleContext) {
 	s.writer.WriteString("\"body\": [")
 }
 
 func (s *TreeShapeListener) ExitStartRule(ctx *parser.StartRuleContext) {
-	s.writer.Flush()
-	s.writer.WriteString("]")
+    s.exitContext()
 }
 
 func (s *TreeShapeListener) EnterVariableSubStmt(ctx *parser.VariableSubStmtContext) {
@@ -250,11 +260,10 @@ func (s *TreeShapeListener) EnterSubStmt(ctx *parser.SubStmtContext) {
 	}
 	s.writer.WriteString("],")
 	s.writer.WriteString("\"SubBody\": [")
-	//	block := nodes[5].GetChildren() // discuss the array accessing
-	//	handleSubBody(block)
 }
 func (s *TreeShapeListener) ExitSubStmt(ctx *parser.SubStmtContext) {
-	s.writer.WriteString("]}} ")
+    s.exitContext()
+	s.writer.WriteString("}} ")
 }
 
 func (s *TreeShapeListener) EnterICS_B_ProcedureCall(ctx *parser.ICS_B_ProcedureCallContext) {
@@ -264,18 +273,6 @@ func (s *TreeShapeListener) EnterICS_B_ProcedureCall(ctx *parser.ICS_B_Procedure
 func (s *TreeShapeListener) EnterECS_ProcedureCall(ctx *parser.ECS_ProcedureCallContext) {
 	s.writer.WriteString(handleFuncCalls(ctx) + ",")
 }
-
-//func handleSubBody(blockTree []antlr.Tree) {
-//	nodes := blockTree
-//	for _, child := range nodes {
-//		if reflect.TypeOf(child) == reflect.TypeOf(new(parser.BlockStmtContext)) {
-//			//			fmt.Println(child.(antlr.ParseTree).GetText())
-//		}
-//		//		fmt.Printf("arguments is: %T\n", child)
-//
-//	}
-//
-//}
 
 func (s *TreeShapeListener) EnterDoLoopStmt(ctx *parser.DoLoopStmtContext) {
 	fmt.Println("Enter do statement")
