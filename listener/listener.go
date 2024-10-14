@@ -220,7 +220,6 @@ func (s *TreeShapeListener) ExitDoLoopStmt(ctx *parser.DoLoopStmtContext) {
     s.writer.WriteString("]}") // Close the DoLoopStatement object
 }
 
-
 func (s *TreeShapeListener) EnterPrintStmt(ctx *parser.PrintStmtContext) {
 	nodes := ctx.GetChildren()
 	//    s.writer.WriteString("{\"CommentedUI\":\"" + ctx.GetText() + "\"},")
@@ -231,4 +230,35 @@ func (s *TreeShapeListener) EnterPrintStmt(ctx *parser.PrintStmtContext) {
 			s.writer.WriteString("{\"RuleType\":\"PrintStmt\", \"Data\": \"" + text + "\"},")
 		}
 	}
+}
+
+func (s *TreeShapeListener) EnterForNextStmt(ctx *parser.ForNextStmtContext) {
+	nodes := ctx.GetChildren()
+	var initialization, condition, from string
+
+	// Start the ForLoopStatement object
+	s.writer.WriteString("{\"RuleType\":\"ForLoopStatement\",\"Body\":[")
+
+	for i, node := range nodes {
+		switch n := node.(type) {
+		case antlr.TerminalNode:
+			// Capture initialization
+			if n.GetText() == "For" && i+1 < len(nodes) {
+				initialization = nodes[i+2].(antlr.ParseTree).GetText()
+			} else if n.GetText() == "To" && i+1 < len(nodes) {
+				condition = nodes[i+2].(antlr.ParseTree).GetText()
+			} else if n.GetText() == "=" && i+1 < len(nodes) {
+				from = nodes[i+2].(antlr.ParseTree).GetText()
+			}
+		}
+	}
+	s.writer.WriteString("{\"Initialization\": \"" + initialization + "\",")
+	s.writer.WriteString("\"Start\": \"" + from + "\",")
+	s.writer.WriteString("\"End\": \"" + condition + "\"},")
+}
+
+func (s *TreeShapeListener) ExitForNextStmt(ctx *parser.ForNextStmtContext) {
+
+	s.writer.WriteString("]}")
+	s.writer.WriteString("}")
 }
