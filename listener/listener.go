@@ -279,7 +279,8 @@ func (s *TreeShapeListener) EnterDoLoopStmt(ctx *parser.DoLoopStmtContext) {
     s.writer.WriteString("\"Body\": [")
 }
 func (s *TreeShapeListener) ExitDoLoopStmt(ctx *parser.DoLoopStmtContext) {
-    s.writer.WriteString("]}") // Close the DoLoopStatement object
+    s.exitContext()
+    s.writer.WriteString("},") // Close the DoLoopStatement object
 }
 
 
