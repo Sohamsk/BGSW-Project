@@ -1,8 +1,5 @@
-Dim I as INTEGER
-Dim A as VARIANT
-I = -5
-A = I + (-5)
-S = (A + 2) + Func(1, "soham")
+Func1 "x", "y"
+call Func1("x", "y")
 Do While Not I = 0
 	Beep
 	I -= 1

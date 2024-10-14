@@ -4,6 +4,7 @@ import (
 	"bosch/listener"
 	"bosch/parser"
 	"bufio"
+	"bytes"
 	"log"
 	"os"
 	"strings"
@@ -21,12 +22,12 @@ func getFileDetails(inputFileName string) (string, string) {
 }
 
 func writeToOutput(file *os.File, fileName string, fileExtension string, tree parser.IStartRuleContext) {
-	w := bufio.NewWriter(file)
-	w.WriteString("{\"FileName\":\"" + fileName + "\", \"FileType\": \"" + fileExtension + "\",")
-	antlr.ParseTreeWalkerDefault.Walk(listener.NewTreeShapeListener(w), tree)
-	file.Seek(-1, 2)
-	w.WriteString("}")
-	w.Flush()
+	file.WriteString("{\"FileName\":\"" + fileName + "\", \"FileType\": \"" + fileExtension + "\",")
+    var buf bytes.Buffer
+    writer := bufio.NewWriter(&buf)
+	antlr.ParseTreeWalkerDefault.Walk(listener.NewTreeShapeListener(writer, &buf), tree)
+    writer.Flush()
+	file.WriteString(buf.String() + "}")
 }
 
 func main() {
