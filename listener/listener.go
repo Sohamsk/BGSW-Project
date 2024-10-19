@@ -14,7 +14,7 @@ import (
 
 type TreeShapeListener struct {
 	*parser.BaseVisualBasic6ParserListener
-    buf *bytes.Buffer
+	buf    *bytes.Buffer
 	writer *bufio.Writer
 	stack  stack.Stack
 }
@@ -22,7 +22,7 @@ type TreeShapeListener struct {
 func NewTreeShapeListener(writer *bufio.Writer, buf *bytes.Buffer) *TreeShapeListener {
 	l := new(TreeShapeListener)
 	l.writer = writer
-    l.buf = buf
+	l.buf = buf
 	l.stack = *stack.InitStack()
 	return l
 }
@@ -39,12 +39,12 @@ func NewTreeShapeListener(writer *bufio.Writer, buf *bytes.Buffer) *TreeShapeLis
 //}
 
 func (s *TreeShapeListener) exitContext() {
-    s.writer.Flush()
-    string := s.buf.String()
-    string = strings.Trim(string, ",") + "]"
-   // fmt.Println(string)
-    s.buf.Reset()
-    s.writer.WriteString(string)
+	s.writer.Flush()
+	string := s.buf.String()
+	string = strings.Trim(string, ",") + "]"
+	// fmt.Println(string)
+	s.buf.Reset()
+	s.writer.WriteString(string)
 }
 
 func (s *TreeShapeListener) EnterStartRule(ctx *parser.StartRuleContext) {
@@ -52,7 +52,7 @@ func (s *TreeShapeListener) EnterStartRule(ctx *parser.StartRuleContext) {
 }
 
 func (s *TreeShapeListener) ExitStartRule(ctx *parser.StartRuleContext) {
-    s.exitContext()
+	s.exitContext()
 }
 
 func (s *TreeShapeListener) EnterVariableSubStmt(ctx *parser.VariableSubStmtContext) {
@@ -262,7 +262,7 @@ func (s *TreeShapeListener) EnterSubStmt(ctx *parser.SubStmtContext) {
 	s.writer.WriteString("\"SubBody\": [")
 }
 func (s *TreeShapeListener) ExitSubStmt(ctx *parser.SubStmtContext) {
-    s.exitContext()
+	s.exitContext()
 	s.writer.WriteString("}} ")
 }
 
@@ -276,31 +276,31 @@ func (s *TreeShapeListener) EnterECS_ProcedureCall(ctx *parser.ECS_ProcedureCall
 
 func (s *TreeShapeListener) EnterDoLoopStmt(ctx *parser.DoLoopStmtContext) {
 	rules := parser.VisualBasic6ParserParserStaticData.RuleNames
-    s.writer.WriteString("{\"RuleType\":\"DoLoopStatement\",")
-    nodes := ctx.GetChildren()
-    for _, node := range nodes {
-        _, ok := node.(antlr.TerminalNode)
-        if (ok) {
-            if (strings.ToLower(node.(antlr.TerminalNode).GetText()) == "while" || strings.ToLower(node.(antlr.TerminalNode).GetText()) == "until") {
-                s.writer.WriteString("\"Kind\":\"" + strings.ToLower(node.(antlr.TerminalNode).GetText()) + "\",")
-            }
-            continue
-        } else if (!ok) {
-            if (rules[node.(antlr.RuleContext).GetRuleIndex()] == "valueStmt") {
-                var buffer bytes.Buffer
-                writer := bufio.NewWriter(&buffer)
-                handleLetExpression(node.(antlr.RuleContext).GetChildren(), writer)
-                writer.Flush()
-                s.writer.WriteString("\"Condition\": [" + strings.Trim(buffer.String(), ",") + "],")
-            }
-        }
+	s.writer.WriteString("{\"RuleType\":\"DoLoopStatement\",")
+	nodes := ctx.GetChildren()
+	for _, node := range nodes {
+		_, ok := node.(antlr.TerminalNode)
+		if ok {
+			if strings.ToLower(node.(antlr.TerminalNode).GetText()) == "while" || strings.ToLower(node.(antlr.TerminalNode).GetText()) == "until" {
+				s.writer.WriteString("\"Kind\":\"" + strings.ToLower(node.(antlr.TerminalNode).GetText()) + "\",")
+			}
+			continue
+		} else if !ok {
+			if rules[node.(antlr.RuleContext).GetRuleIndex()] == "valueStmt" {
+				var buffer bytes.Buffer
+				writer := bufio.NewWriter(&buffer)
+				handleLetExpression(node.(antlr.RuleContext).GetChildren(), writer)
+				writer.Flush()
+				s.writer.WriteString("\"Condition\": [" + strings.Trim(buffer.String(), ",") + "],")
+			}
+		}
 
-    }
-    s.writer.WriteString("\"Body\": [")
+	}
+	s.writer.WriteString("\"Body\": [")
 }
 func (s *TreeShapeListener) ExitDoLoopStmt(ctx *parser.DoLoopStmtContext) {
-    s.exitContext()
-    s.writer.WriteString("},") // Close the DoLoopStatement object
+	s.exitContext()
+	s.writer.WriteString("},") // Close the DoLoopStatement object
 }
 
 func (s *TreeShapeListener) EnterPrintStmt(ctx *parser.PrintStmtContext) {
@@ -345,59 +345,77 @@ func (s *TreeShapeListener) ExitForNextStmt(ctx *parser.ForNextStmtContext) {
 	s.writer.WriteString("}")
 }
 func (s *TreeShapeListener) EnterDeftypeStmt(ctx *parser.DeftypeStmtContext) {
-    nodes := ctx.GetChildren()
-    s.writer.WriteString("{\"RuleType\":\"DefType\",")
-    for _, node := range(nodes) {
-        if (reflect.TypeOf(node) == reflect.TypeOf(new (parser.LetterrangeContext))) {
-            s.writer.WriteString("\"LetterRange\":\"")
-            first := true
-            for _, child := range(node.GetChildren()) {
-                if (reflect.TypeOf(child) == reflect.TypeOf(new(parser.CertainIdentifierContext))) {
-                    if (first) {
-                        s.writer.WriteString(child.(antlr.RuleNode).GetText())
-                        first = !first
-                    } else {
-                        s.writer.WriteString("-" + child.(antlr.RuleNode).GetText())
-                    }
-                }
-            }
-            s.writer.WriteString("\"")
-        } else if (node.(antlr.TerminalNode).GetText() != " ") {
-            dataType := strings.ToLower(node.(antlr.TerminalNode).GetText())
+	nodes := ctx.GetChildren()
+	s.writer.WriteString("{\"RuleType\":\"DefType\",")
+	for _, node := range nodes {
+		if reflect.TypeOf(node) == reflect.TypeOf(new(parser.LetterrangeContext)) {
+			s.writer.WriteString("\"LetterRange\":\"")
+			first := true
+			for _, child := range node.GetChildren() {
+				if reflect.TypeOf(child) == reflect.TypeOf(new(parser.CertainIdentifierContext)) {
+					if first {
+						s.writer.WriteString(child.(antlr.RuleNode).GetText())
+						first = !first
+					} else {
+						s.writer.WriteString("-" + child.(antlr.RuleNode).GetText())
+					}
+				}
+			}
+			s.writer.WriteString("\"")
+		} else if node.(antlr.TerminalNode).GetText() != " " {
+			dataType := strings.ToLower(node.(antlr.TerminalNode).GetText())
 
-            switch dataType {
-            case "defbool":
-                s.writer.WriteString("\"DataType\":\"Boolean\",")
-            case "defbyte":
-                s.writer.WriteString("\"DataType\":\"Byte\",")
-            case "defint":
-                s.writer.WriteString("\"DataType\":\"Integer\",")
-            case "deflng":
-                s.writer.WriteString("\"DataType\":\"Long\",")
-            case "deflnglng":
-                s.writer.WriteString("\"DataType\":\"LongLong (valid on 64-bit platforms only)\",")
-            case "deflngptr":
-                s.writer.WriteString("\"DataType\":\"LongPtr\",")
-            case "defcur":
-                s.writer.WriteString("\"DataType\":\"Currency\",")
-            case "defsng":
-                s.writer.WriteString("\"DataType\":\"Single\",")
-            case "defdbl":
-                s.writer.WriteString("\"DataType\":\"Double\",")
-            case "defDec":
-                s.writer.WriteString("\"DataType\":\"Decimal (not currently supported)\",")
-            case "defdate":
-                s.writer.WriteString("\"DataType\":\"Date\",")
-            case "defstr":
-                s.writer.WriteString("\"DataType\":\"String\",")
-            case "defobj":
-                s.writer.WriteString("\"DataType\":\"Object\",")
-            case "defvar":
-                s.writer.WriteString("\"DataType\":\"Variant\",")
-            }
-        } else {
-            continue
-        }
-    }
-    s.writer.WriteString("},")
+			switch dataType {
+			case "defbool":
+				s.writer.WriteString("\"DataType\":\"Boolean\",")
+			case "defbyte":
+				s.writer.WriteString("\"DataType\":\"Byte\",")
+			case "defint":
+				s.writer.WriteString("\"DataType\":\"Integer\",")
+			case "deflng":
+				s.writer.WriteString("\"DataType\":\"Long\",")
+			case "deflnglng":
+				s.writer.WriteString("\"DataType\":\"LongLong (valid on 64-bit platforms only)\",")
+			case "deflngptr":
+				s.writer.WriteString("\"DataType\":\"LongPtr\",")
+			case "defcur":
+				s.writer.WriteString("\"DataType\":\"Currency\",")
+			case "defsng":
+				s.writer.WriteString("\"DataType\":\"Single\",")
+			case "defdbl":
+				s.writer.WriteString("\"DataType\":\"Double\",")
+			case "defDec":
+				s.writer.WriteString("\"DataType\":\"Decimal (not currently supported)\",")
+			case "defdate":
+				s.writer.WriteString("\"DataType\":\"Date\",")
+			case "defstr":
+				s.writer.WriteString("\"DataType\":\"String\",")
+			case "defobj":
+				s.writer.WriteString("\"DataType\":\"Object\",")
+			case "defvar":
+				s.writer.WriteString("\"DataType\":\"Variant\",")
+			}
+		} else {
+			continue
+		}
+	}
+	s.writer.WriteString("},")
+}
+
+func (s *TreeShapeListener) EnterRandomizeStmt(ctx *parser.RandomizeStmtContext) {
+	nodes := ctx.GetChildren()
+	var seed string
+	s.writer.WriteString("{\"RuleType\":\"RandomizeStatement\", ")
+
+	if len(nodes) > 1 {
+		seed = nodes[2].(antlr.ParseTree).GetText()
+		s.writer.WriteString("\"Seed\": \"" + seed + "\"}")
+	} else {
+		s.writer.WriteString("\"Seed\": \"None\"}")
+	}
+	s.writer.WriteString("")
+}
+
+func (s *TreeShapeListener) ExitRandomizeStmt(ctx *parser.RandomizeStmtContext) {
+	s.writer.WriteString("}")
 }
