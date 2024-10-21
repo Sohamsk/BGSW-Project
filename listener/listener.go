@@ -214,7 +214,7 @@ func (s *TreeShapeListener) EnterLetStmt(ctx *parser.LetStmtContext) {
 
 func (s *TreeShapeListener) EnterSubStmt(ctx *parser.SubStmtContext) {
 	nodes := ctx.GetChildren()
-	s.writer.WriteString("{\"SubStatement\": {")
+    s.writer.WriteString("{\"RuleType\":\"SubStatement\",")
 	// handling arguments of a Sub
 	index := 1
 	Visibility := "Public"
@@ -265,7 +265,7 @@ func (s *TreeShapeListener) EnterSubStmt(ctx *parser.SubStmtContext) {
 }
 func (s *TreeShapeListener) ExitSubStmt(ctx *parser.SubStmtContext) {
 	s.exitContext()
-	s.writer.WriteString("}} ")
+	s.writer.WriteString("}")
 }
 
 func (s *TreeShapeListener) EnterICS_B_ProcedureCall(ctx *parser.ICS_B_ProcedureCallContext) {
