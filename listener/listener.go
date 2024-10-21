@@ -322,29 +322,29 @@ func (s *TreeShapeListener) EnterForNextStmt(ctx *parser.ForNextStmtContext) {
 	var initialization, condition, from string
 
 	// Start the ForLoopStatement object
-	s.writer.WriteString("{\"RuleType\":\"ForLoopStatement\",\"Body\":[")
+	s.writer.WriteString("{\"RuleType\":\"ForLoopStatement\",")
 
 	for i, node := range nodes {
 		switch n := node.(type) {
 		case antlr.TerminalNode:
 			// Capture initialization
-			if n.GetText() == "For" && i+1 < len(nodes) {
+			if n.GetText() == "For" && i+2 < len(nodes) {
 				initialization = nodes[i+2].(antlr.ParseTree).GetText()
-			} else if n.GetText() == "To" && i+1 < len(nodes) {
+			} else if n.GetText() == "To" && i+2 < len(nodes) {
 				condition = nodes[i+2].(antlr.ParseTree).GetText()
 			} else if n.GetText() == "=" && i+1 < len(nodes) {
-				from = nodes[i+2].(antlr.ParseTree).GetText()
+				from = nodes[i+1].(antlr.ParseTree).GetText()
 			}
 		}
 	}
-	s.writer.WriteString("{\"Initialization\": \"" + initialization + "\",")
+	s.writer.WriteString("\"Initialization\": \"" + initialization + "\",")
 	s.writer.WriteString("\"Start\": \"" + from + "\",")
-	s.writer.WriteString("\"End\": \"" + condition + "\"},")
+    s.writer.WriteString("\"End\": \"" + condition + "\",\"Body\": [")
 }
 
 func (s *TreeShapeListener) ExitForNextStmt(ctx *parser.ForNextStmtContext) {
-	s.writer.WriteString("]}")
-	s.writer.WriteString("}")
+    s.exitContext()
+	s.writer.WriteString("}}")
 }
 func (s *TreeShapeListener) EnterDeftypeStmt(ctx *parser.DeftypeStmtContext) {
 	nodes := ctx.GetChildren()
