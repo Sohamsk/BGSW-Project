@@ -19,6 +19,7 @@ func (s *TreeShapeListener) EnterIfBlockStmt(ctx *parser.IfBlockStmtContext) {
 }
 
 func (s *TreeShapeListener) ExitIfBlockStmt(ctx *parser.IfBlockStmtContext) {
+    s.exitContext()
 	s.writer.WriteString("},")
 }
 
@@ -36,6 +37,7 @@ func (s *TreeShapeListener) EnterIfElseIfBlockStmt(ctx *parser.IfElseIfBlockStmt
 }
 
 func (s *TreeShapeListener) ExitIfElseIfBlockStmt(ctx *parser.IfElseIfBlockStmtContext) {
+    s.exitContext()
 	s.writer.WriteString("},")
 }
 
@@ -45,9 +47,11 @@ func (s *TreeShapeListener) EnterIfElseBlockStmt(ctx *parser.IfElseBlockStmtCont
 }
 
 func (s *TreeShapeListener) ExitIfElseBlockStmt(ctx *parser.IfElseBlockStmtContext) {
+    s.exitContext()
 	s.writer.WriteString("}")
 }
 
 func (s *TreeShapeListener) ExitBlockIfThenElseStmt(ctx *parser.BlockIfThenElseContext) {
+    s.exitContext()
 	s.writer.WriteString("}")
 }
