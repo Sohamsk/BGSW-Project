@@ -337,11 +337,11 @@ func (s *TreeShapeListener) EnterForNextStmt(ctx *parser.ForNextStmtContext) {
 	}
 	s.writer.WriteString("\"Initialization\": \"" + initialization + "\",")
 	s.writer.WriteString("\"Start\": \"" + from + "\",")
-    s.writer.WriteString("\"End\": \"" + condition + "\",\"Body\": [")
+	s.writer.WriteString("\"End\": \"" + condition + "\",\"Body\": [")
 }
 
 func (s *TreeShapeListener) ExitForNextStmt(ctx *parser.ForNextStmtContext) {
-    s.exitContext()
+	s.exitContext()
 	s.writer.WriteString("}}")
 }
 func (s *TreeShapeListener) EnterDeftypeStmt(ctx *parser.DeftypeStmtContext) {
@@ -418,4 +418,88 @@ func (s *TreeShapeListener) EnterRandomizeStmt(ctx *parser.RandomizeStmtContext)
 
 func (s *TreeShapeListener) ExitRandomizeStmt(ctx *parser.RandomizeStmtContext) {
 	s.writer.WriteString("}")
+}
+
+func (s *TreeShapeListener) EnterSelectCaseStmt(ctx *parser.SelectCaseStmtContext) {
+	s.writer.WriteString("{\"RuleType\":\"SelectStatement\", ")
+
+	// Get the value statement for the Select Case
+	valueStmt := ctx.ValueStmt().GetText()
+	s.writer.WriteString("\"ValueStatement\": \"" + valueStmt + "\", ")
+
+	s.writer.WriteString("\"CaseClauses\": [")
+
+	// Iterate over all case clauses
+	caseClauses := ctx.AllSC_Case()
+	for i, caseClause := range caseClauses {
+		if i > 0 {
+			s.writer.WriteString(", ") // Add a comma between case clauses
+		}
+		if scCaseClause, ok := caseClause.(*parser.SC_CaseContext); ok {
+			s.EnterCaseClause(scCaseClause)
+		} else {
+			s.writer.WriteString("{\"CaseClause\": {\"Error\": \"Invalid CaseClause\"}}")
+		}
+	}
+
+	s.writer.WriteString("]}") // End the CaseClauses array
+	s.writer.WriteString("}")  // Close the Select Statement object
+}
+
+func (s *TreeShapeListener) EnterCaseClause(ctx *parser.SC_CaseContext) {
+	s.writer.WriteString("{\"CaseClause\": {") // Start CaseClause object
+
+	// Debugging output to check the type of ctx
+	fmt.Printf("Received CaseClause Context: %T\n", ctx)
+
+	// Type assertion for condition
+	if cond, ok := ctx.SC_Cond().(*parser.SC_CondContext); ok {
+		s.writer.WriteString("\"Condition\": ")
+		s.EnterCaseCondition(cond) // Add the condition to the CaseClause
+	} else {
+		s.writer.WriteString("\"Error\": \"Invalid Condition\"")
+	}
+
+	s.writer.WriteString("}}") // Close the CaseClause object
+}
+
+func (s *TreeShapeListener) EnterCaseCondition(ctx *parser.SC_CondContext) {
+	s.writer.WriteString("{\"ConditionExpression\": [") // Start ConditionExpression array
+
+	// Check if the condition is an ELSE statement
+	if ctx.GetChild(0).(antlr.ParseTree).GetText() == "ELSE" {
+		s.writer.WriteString("\"ELSE\"") // Write ELSE condition
+	} else {
+		// Prepare to collect conditions
+		for i, condExpr := range ctx.GetChildren() {
+			if i > 0 {
+				s.writer.WriteString(", ") // Add a comma between conditions
+			}
+			switch condExpr := condExpr.(type) {
+			case *parser.SC_CondExprContext:
+				conditionText := condExpr.GetText()
+				s.writer.WriteString("\"" + conditionText + "\"") // Write condition expression
+			default:
+				s.writer.WriteString("\"UnknownCondition\"")
+			}
+		}
+	}
+
+	s.writer.WriteString("]}") // Close ConditionExpression array
+}
+
+// This method is for handling specific conditions in SC_CondExpr
+func (s *TreeShapeListener) EnterSC_CondExpr(ctx *parser.SC_CondExprContext) {
+	if ctx.GetChild(0).(antlr.ParseTree).GetText() == "IS" {
+		comparisonOperator := ctx.GetChild(1).(antlr.ParseTree).GetText() // Assuming it's at index 1
+		valueStmt := ctx.GetChild(2).(antlr.ParseTree).GetText()          // Assuming it's at index 2
+		fmt.Printf("Condition: IS %s %s\n", comparisonOperator, valueStmt)
+	} else if len(ctx.GetChildren()) == 1 {
+		value := ctx.GetChild(0).(antlr.ParseTree).GetText() // Access the single value statement
+		fmt.Println("Value:", value)
+	} else if len(ctx.GetChildren()) == 3 {
+		leftValue := ctx.GetChild(0).(antlr.ParseTree).GetText()  // First valueStmt
+		rightValue := ctx.GetChild(2).(antlr.ParseTree).GetText() // Second valueStmt (after the "TO")
+		fmt.Printf("Condition Range: %s TO %s\n", leftValue, rightValue)
+	}
 }
