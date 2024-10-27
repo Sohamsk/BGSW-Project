@@ -4,7 +4,7 @@ Dim MyBool As Boolean
 IsVisible = True
 MyBool = True
 
-If IsVisible Then 
+If IsVisible Then
     Beep
     IsVisible = False
 ElseIf MyBool Then
