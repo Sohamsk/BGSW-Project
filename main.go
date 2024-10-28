@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bosch/converter"
 	"bosch/listener"
 	"bosch/parser"
 	"bufio"
@@ -54,4 +55,6 @@ func main() {
 	f.Seek(0, 0)
 	writeToOutput(f, fileName, fileExtension, tree)
 	f.Close()
+
+    converter.ConvertRules()
 }
