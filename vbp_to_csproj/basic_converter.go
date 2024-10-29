@@ -5,6 +5,7 @@ import (
 	"encoding/xml"
 	"fmt"
 	"os"
+	"path"
 	"strconv"
 	"strings"
 )
@@ -175,12 +176,13 @@ func writeCsprojFile(project Project, outputFilename string) error {
 	return encoder.Encode(project)
 }
 
-func main() {
+func ConvertVBpFiletoCSprojFile(vbpFilePath string) {
 	// Specify input and output files
-	inputVbp := "/home/gen1us/Desktop/bosch/BGSW-Project/vbp_to_csproj/Complex.vbp" // Change to the name of your input vbp file
-	outputCsproj := "ConvertedProject.csproj"                                       // Desired output csproj filename
+	dir, vbpFileName := path.Split(vbpFilePath)
+	vbpFileNameWithoutExtension := strings.Split(vbpFileName, ".")[0]
+	outputCsproj := dir + vbpFileNameWithoutExtension + ".csproj" // Desired output csproj filename
 
-	project, err := parseVbpFile(inputVbp)
+	project, err := parseVbpFile(vbpFilePath)
 	if err != nil {
 		fmt.Println("Error parsing .vbp file:", err)
 		return
@@ -192,5 +194,5 @@ func main() {
 		return
 	}
 
-	fmt.Printf("Successfully converted %s to %s\n", inputVbp, outputCsproj)
+	fmt.Printf("Successfully converted %s to %s\n", vbpFilePath, outputCsproj)
 }
