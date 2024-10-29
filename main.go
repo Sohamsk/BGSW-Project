@@ -6,6 +6,7 @@ import (
 	"bosch/parser"
 	"bufio"
 	"bytes"
+	"fmt"
 	"log"
 	"os"
 	"strings"
@@ -22,13 +23,13 @@ func getFileDetails(inputFileName string) (string, string) {
 	return fileName, fileExtension
 }
 
-func writeToOutput(file *os.File, fileName string, fileExtension string, tree parser.IStartRuleContext) {
-	file.WriteString("{\"FileName\":\"" + fileName + "\", \"FileType\": \"" + fileExtension + "\",")
-    var buf bytes.Buffer
-    writer := bufio.NewWriter(&buf)
-	antlr.ParseTreeWalkerDefault.Walk(listener.NewTreeShapeListener(writer, &buf), tree)
+func writeToOutput(file *os.File, buf *bytes.Buffer, fileName string, fileExtension string, tree parser.IStartRuleContext) {
+	buf.WriteString("{\"FileName\":\"" + fileName + "\", \"FileType\": \"" + fileExtension + "\",")
+    writer := bufio.NewWriter(buf)
+	antlr.ParseTreeWalkerDefault.Walk(listener.NewTreeShapeListener(writer, buf), tree)
     writer.Flush()
-	file.WriteString(buf.String() + "}")
+    buf.WriteString("}")
+	file.WriteString(buf.String())
 }
 
 func main() {
@@ -53,8 +54,10 @@ func main() {
 		log.Panic(err)
 	}
 	f.Seek(0, 0)
-	writeToOutput(f, fileName, fileExtension, tree)
+    var buf bytes.Buffer
+	writeToOutput(f, &buf, fileName, fileExtension, tree)
 	f.Close()
 
-    converter.ConvertRules()
+    fmt.Println(buf.String())
+    converter.Convert(buf.String())
 }
