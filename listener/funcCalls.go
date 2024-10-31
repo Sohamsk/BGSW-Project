@@ -59,3 +59,11 @@ func handleFuncCalls(single antlr.Tree) string {
 	str = strings.TrimRight(str, ",") + "]}"
 	return str
 }
+
+func (s *TreeShapeListener) EnterICS_B_ProcedureCall(ctx *parser.ICS_B_ProcedureCallContext) {
+	s.writer.WriteString(handleFuncCalls(ctx) + ",")
+}
+
+func (s *TreeShapeListener) EnterECS_ProcedureCall(ctx *parser.ECS_ProcedureCallContext) {
+	s.writer.WriteString(handleFuncCalls(ctx) + ",")
+}

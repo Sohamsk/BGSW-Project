@@ -97,10 +97,3 @@ func fetchParentOfTerminal(someTree antlr.Tree) string {
 	return "kahitri gandlay "
 }
 
-func (s *TreeShapeListener) EnterICS_B_ProcedureCall(ctx *parser.ICS_B_ProcedureCallContext) {
-	s.writer.WriteString(handleFuncCalls(ctx) + ",")
-}
-
-func (s *TreeShapeListener) EnterECS_ProcedureCall(ctx *parser.ECS_ProcedureCallContext) {
-	s.writer.WriteString(handleFuncCalls(ctx) + ",")
-}
