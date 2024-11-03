@@ -4,6 +4,7 @@ import (
 	"bosch/converter"
 	"bosch/listener"
 	"bosch/parser"
+	vbptocsproj "bosch/vbp_to_csproj"
 	"bufio"
 	"bytes"
 	"fmt"
@@ -25,14 +26,15 @@ func getFileDetails(inputFileName string) (string, string) {
 
 func writeToOutput(file *os.File, buf *bytes.Buffer, fileName string, fileExtension string, tree parser.IStartRuleContext) {
 	buf.WriteString("{\"FileName\":\"" + fileName + "\", \"FileType\": \"" + fileExtension + "\",")
-    writer := bufio.NewWriter(buf)
+	writer := bufio.NewWriter(buf)
 	antlr.ParseTreeWalkerDefault.Walk(listener.NewTreeShapeListener(writer, buf), tree)
-    writer.Flush()
-    buf.WriteString("}")
+	writer.Flush()
+	buf.WriteString("}")
 	file.WriteString(buf.String())
 }
 
 func main() {
+	vbptocsproj.ConvertVBpFiletoCSprojFile("./vbp_to_csproj/Complex.vbp") // TODO : just an example file change later
 	inputfileName := os.Args[1]
 
 	input, err := antlr.NewFileStream(inputfileName)
@@ -54,10 +56,10 @@ func main() {
 		log.Panic(err)
 	}
 	f.Seek(0, 0)
-    var buf bytes.Buffer
+	var buf bytes.Buffer
 	writeToOutput(f, &buf, fileName, fileExtension, tree)
 	f.Close()
 
-    fmt.Println(buf.String())
-    converter.Convert(buf.String())
+	fmt.Println(buf.String())
+	converter.Convert(buf.String())
 }
