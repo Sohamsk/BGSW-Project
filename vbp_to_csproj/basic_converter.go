@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"os"
 	"path"
-	"strconv"
+	"path/filepath"
 	"strings"
 )
 
@@ -84,48 +84,58 @@ func parseVbpFile(filename string) (Project, error) {
 			guidStart := strings.Index(reference[0], "{")
 			guidEnd := strings.Index(reference[0], "}")
 			if guidStart != -1 && guidEnd != -1 {
-				guid := reference[0][guidStart : guidEnd+1]
+				//guid := reference[0][guidStart : guidEnd+1]
 
 				// Extract the namespace name and version
 				namespace := reference[3]
 				// Check Extension of file Depending on that:
 				// 1. .tlb --> do tlb logic
 				// 2. .dll --> run tlbimp then get the output path and put it inside HintPath Property
-
+				// Define your PowerShell command
+				if filepath.Ext(namespace) == ".tlb" {
+					continue
+				}
+				success := handleCOMReference(filepath.Base(namespace))
+				if !success {
+					fmt.Println("Error in the powershell execution")
+				}
+				InteropFileName := "Interop." + filepath.Base(namespace)
 				// Add the parsed COM reference to the ItemGroup
 				comReference := Reference{
-					Include: namespace,
+					Include:  strings.TrimSuffix(InteropFileName, filepath.Ext(InteropFileName)),
+					HintPath: "..\\InteropDlls\\" + InteropFileName,
 				}
 				itemGroup.Reference = append(itemGroup.Reference, comReference)
 			}
-		} else if strings.HasPrefix(line, "Object=") {
-			objectParts := strings.Split(strings.TrimPrefix(line, "Object="), "#")
-
-			// Extract the GUID from inside the `{}` braces
-			guidStart := strings.Index(objectParts[0], "{")
-			guidEnd := strings.Index(objectParts[0], "}")
-			if guidStart != -1 && guidEnd != -1 {
-				guid := objectParts[0][guidStart : guidEnd+1]
-
-				// Extract the major and minor version
-				version := strings.Split(objectParts[1], ".")
-				majorVersion := parseVersionPart(version[0]) // Helper function to convert to integer
-				minorVersion := parseVersionPart(version[1])
-
-				// Extract the control name, which comes after the last `;` separator
-				controlName := strings.TrimSpace(strings.Split(objectParts[2], ";")[1])
-
-				// Add the parsed COM reference to the ItemGroup
-				comReference := COMReference{
-					Include:      controlName,
-					Guid:         guid,
-					VersionMajor: majorVersion,
-					VersionMinor: minorVersion,
-				}
-				itemGroup.COMReference = append(itemGroup.COMReference, comReference)
-			}
-
 		}
+		// } else if strings.HasPrefix(line, "Object=") {
+		// 	objectParts := strings.Split(strings.TrimPrefix(line, "Object="), "#")
+
+		// 	// Extract the GUID from inside the `{}` braces
+		// 	guidStart := strings.Index(objectParts[0], "{")
+		// 	guidEnd := strings.Index(objectParts[0], "}")
+		// 	if guidStart != -1 && guidEnd != -1 {
+		// 		guid := objectParts[0][guidStart : guidEnd+1]
+
+		// 		// Extract the major and minor version
+		// 		version := strings.Split(objectParts[1], ".")
+		// 		majorVersion := parseVersionPart(version[0]) // Helper function to convert to integer
+		// 		minorVersion := parseVersionPart(version[1])
+
+		// 		// Extract the control name, which comes after the last `;` separator
+		// 		controlName := strings.TrimSpace(strings.Split(objectParts[2], ";")[1])
+
+		// 		// Add the parsed COM reference to the ItemGroup
+		// 		comReference := COMReference{
+		// 			Include:      controlName,
+		// 			Guid:         guid,
+		// 			VersionMajor: majorVersion,
+		// 			VersionMinor: minorVersion,
+		// 		}
+		// 		itemGroup.COMReference = append(itemGroup.COMReference, comReference)
+		// 	}
+
+		// }
 	}
 
 	// Add collected items to project
@@ -137,13 +147,13 @@ func parseVbpFile(filename string) (Project, error) {
 	return project, nil
 }
 
-// Helper function to parse version part to integer, handling errors
-func parseVersionPart(part string) int {
-	if val, err := strconv.Atoi(part); err == nil {
-		return val
-	}
-	return 0 // Fallback to 0 if parsing fails
-}
+// // Helper function to parse version part to integer, handling errors
+// func parseVersionPart(part string) int {
+// 	if val, err := strconv.Atoi(part); err == nil {
+// 		return val
+// 	}
+// 	return 0 // Fallback to 0 if parsing fails
+// }
 
 // Function to write Project struct as .csproj XML file
 func writeCsprojFile(project Project, outputFilename string) error {
