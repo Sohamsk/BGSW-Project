@@ -34,7 +34,8 @@ func handleLetExpression(nodes []antlr.Tree, w *bufio.Writer) {
 				if holds {
 					w.WriteString("{\"Symbol\": \"" + single.(antlr.TerminalNode).GetText() + "\"},")
 				} else if parser.VisualBasic6ParserParserStaticData.RuleNames[single.(antlr.RuleContext).GetRuleIndex()] == "iCS_S_ProcedureOrArrayCall" {
-					w.WriteString(handleFuncCalls(single) + ",")
+					w.WriteString("{\"Type\": \"FunctionCall\",")
+					w.WriteString(handleFuncCalls(single) + "},")
 				} else {
 					// find type of a node that is not a func call or and expression
 					fmt.Println(fetchParentOfTerminal(node))
