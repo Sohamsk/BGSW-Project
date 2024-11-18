@@ -45,7 +45,7 @@ func handleFuncCalls(single antlr.Tree) string {
 						if proc {
 							w.WriteString("{\"Type\": \"FunctionCall\"," + handleFuncCalls(node.GetChild(0).GetChild(0).GetChild(0)) + "},")
 						} else {
-							w.WriteString("{\"type\":\"" + rules[parent.(antlr.RuleContext).GetRuleIndex()] + "\", \"sym\": \"" + strings.Trim(node.GetText(), "\"") + "\"},")
+							w.WriteString("{\"type\":\"" + rules[parent.(antlr.RuleContext).GetRuleIndex()] + "\", \"Symbol\": \"" + strings.Trim(node.GetText(), "\"") + "\"},")
 						}
 					}
 				}

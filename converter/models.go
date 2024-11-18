@@ -24,7 +24,7 @@ type ArgType struct {
 
 type Literal struct {
 	ArgType
-	Symbol string `json:"sym"`
+	Symbol string
 }
 
 type FuncArg struct {
@@ -37,4 +37,9 @@ type FuncRule struct {
 	Rule
 	Identifier string
 	Arguments  []json.RawMessage
+}
+
+type ExpressionRule struct {
+	Rule
+	Body []json.RawMessage
 }
