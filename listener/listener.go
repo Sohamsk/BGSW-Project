@@ -5,7 +5,6 @@ import (
 	"bosch/stack"
 	"bufio"
 	"bytes"
-	"reflect"
 	"strings"
 
 	"github.com/antlr4-go/antlr/v4"
@@ -59,41 +58,10 @@ func (s *TreeShapeListener) ExitStartRule(ctx *parser.StartRuleContext) {
 
 func fetchParentOfTerminal(someTree antlr.Tree) string {
 	rules := parser.VisualBasic6ParserParserStaticData.RuleNames
-	if reflect.TypeOf(someTree) == reflect.TypeOf(new(antlr.TerminalNode)) {
+	_, holds := someTree.(antlr.TerminalNode)
+	if holds {
 		return rules[someTree.GetParent().(antlr.RuleContext).GetRuleIndex()]
 	} else {
-		if someTree.GetChildCount() > 1 {
-			fetchParentOfTerminal(someTree.GetChild(0))
-
-		}
+		return fetchParentOfTerminal(someTree.GetChild(0))
 	}
-
-	//	for _, node := range someTree.GetChildren() {
-	//		switch node := node.(type) {
-	//		case antlr.TerminalNode:
-	//			break
-	//		case antlr.RuleNode:
-	//			var some antlr.Tree
-	//			flag := false
-	//			some = node.GetChild(0)
-	//		outer:
-	//			for !flag {
-	//				some = some.GetChild(0)
-	//				switch some := some.(type) {
-	//				case antlr.TerminalNode:
-	//					parent = some.GetParent()
-	//					break outer
-	//				case antlr.RuleContext:
-	//					fmt.Println(rules[some.GetRuleIndex()])
-	//
-	//				}
-	//			}
-	//			if !flag {
-	//			} else {
-	//				return ""
-	//			}
-	//		}
-	//	}
-	return "kahitri gandlay "
 }
-

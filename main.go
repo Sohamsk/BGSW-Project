@@ -46,7 +46,7 @@ func main() {
 	stream := antlr.NewCommonTokenStream(lexer, 0)
 	p := parser.NewVisualBasic6Parser(stream)
 	p.BuildParseTrees = true
-	p.AddErrorListener(antlr.NewDiagnosticErrorListener(true))
+	//p.AddErrorListener(antlr.NewDiagnosticErrorListener(true))
 	tree := p.StartRule()
 
 	f, err := os.Create("op.json")
