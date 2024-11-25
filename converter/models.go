@@ -43,3 +43,17 @@ type ExpressionRule struct {
 	Rule
 	Body []json.RawMessage
 }
+
+type DeclArg struct {
+	ArgumentName  string
+	ArgumentType  string
+	IsPassedByRef bool
+}
+
+type SubStmt struct {
+	Rule
+	Identifier string
+	Visibility string
+	Arguments  []DeclArg
+	SubBody    []json.RawMessage
+}

@@ -23,6 +23,10 @@ func Convert(raw string) string {
 	if err != nil {
 		panic("Error: Error unmarshalling json")
 	}
+	_, ok := funcMap["expression"]
+	if !ok {
+		panic("failed to init")
+	}
 	fmt.Println("Name: " + context.FileName + " Type: " + context.FileType)
 	fmt.Println(handleBody(context.Body))
 	return raw

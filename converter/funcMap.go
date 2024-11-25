@@ -6,6 +6,34 @@ import (
 	"strings"
 )
 
+var funcMap map[string]func(json.RawMessage) string
+
+func init() {
+	funcMap = map[string]func(json.RawMessage) string{
+		"DeclareVariable": DeclareVariableRule,
+		"FunctionCall":    FuncCallRule,
+		"expression":      ExpressionRuleHandler,
+		"SubStatement":    SubStmtHandler,
+	}
+}
+
+var vb_cs_types = map[string]string{
+	"Boolean":   "bool",
+	"Byte":      "byte",
+	"Currency":  "decimal",
+	"Date":      "DateTime",
+	"Double":    "double",
+	"Integer":   "short",
+	"Long":      "int",
+	"Object":    "object",
+	"Single":    "float",
+	"String":    "string",
+	"Variant":   "object",  // Variant usually maps to object
+	"Byte()":    "byte[]",  // Byte array
+	"Integer()": "short[]", // Integer array
+	"Long()":    "int[]",   // Long array
+}
+
 func incorrectNode() {
 	panic("Error: Incorrect node")
 }
@@ -52,6 +80,7 @@ func FuncCallRule(content json.RawMessage) string {
 	}
 	return strings.Trim(sb.String(), ",") + ");"
 }
+
 func FuncCallArg(content json.RawMessage) string {
 	fun := FuncArg{}
 	err := json.Unmarshal(content, &fun)
@@ -103,11 +132,25 @@ func ExpressionRuleHandler(content json.RawMessage) string {
 		}
 	}
 
-	return sb.String()
+	return sb.String() + ";"
 }
 
-var funcMap = map[string]func(json.RawMessage) string{
-	"DeclareVariable": DeclareVariableRule,
-	"FunctionCall":    FuncCallRule,
-	"expression":      ExpressionRuleHandler,
+func SubStmtHandler(content json.RawMessage) string {
+	sub := SubStmt{}
+	err := json.Unmarshal(content, &sub)
+	if err != nil {
+		incorrectNode()
+	}
+	var sb strings.Builder
+	sb.WriteString("void " + sub.Identifier + "(")
+	for _, arg := range sub.Arguments {
+		sb.WriteString(vb_cs_types[arg.ArgumentType] + " " + arg.ArgumentName + ",")
+	}
+	str := sb.String()
+	sb.Reset()
+	sb.WriteString(strings.Trim(str, ","))
+	sb.WriteString(") {")
+	sb.WriteString(handleBody(sub.SubBody))
+	sb.WriteString("}")
+	return sb.String()
 }
