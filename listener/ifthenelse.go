@@ -58,10 +58,10 @@ func (s *TreeShapeListener) EnterIfElseBlockStmt(ctx *parser.IfElseBlockStmtCont
 
 func (s *TreeShapeListener) ExitIfElseBlockStmt(ctx *parser.IfElseBlockStmtContext) {
 	s.exitContext()
-	s.writer.WriteString("}")
+	s.writer.WriteString("},")
 }
 
 func (s *TreeShapeListener) ExitBlockIfThenElseStmt(ctx *parser.BlockIfThenElseContext) {
 	s.exitContext()
-	s.writer.WriteString("}")
+	s.writer.WriteString("},")
 }

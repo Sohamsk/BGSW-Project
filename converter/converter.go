@@ -6,39 +6,43 @@ import (
 )
 
 type RawItem struct {
-	Type string          `json:"ruletype"`
+	Type string `json:"ruletype"`
 }
 
-func handleBody(rules []json.RawMessage)string {
-    var result string
-    for _, rule := range(rules) {
-        result += ConvertRule(rule)
-    }
-    return result
+func handleBody(rules []json.RawMessage) string {
+	var result string
+	for _, rule := range rules {
+		result += ConvertRule(rule)
+	}
+	return result
 }
 
-func Convert(raw string)string {
-    context := FileContext{}
-    err := json.Unmarshal([]byte(raw), &context)
-    if err != nil {
-        panic("Error: Error unmarshalling json")
-    }
-    fmt.Println("Name: " + context.FileName + " Type: " + context.FileType)
-    fmt.Println(handleBody(context.Body))
-    return raw
+func Convert(raw string) string {
+	context := FileContext{}
+	err := json.Unmarshal([]byte(raw), &context)
+	if err != nil {
+		panic("Error: Error unmarshalling json")
+	}
+	_, ok := funcMap["expression"]
+	if !ok {
+		panic("failed to init")
+	}
+	fmt.Println("Name: " + context.FileName + " Type: " + context.FileType)
+	fmt.Println(handleBody(context.Body))
+	return raw
 }
 
 // the converter should take the json string and the project context which we'll get on parsing the vbp file
-func ConvertRule(rawMsg json.RawMessage)string {
-    raw := RawItem{}
-    err := json.Unmarshal([]byte(rawMsg), &raw)
-    if err != nil {
-        panic("Error: Error unmarshalling json")
-    }
+func ConvertRule(rawMsg json.RawMessage) string {
+	raw := RawItem{}
+	err := json.Unmarshal([]byte(rawMsg), &raw)
+	if err != nil {
+		panic("Error: Error unmarshalling json")
+	}
 
-    action, ok := funcMap[raw.Type]
-    if (!ok) {
-        panic("Error: Invalid RuleType")
-    }
-    return action(rawMsg)
+	action, ok := funcMap[raw.Type]
+	if !ok {
+		panic(raw.Type)
+	}
+	return action(rawMsg)
 }

@@ -32,13 +32,14 @@ func handleLetExpression(nodes []antlr.Tree, w *bufio.Writer) {
 				single := node.GetChild(0).GetChild(0)
 				_, holds := single.(antlr.TerminalNode)
 				if holds {
-					w.WriteString("{\"Symbol\": \"" + single.(antlr.TerminalNode).GetText() + "\"},")
+					w.WriteString("{\"Type\": \"" + fetchParentOfTerminal(node) + "\",\"Symbol\": \"" + strings.Trim(single.(antlr.TerminalNode).GetText(), "\"") + "\"},")
 				} else if parser.VisualBasic6ParserParserStaticData.RuleNames[single.(antlr.RuleContext).GetRuleIndex()] == "iCS_S_ProcedureOrArrayCall" {
-					w.WriteString(handleFuncCalls(single) + ",")
+					w.WriteString("{\"Type\": \"FunctionCall\",")
+					w.WriteString(handleFuncCalls(single) + "},")
 				} else {
 					// find type of a node that is not a func call or and expression
-					fmt.Println(fetchParentOfTerminal(node))
-					w.WriteString("{\"Identifier\": \"" + node.GetText() + "\"},")
+					fmt.Println("fetch " + fetchParentOfTerminal(node.GetChild(0)))
+					w.WriteString("{\"Type\":\"" + fetchParentOfTerminal(node) + "\", \"Symbol\":\"" + node.GetText() + "\"},")
 				}
 			} else {
 				//				fmt.Println("nest")
@@ -55,7 +56,7 @@ func (s *TreeShapeListener) EnterLetStmt(ctx *parser.LetStmtContext) {
 	nodes := ctx.GetChildren()
 	var buffer bytes.Buffer
 	writer := bufio.NewWriter(&buffer)
-	fmt.Println(ctx.GetText())
+	//fmt.Println(ctx.GetText())
 	s.writer.WriteString("{\"RuleType\": \"expression\", \"Body\": ")
 	writer.WriteString("[")
 	handleLetExpression(nodes, writer)
