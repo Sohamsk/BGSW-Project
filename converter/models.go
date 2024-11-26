@@ -57,3 +57,11 @@ type SubStmt struct {
 	Arguments  []DeclArg
 	SubBody    []json.RawMessage
 }
+
+type DoloopStmt struct {
+	Rule
+	Kind       string
+	BeforeLoop bool
+	Condition  []json.RawMessage
+	Body       []json.RawMessage
+}

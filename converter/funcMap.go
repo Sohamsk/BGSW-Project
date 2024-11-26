@@ -14,6 +14,7 @@ func init() {
 		"FunctionCall":    FuncCallRule,
 		"expression":      ExpressionRuleHandler,
 		"SubStatement":    SubStmtHandler,
+		"DoLoopStatement": DoLoopStmtHandler,
 	}
 }
 
@@ -142,6 +143,9 @@ func SubStmtHandler(content json.RawMessage) string {
 		incorrectNode()
 	}
 	var sb strings.Builder
+	if sub.Visibility == "Public" {
+		sb.WriteString("public ")
+	}
 	sb.WriteString("void " + sub.Identifier + "(")
 	for _, arg := range sub.Arguments {
 		sb.WriteString(vb_cs_types[arg.ArgumentType] + " " + arg.ArgumentName + ",")
@@ -152,5 +156,57 @@ func SubStmtHandler(content json.RawMessage) string {
 	sb.WriteString(") {")
 	sb.WriteString(handleBody(sub.SubBody))
 	sb.WriteString("}")
+	return sb.String()
+}
+
+func ProcessCondition(parts []json.RawMessage) string {
+	var sb strings.Builder
+	for _, raw := range parts {
+		arg := ArgType{}
+		err := json.Unmarshal(raw, &arg)
+		if err != nil {
+			incorrectArg()
+		}
+		if arg.Type == "FunctionCall" {
+			sb.WriteString(FuncCallArg(raw))
+		} else {
+			arg := Literal{}
+			json.Unmarshal(raw, &arg)
+			sb.WriteString(arg.Symbol)
+		}
+	}
+	return sb.String()
+}
+
+func DoLoopStmtHandler(content json.RawMessage) string {
+	loop := DoloopStmt{}
+	err := json.Unmarshal(content, &loop)
+	if err != nil {
+		incorrectNode()
+	}
+	var sb strings.Builder
+	if loop.BeforeLoop {
+		sb.WriteString("while(")
+		if loop.Kind == "until" {
+			sb.WriteString("!(")
+			sb.WriteString(ProcessCondition(loop.Condition) + "))")
+		} else {
+			sb.WriteString(ProcessCondition(loop.Condition) + ")")
+		}
+	} else {
+		sb.WriteString("do")
+	}
+	sb.WriteString("{")
+	sb.WriteString(handleBody(loop.Body))
+	sb.WriteString("}")
+	if !loop.BeforeLoop {
+		sb.WriteString("while(")
+		if loop.Kind == "until" {
+			sb.WriteString("!(")
+			sb.WriteString(ProcessCondition(loop.Condition) + "));")
+		} else {
+			sb.WriteString(ProcessCondition(loop.Condition) + ");")
+		}
+	}
 	return sb.String()
 }
