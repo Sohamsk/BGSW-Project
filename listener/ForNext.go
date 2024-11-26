@@ -28,7 +28,12 @@ func (s *TreeShapeListener) EnterForNextStmt(ctx *parser.ForNextStmtContext) {
 			}
 		}
 	}
-	s.writer.WriteString("\"Initialization\": \"" + initialization + "\",")
+
+	if step == "" {
+		step = "1"
+	}
+
+	s.writer.WriteString("\"Identifier Name\": \"" + initialization + "\",")
 	s.writer.WriteString("\"Start\": \"" + from + "\",")
 	s.writer.WriteString("\"End\": \"" + condition + "\",")
 	s.writer.WriteString("\"Step\": \"" + step + "\",")

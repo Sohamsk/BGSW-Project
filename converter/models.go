@@ -3,17 +3,26 @@ package converter
 import "encoding/json"
 
 type FileContext struct {
-    FileName string
-    FileType string
-    Body []json.RawMessage `json:"body"`
+	FileName string
+	FileType string
+	Body     []json.RawMessage `json:"body"`
 }
 
 type Rule struct {
-    RuleType string
+	RuleType string
 }
 
 type Dim struct {
-    Rule
-    Identifier string
-    Type string
+	Rule
+	Identifier string
+	Type       string
+}
+
+type ForNext struct {
+	Rule
+	IdentifierName string
+	Start          int
+	End            int
+	Step           int
+	Body           []json.RawMessage
 }
