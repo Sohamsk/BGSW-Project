@@ -1,10 +1,13 @@
-Func1 "x", "y"
-call Func1("x", "y")
-call Func1("x", Func1("y", "z"))
-Func2 2, "x"
-'y = x + c + Func1("x", "y") + 2
-'some = "string"
-'Do While Not I = 0
-'	Beep
-'	I -= 1
-'Loop
+Public Sub Test1()
+    If i = 1 Then
+        Statment
+    ElseIf i = 2 Then Statment
+    ElseIf i = 3 Then Statment
+    End If
+End Sub
+
+Public Sub Test2()
+    Do
+    Loop Until i >= 1
+End Sub
+

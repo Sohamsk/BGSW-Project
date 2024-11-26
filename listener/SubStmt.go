@@ -61,5 +61,5 @@ func (s *TreeShapeListener) EnterSubStmt(ctx *parser.SubStmtContext) {
 }
 func (s *TreeShapeListener) ExitSubStmt(ctx *parser.SubStmtContext) {
 	s.exitContext()
-	s.writer.WriteString("}")
+	s.writer.WriteString("},")
 }
