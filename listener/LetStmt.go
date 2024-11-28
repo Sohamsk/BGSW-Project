@@ -4,7 +4,7 @@ import (
 	"bosch/parser"
 	"bufio"
 	"bytes"
-	"fmt"
+	//	"fmt"
 	"strings"
 
 	"github.com/antlr4-go/antlr/v4"
@@ -38,7 +38,7 @@ func handleLetExpression(nodes []antlr.Tree, w *bufio.Writer) {
 					w.WriteString(handleFuncCalls(single) + "},")
 				} else {
 					// find type of a node that is not a func call or and expression
-					fmt.Println("fetch " + fetchParentOfTerminal(node.GetChild(0)))
+					//					fmt.Println("fetch " + fetchParentOfTerminal(node.GetChild(0)))
 					w.WriteString("{\"Type\":\"" + fetchParentOfTerminal(node) + "\", \"Symbol\":\"" + node.GetText() + "\"},")
 				}
 			} else {

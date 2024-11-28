@@ -15,6 +15,9 @@ func init() {
 		"expression":      ExpressionRuleHandler,
 		"SubStatement":    SubStmtHandler,
 		"DoLoopStatement": DoLoopStmtHandler,
+		"IfThenElse":      IfThenElseStmtHandler,
+		"ElseIf":          ElseIfHandler,
+		"ElseBlock":       ElseHandler,
 	}
 }
 
@@ -208,5 +211,58 @@ func DoLoopStmtHandler(content json.RawMessage) string {
 			sb.WriteString(ProcessCondition(loop.Condition) + ");")
 		}
 	}
+	return sb.String()
+}
+func IfThenElseStmtHandler(content json.RawMessage) string {
+	var ifStmt IfThenElseStmtRule
+	err := json.Unmarshal(content, &ifStmt)
+	if err != nil {
+		incorrectNode()
+	}
+
+	var sb strings.Builder
+
+	// Handle the `IfThenElseStmtRule`
+	sb.WriteString("if (")
+	sb.WriteString(ProcessCondition(ifStmt.Condition)) // Using handleBody for Condition
+	sb.WriteString(") {\n")
+	sb.WriteString(handleBody(ifStmt.IfBlock)) // Using handleBody for IfBlock
+	sb.WriteString("\n}")
+
+	return sb.String()
+}
+
+func ElseIfHandler(content json.RawMessage) string {
+	var elseIfStmt ElseIfRule
+	err := json.Unmarshal(content, &elseIfStmt)
+	if err != nil {
+		incorrectNode()
+	}
+
+	var sb strings.Builder
+
+	// Handle the `ElseIfRule`
+	sb.WriteString("else if (")
+	sb.WriteString(ProcessCondition(elseIfStmt.Condition)) // Using handleBody for Condition
+	sb.WriteString(") {\n")
+	sb.WriteString(handleBody(elseIfStmt.ElseIfBlock)) // Using handleBody for ElseIfBlock
+	sb.WriteString("\n}")
+
+	return sb.String()
+}
+
+func ElseHandler(content json.RawMessage) string {
+	var elseStmt ElseRule
+	err := json.Unmarshal(content, &elseStmt)
+	if err != nil {
+		incorrectNode()
+	}
+
+	var sb strings.Builder
+
+	// Handle the `ElseRule`
+	sb.WriteString("else {\n")
+	sb.WriteString(handleBody(elseStmt.Body)) // Using handleBody for ElseBlock
+	sb.WriteString("\n}")
 	return sb.String()
 }
