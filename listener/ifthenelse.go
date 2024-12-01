@@ -13,7 +13,7 @@ func (s *TreeShapeListener) EnterIfBlockStmt(ctx *parser.IfBlockStmtContext) {
 	for _, node := range nodes {
 		switch node := node.(type) {
 		case *parser.IfConditionStmtContext:
-			s.writer.WriteString("\"IsBlock\":\"True\",")
+			s.writer.WriteString("\"IsBlock\":true,")
 			var buffer bytes.Buffer
 			writer := bufio.NewWriter(&buffer)
 			handleLetExpression(node.GetChild(0).GetChildren(), writer)

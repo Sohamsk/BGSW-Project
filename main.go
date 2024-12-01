@@ -4,6 +4,7 @@ import (
 	"bosch/converter"
 	"bosch/listener"
 	"bosch/parser"
+	//	vbptocsproj "bosch/vbp_to_csproj"
 	"bufio"
 	"bytes"
 	"fmt"
@@ -33,6 +34,7 @@ func writeToOutput(file *os.File, buf *bytes.Buffer, fileName string, fileExtens
 }
 
 func main() {
+	//	vbptocsproj.ConvertVBpFiletoCSprojFile("./vbp_to_csproj/Complex.vbp") // TODO : just an example file change later
 	inputfileName := os.Args[1]
 
 	input, err := antlr.NewFileStream(inputfileName)

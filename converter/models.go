@@ -74,3 +74,20 @@ type FuncDecl struct {
 	ReturnType string
 	Body       []json.RawMessage
 }
+type ElseIfRule struct {
+	Rule
+	Condition   []json.RawMessage
+	ElseIfBlock []json.RawMessage
+}
+
+type ElseRule struct {
+	Rule
+	Body []json.RawMessage
+}
+
+type IfThenElseStmtRule struct {
+	Rule
+	IsBlock   bool
+	Condition []json.RawMessage
+	IfBlock   []json.RawMessage
+}
