@@ -19,6 +19,7 @@ func init() {
 		"ElseIf":          ElseIfHandler,
 		"ElseBlock":       ElseHandler,
 		"FuncStatement":   FunctionHandler,
+		"ForNext":         ForNextRule,
 	}
 }
 
@@ -282,4 +283,23 @@ func ElseHandler(content json.RawMessage) string {
 	sb.WriteString(handleBody(elseStmt.Body)) // Using handleBody for ElseBlock
 	sb.WriteString("\n}")
 	return sb.String()
+}
+func ForNextRule(content json.RawMessage) string {
+	forNext := ForNext{}
+	err := json.Unmarshal(content, &forNext)
+	if err != nil {
+		panic("Error: Incorrect node")
+	}
+	// Generate the loop representation
+	loop := fmt.Sprintf("for(int %s=%d; %s<=%d; %s+=%d)",
+		forNext.IdentifierName,
+		forNext.Start,
+		forNext.IdentifierName,
+		forNext.End,
+		forNext.IdentifierName,
+		forNext.Step)
+
+	// Print the loop representation
+	fmt.Println(loop)
+	return loop
 }

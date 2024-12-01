@@ -90,3 +90,11 @@ type FuncDecl struct {
 	ReturnType string
 	Body       []json.RawMessage
 }
+type ForNext struct {
+	Rule
+	IdentifierName string
+	Start          int
+	End            int
+	Step           int
+	Body           []json.RawMessage
+}
