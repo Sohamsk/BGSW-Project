@@ -39,15 +39,15 @@ func (s *TreeShapeListener) EnterFunctionStmt(ctx *parser.FunctionStmtContext) {
 								passedByRef = false
 							}
 						case *parser.AmbiguousIdentifierContext:
-							arguments = append(arguments, fmt.Sprintf("{\"ArgumentName%d\":\"%s\",", index, greatGrandchild.(antlr.ParseTree).GetText()))
+							arguments = append(arguments, fmt.Sprintf("{\"ArgumentName\":\"%s\",", greatGrandchild.(antlr.ParseTree).GetText()))
 							index++
 						case *parser.AsTypeClauseContext:
 							argType := greatGrandchild.GetChild(2).(antlr.ParseTree).GetText()
 							arguments[len(arguments)-1] += fmt.Sprintf("\"ArgumentType\": \"%s\",", argType)
-							arguments[len(arguments)-1] += fmt.Sprintf("\"IsPassedByRef\": \"%t\"}", passedByRef)
+							arguments[len(arguments)-1] += fmt.Sprintf("\"IsPassedByRef\": %t}", passedByRef)
 						case *parser.TypeHintContext:
 							arguments[len(arguments)-1] += fmt.Sprintf("\"ArgumentTypeHint\": \"%s\",", greatGrandchild.(antlr.ParseTree).GetText())
-							arguments[len(arguments)-1] += fmt.Sprintf("\"IsPassedByRef\": \"%t\"}", passedByRef)
+							arguments[len(arguments)-1] += fmt.Sprintf("\"IsPassedByRef\": %t}", passedByRef)
 						}
 
 					}

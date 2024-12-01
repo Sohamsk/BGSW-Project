@@ -82,3 +82,11 @@ type IfThenElseStmtRule struct {
 	Condition []json.RawMessage
 	IfBlock   []json.RawMessage
 }
+type FuncDecl struct {
+	Rule
+	Identifier string
+	Visibility string
+	Arguments  []DeclArg
+	ReturnType string
+	Body       []json.RawMessage
+}
