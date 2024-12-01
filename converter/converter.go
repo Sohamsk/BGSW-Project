@@ -23,13 +23,8 @@ func Convert(raw string) string {
 	if err != nil {
 		panic("Error: Error unmarshalling json")
 	}
-	_, ok := funcMap["expression"]
-	if !ok {
-		panic("failed to init")
-	}
-	fmt.Println("Name: " + context.FileName + " Type: " + context.FileType)
-	fmt.Println(handleBody(context.Body))
-	return raw
+	converted := fmt.Sprintf("class %s {%s}", context.FileName, handleBody(context.Body))
+	return converted
 }
 
 // the converter should take the json string and the project context which we'll get on parsing the vbp file

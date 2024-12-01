@@ -59,5 +59,5 @@ func main() {
 	f.Close()
 
 	fmt.Println(buf.String())
-	converter.Convert(buf.String())
+	fmt.Println(converter.Convert(buf.String()))
 }
