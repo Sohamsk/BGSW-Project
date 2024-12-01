@@ -10,7 +10,7 @@ import (
 
 func (s *TreeShapeListener) EnterSubStmt(ctx *parser.SubStmtContext) {
 	nodes := ctx.GetChildren()
-	s.writer.WriteString("{\"SubStatement\": {")
+	s.writer.WriteString("{\"RuleType\":\"SubStatement\",")
 	// handling arguments of a Sub
 	index := 1
 	Visibility := "Public"
@@ -20,9 +20,9 @@ func (s *TreeShapeListener) EnterSubStmt(ctx *parser.SubStmtContext) {
 		case *parser.VisibilityContext:
 			Visibility = child.(antlr.ParseTree).GetText()
 		case *parser.AmbiguousIdentifierContext:
-			s.writer.WriteString("\"SubName\": \"" + child.(antlr.ParseTree).GetText() + "\",")
+			s.writer.WriteString("\"Identifier\": \"" + child.(antlr.ParseTree).GetText() + "\",")
 			s.writer.WriteString("\"Visibility\": \"" + Visibility + "\",")
-			s.writer.WriteString("\"arguments\": [")
+			s.writer.WriteString("\"Arguments\": [")
 		case *parser.ArgListContext:
 			passedByRef := true
 			for _, grandchild := range child.GetChildren() {
@@ -36,12 +36,12 @@ func (s *TreeShapeListener) EnterSubStmt(ctx *parser.SubStmtContext) {
 							}
 
 						case *parser.AmbiguousIdentifierContext:
-							arguments = append(arguments, fmt.Sprintf("{\"ArgumentName%d\":\"%s\",", index, greatGrandchild.(antlr.ParseTree).GetText()))
+							arguments = append(arguments, fmt.Sprintf("{\"ArgumentName\":\"%s\",", greatGrandchild.(antlr.ParseTree).GetText()))
 							index++
 						case *parser.AsTypeClauseContext:
 							argType := greatGrandchild.GetChild(2).(antlr.ParseTree).GetText()
 							arguments[len(arguments)-1] += fmt.Sprintf("\"ArgumentType\": \"%s\",", argType)
-							arguments[len(arguments)-1] += fmt.Sprintf("\"IsPassedByRef\": \"%t\"}", passedByRef)
+							arguments[len(arguments)-1] += fmt.Sprintf("\"IsPassedByRef\": %t}", passedByRef)
 						case *parser.TypeHintContext:
 							arguments[len(arguments)-1] += fmt.Sprintf("\"ArgumentTypeHint\": \"%s\",", greatGrandchild.(antlr.ParseTree).GetText())
 							arguments[len(arguments)-1] += fmt.Sprintf("\"IsPassedByRef\": \"%t\"}", passedByRef)
@@ -61,5 +61,5 @@ func (s *TreeShapeListener) EnterSubStmt(ctx *parser.SubStmtContext) {
 }
 func (s *TreeShapeListener) ExitSubStmt(ctx *parser.SubStmtContext) {
 	s.exitContext()
-	s.writer.WriteString("}} ")
+	s.writer.WriteString("},")
 }

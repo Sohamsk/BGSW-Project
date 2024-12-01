@@ -11,7 +11,6 @@ build:
 .PHONY: test
 test: build
 	./dist/main $(TARGET)
-	cat op.json
 
 .PHONY: clean
 clean:

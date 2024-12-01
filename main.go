@@ -25,10 +25,10 @@ func getFileDetails(inputFileName string) (string, string) {
 
 func writeToOutput(file *os.File, buf *bytes.Buffer, fileName string, fileExtension string, tree parser.IStartRuleContext) {
 	buf.WriteString("{\"FileName\":\"" + fileName + "\", \"FileType\": \"" + fileExtension + "\",")
-    writer := bufio.NewWriter(buf)
+	writer := bufio.NewWriter(buf)
 	antlr.ParseTreeWalkerDefault.Walk(listener.NewTreeShapeListener(writer, buf), tree)
-    writer.Flush()
-    buf.WriteString("}")
+	writer.Flush()
+	buf.WriteString("}")
 	file.WriteString(buf.String())
 }
 
@@ -46,7 +46,7 @@ func main() {
 	stream := antlr.NewCommonTokenStream(lexer, 0)
 	p := parser.NewVisualBasic6Parser(stream)
 	p.BuildParseTrees = true
-	p.AddErrorListener(antlr.NewDiagnosticErrorListener(true))
+	//p.AddErrorListener(antlr.NewDiagnosticErrorListener(true))
 	tree := p.StartRule()
 
 	f, err := os.Create("op.json")
@@ -54,10 +54,10 @@ func main() {
 		log.Panic(err)
 	}
 	f.Seek(0, 0)
-    var buf bytes.Buffer
+	var buf bytes.Buffer
 	writeToOutput(f, &buf, fileName, fileExtension, tree)
 	f.Close()
 
-    fmt.Println(buf.String())
-    converter.Convert(buf.String())
+	fmt.Println(buf.String())
+	fmt.Println(converter.Convert(buf.String()))
 }

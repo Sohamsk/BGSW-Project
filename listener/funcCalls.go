@@ -13,7 +13,7 @@ func handleFuncCalls(single antlr.Tree) string {
 	rules := parser.VisualBasic6ParserParserStaticData.RuleNames
 	var buf bytes.Buffer
 	w := bufio.NewWriter(&buf)
-	w.WriteString("{\"Type\": \"functioncall\",")
+	// w.WriteString("{\"Type\": \"functioncall\",")
 	for _, child := range single.(antlr.RuleNode).GetChildren() {
 		switch val := child.(type) {
 		case antlr.TerminalNode:
@@ -43,9 +43,9 @@ func handleFuncCalls(single antlr.Tree) string {
 							}
 						}
 						if proc {
-							w.WriteString(handleFuncCalls(node.GetChild(0).GetChild(0).GetChild(0)) + ",")
+							w.WriteString("{\"Type\": \"FunctionCall\"," + handleFuncCalls(node.GetChild(0).GetChild(0).GetChild(0)) + "},")
 						} else {
-							w.WriteString("{\"type\":\"" + rules[parent.(antlr.RuleContext).GetRuleIndex()] + "\", \"sym\": \"" + strings.Trim(node.GetText(), "\"") + "\"},")
+							w.WriteString("{\"type\":\"" + rules[parent.(antlr.RuleContext).GetRuleIndex()] + "\", \"Symbol\": \"" + strings.Trim(node.GetText(), "\"") + "\"},")
 						}
 					}
 				}
@@ -56,14 +56,16 @@ func handleFuncCalls(single antlr.Tree) string {
 	}
 	w.Flush()
 	str := buf.String()
-	str = strings.TrimRight(str, ",") + "]}"
+	str = strings.TrimRight(str, ",") + "]"
 	return str
 }
 
 func (s *TreeShapeListener) EnterICS_B_ProcedureCall(ctx *parser.ICS_B_ProcedureCallContext) {
-	s.writer.WriteString(handleFuncCalls(ctx) + ",")
+	s.writer.WriteString("{\"RuleType\": \"FunctionCall\",")
+	s.writer.WriteString(handleFuncCalls(ctx) + "},")
 }
 
 func (s *TreeShapeListener) EnterECS_ProcedureCall(ctx *parser.ECS_ProcedureCallContext) {
-	s.writer.WriteString(handleFuncCalls(ctx) + ",")
+	s.writer.WriteString("{\"RuleType\": \"FunctionCall\",")
+	s.writer.WriteString(handleFuncCalls(ctx) + "},")
 }
