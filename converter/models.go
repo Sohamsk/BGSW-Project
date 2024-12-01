@@ -91,3 +91,11 @@ type IfThenElseStmtRule struct {
 	Condition []json.RawMessage
 	IfBlock   []json.RawMessage
 }
+type ForNext struct {
+	Rule
+	IdentifierName string
+	Start          int
+	End            int
+	Step           int
+	Body           []json.RawMessage
+}
