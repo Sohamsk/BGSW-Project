@@ -15,6 +15,7 @@ func init() {
 		"expression":      ExpressionRuleHandler,
 		"SubStatement":    SubStmtHandler,
 		"DoLoopStatement": DoLoopStmtHandler,
+		"FuncStatement":   FunctionHandler,
 	}
 }
 
@@ -132,7 +133,6 @@ func ExpressionRuleHandler(content json.RawMessage) string {
 			sb.WriteString(arg.Symbol)
 		}
 	}
-
 	return sb.String() + ";"
 }
 
@@ -156,6 +156,23 @@ func SubStmtHandler(content json.RawMessage) string {
 	sb.WriteString(") {")
 	sb.WriteString(handleBody(sub.SubBody))
 	sb.WriteString("}")
+	return sb.String()
+}
+
+func FunctionHandler(content json.RawMessage) string {
+	funct := FuncDecl{}
+	err := json.Unmarshal(content, &funct)
+	if err != nil {
+		incorrectNode()
+	}
+	var sb strings.Builder
+	sb.WriteString(fmt.Sprintf("%s %s %s (", strings.ToLower(funct.Visibility), vb_cs_types[funct.ReturnType], funct.Identifier))
+	for _, arg := range funct.Arguments {
+		sb.WriteString(vb_cs_types[arg.ArgumentType] + " " + arg.ArgumentName + ",")
+	}
+	str := sb.String()
+	sb.Reset()
+	sb.WriteString(strings.Trim(str, ",") + "){" + handleBody(funct.Body) + "}") // need a seperate body handler to handle functions returning values as there is no return keyword in vb6
 	return sb.String()
 }
 
