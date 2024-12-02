@@ -13,11 +13,11 @@ type Rule struct {
 }
 
 type Dim struct {
-	Rule
-	Identifier string
-	Type       string
+	Identifier string `json:"identifier"`
+	Type       string `json:"type"`
+	Scope      string `json:"scope,omitempty"`
+	WithEvents bool   `json:"withEvents,omitempty"`
 }
-
 type ArgType struct {
 	Type string
 }
@@ -93,9 +93,9 @@ type IfThenElseStmtRule struct {
 }
 type ForNext struct {
 	Rule
-	IdentifierName string
-	Start          int
-	End            int
-	Step           int
-	Body           []json.RawMessage
+	IdentifierName string            `json:"IdentifierName"`
+	Start          string            `json:"Start"`
+	End            string            `json:"End"`
+	Step           string            `json:"Step"`
+	Body           []json.RawMessage `json:"Body"`
 }

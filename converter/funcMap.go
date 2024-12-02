@@ -3,6 +3,7 @@ package converter
 import (
 	"encoding/json"
 	"fmt"
+	"strconv"
 	"strings"
 )
 
@@ -19,7 +20,7 @@ func init() {
 		"IfThenElse":      IfThenElseStmtHandler,
 		"ElseIf":          ElseIfHandler,
 		"ElseBlock":       ElseHandler,
-		"ForNext":         ForNextRule,
+		"ForNextStmt":     ForNextRule,
 	}
 }
 
@@ -48,14 +49,62 @@ func incorrectArg() {
 	panic("incorrect argument")
 }
 
+//func DeclareVariableRule(content json.RawMessage) string {
+//	dim := Dim{}
+//	err := json.Unmarshal(content, &dim)
+//	if err != nil {
+//		incorrectNode()
+//	}
+//	fmt.Println(dim.Identifier)
+//	return string(content)
+//}
+
 func DeclareVariableRule(content json.RawMessage) string {
+	// Unmarshal the JSON content into a Dim struct
 	dim := Dim{}
 	err := json.Unmarshal(content, &dim)
 	if err != nil {
+		// Handle incorrect JSON by calling a predefined error handler
 		incorrectNode()
+		return ""
 	}
-	fmt.Println(dim.Identifier)
-	return string(content)
+
+	// Convert the type using the mapping
+	csType, exists := vb_cs_types[dim.Type]
+	if !exists {
+		// If type not found, use the original type (might be a custom type)
+		csType = dim.Type
+	}
+
+	// Construct the C# variable declaration
+	var declaration string
+
+	// Handle scope (optional)
+	if dim.Scope != "" {
+		switch strings.ToLower(dim.Scope) {
+		case "public":
+			declaration += "public "
+		case "private":
+			declaration += "private "
+		case "protected":
+			declaration += "protected "
+		case "friend":
+			// In C#, friend (internal) accessibility
+			declaration += "internal "
+		}
+	}
+
+	// Handle WithEvents (specific to VB6)
+	if dim.WithEvents {
+		// In C#, events are typically handled differently
+		// This is a placeholder - actual implementation might vary
+		declaration += "event "
+	}
+
+	// Finalize the declaration
+	declaration += fmt.Sprintf("%s %s;", csType, dim.Identifier)
+
+	return declaration
 }
 
 func FuncCallRule(content json.RawMessage) string {
@@ -284,23 +333,33 @@ func ElseHandler(content json.RawMessage) string {
 	sb.WriteString("\n}")
 	return sb.String()
 }
-
 func ForNextRule(content json.RawMessage) string {
 	forNext := ForNext{}
 	err := json.Unmarshal(content, &forNext)
 	if err != nil {
 		panic("Error: Incorrect node")
 	}
-	// Generate the loop representation
-	loop := fmt.Sprintf("for(int %s=%d; %s<=%d; %s+=%d)",
-		forNext.IdentifierName,
-		forNext.Start,
-		forNext.IdentifierName,
-		forNext.End,
-		forNext.IdentifierName,
-		forNext.Step)
 
-	// Print the loop representation
-	fmt.Println(loop)
-	return loop
+	// Convert start, end, and step to integers
+	start, _ := strconv.Atoi(forNext.Start)
+	end, _ := strconv.Atoi(forNext.End)
+	step, _ := strconv.Atoi(forNext.Step)
+	// Generate the loop representation
+	// Note: C# uses <= for the condition, similar to VB6
+	loop := fmt.Sprintf("for(int %s = %d; %s <= %d; %s += %d)",
+		forNext.IdentifierName,
+		start,
+		forNext.IdentifierName,
+		end,
+		forNext.IdentifierName,
+		step,
+	)
+
+	var sb strings.Builder
+	sb.WriteString(loop)
+	sb.WriteString(" {\n")
+	sb.WriteString(handleBody(forNext.Body))
+	sb.WriteString("\n}")
+
+	return sb.String()
 }

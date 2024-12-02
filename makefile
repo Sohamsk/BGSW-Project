@@ -1,4 +1,4 @@
-TARGET?=./testfiles/ifThenElseTest.cls
+TARGET?=./testfiles/ultimate_test.cls
 .PHONY: setup
 setup:
 	curl https://www.antlr.org/download/antlr-4.13.2-complete.jar -o ./parser/antlr.jar

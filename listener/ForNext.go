@@ -33,7 +33,7 @@ func (s *TreeShapeListener) EnterForNextStmt(ctx *parser.ForNextStmtContext) {
 		step = "1"
 	}
 
-	s.writer.WriteString("\"Identifier Name\": \"" + initialization + "\",")
+	s.writer.WriteString("\"IdentifierName\": \"" + initialization + "\",")
 	s.writer.WriteString("\"Start\": \"" + from + "\",")
 	s.writer.WriteString("\"End\": \"" + condition + "\",")
 	s.writer.WriteString("\"Step\": \"" + step + "\",")
@@ -42,5 +42,5 @@ func (s *TreeShapeListener) EnterForNextStmt(ctx *parser.ForNextStmtContext) {
 
 func (s *TreeShapeListener) ExitForNextStmt(ctx *parser.ForNextStmtContext) {
 	s.exitContext()
-	s.writer.WriteString("}")
+	s.writer.WriteString("},")
 }
