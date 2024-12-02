@@ -158,7 +158,7 @@ func FuncCallArg(content json.RawMessage) string {
 			if arg.Type == "literal" {
 				sb.WriteString("\"" + arg.Symbol + "\",")
 			} else {
-				sb.WriteString(arg.Symbol)
+				sb.WriteString(arg.Symbol + ",")
 			}
 		}
 	}
@@ -242,7 +242,11 @@ func ProcessCondition(parts []json.RawMessage) string {
 		} else {
 			arg := Literal{}
 			json.Unmarshal(raw, &arg)
-			sb.WriteString(arg.Symbol)
+			if arg.Symbol == "=" {
+				sb.WriteString("==")
+			} else {
+				sb.WriteString(arg.Symbol)
+			}
 		}
 	}
 	return sb.String()
