@@ -4,12 +4,12 @@ import (
 	"bosch/converter"
 	"bosch/listener"
 	"bosch/parser"
-	//	vbptocsproj "bosch/vbp_to_csproj"
 	"bufio"
 	"bytes"
 	"fmt"
 	"log"
 	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/antlr4-go/antlr/v4"
@@ -24,13 +24,37 @@ func getFileDetails(inputFileName string) (string, string) {
 	return fileName, fileExtension
 }
 
+func writeOutputFiles(fileName, fileExtension string, jsonContent string, convertedContent string) error {
+	// Create output directory if it doesn't exist
+	outputDir := "output"
+	err := os.MkdirAll(outputDir, 0755)
+	if err != nil {
+		return fmt.Errorf("failed to create output directory: %v", err)
+	}
+
+	// Write JSON output file
+	jsonFilePath := filepath.Join(outputDir, "op.json")
+	err = os.WriteFile(jsonFilePath, []byte(jsonContent), 0644)
+	if err != nil {
+		return fmt.Errorf("failed to write JSON file: %v", err)
+	}
+
+	// Write converted CS file
+	csFilePath := filepath.Join(outputDir, fileName+".cs")
+	err = os.WriteFile(csFilePath, []byte(convertedContent), 0644)
+	if err != nil {
+		return fmt.Errorf("failed to write CS file: %v", err)
+	}
+
+	return nil
+}
+
 func writeToOutput(file *os.File, buf *bytes.Buffer, fileName string, fileExtension string, tree parser.IStartRuleContext) {
 	buf.WriteString("{\"FileName\":\"" + fileName + "\", \"FileType\": \"" + fileExtension + "\",")
 	writer := bufio.NewWriter(buf)
 	antlr.ParseTreeWalkerDefault.Walk(listener.NewTreeShapeListener(writer, buf), tree)
 	writer.Flush()
 	buf.WriteString("}")
-	file.WriteString(buf.String())
 }
 
 func main() {
@@ -39,7 +63,7 @@ func main() {
 			fmt.Printf("\033[31m%s\033[0m\n", r)
 		}
 	}()
-	//	vbptocsproj.ConvertVBpFiletoCSprojFile("./vbp_to_csproj/Complex.vbp") // TODO : just an example file change later
+
 	if len(os.Args) != 2 {
 		panic("File Not specified.")
 	}
@@ -57,18 +81,17 @@ func main() {
 	stream := antlr.NewCommonTokenStream(lexer, 0)
 	p := parser.NewVisualBasic6Parser(stream)
 	p.BuildParseTrees = true
-	//p.AddErrorListener(antlr.NewDiagnosticErrorListener(true))
 	tree := p.StartRule()
 
-	f, err := os.Create("op.json")
-	if err != nil {
-		log.Panic(err)
-	}
-	f.Seek(0, 0)
 	var buf bytes.Buffer
-	writeToOutput(f, &buf, fileName, fileExtension, tree)
-	f.Close()
+	writeToOutput(nil, &buf, fileName, fileExtension, tree)
+	jsonContent := buf.String()
 
-	fmt.Println(buf.String())
-	fmt.Println(converter.Convert(buf.String()))
+	convertedContent := converter.Convert(jsonContent)
+
+	err = writeOutputFiles(fileName, fileExtension, jsonContent, convertedContent)
+	if err != nil {
+		log.Panic("Error writing output files")
+	}
+
 }
