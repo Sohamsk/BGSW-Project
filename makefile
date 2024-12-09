@@ -1,14 +1,17 @@
-TARGET?=./test.bas
-
+TARGET?=./testfiles/ultimate_test.cls
+.PHONY: setup
 setup:
 	curl https://www.antlr.org/download/antlr-4.13.2-complete.jar -o ./parser/antlr.jar
 	go generate ./...
 
+.PHONY: build
 build:
 	go build -o ./dist/main main.go
 
+.PHONY: test
 test: build
 	./dist/main $(TARGET)
 
+.PHONY: clean
 clean:
-	rm -rf op.txt ./dist
+	rm -rf op.json ./dist
