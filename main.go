@@ -34,7 +34,16 @@ func writeToOutput(file *os.File, buf *bytes.Buffer, fileName string, fileExtens
 }
 
 func main() {
+	defer func() {
+		if r := recover(); r != nil {
+			fmt.Printf("\033[31m%s\033[0m\n", r)
+		}
+	}()
 	//	vbptocsproj.ConvertVBpFiletoCSprojFile("./vbp_to_csproj/Complex.vbp") // TODO : just an example file change later
+	if len(os.Args) != 2 {
+		panic("File Not specified.")
+	}
+
 	inputfileName := os.Args[1]
 
 	input, err := antlr.NewFileStream(inputfileName)
