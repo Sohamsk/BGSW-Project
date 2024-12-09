@@ -25,20 +25,20 @@ func init() {
 }
 
 var vb_cs_types = map[string]string{
-	"Boolean":   "bool",
-	"Byte":      "byte",
-	"Currency":  "decimal",
-	"Date":      "DateTime",
-	"Double":    "double",
-	"Integer":   "short",
-	"Long":      "int",
-	"Object":    "object",
-	"Single":    "float",
-	"String":    "string",
-	"Variant":   "object",  // Variant usually maps to object
-	"Byte()":    "byte[]",  // Byte array
-	"Integer()": "short[]", // Integer array
-	"Long()":    "int[]",   // Long array
+	"boolean":   "bool",
+	"byte":      "byte",
+	"currency":  "decimal",
+	"date":      "DateTime",
+	"double":    "double",
+	"integer":   "short",
+	"long":      "int",
+	"object":    "object",
+	"single":    "float",
+	"string":    "string",
+	"variant":   "object",  // Variant usually maps to object
+	"byte()":    "byte[]",  // Byte array
+	"integer()": "short[]", // Integer array
+	"long()":    "int[]",   // Long array
 }
 
 func incorrectNode() {
@@ -48,16 +48,6 @@ func incorrectNode() {
 func incorrectArg() {
 	panic("incorrect argument")
 }
-
-//func DeclareVariableRule(content json.RawMessage) string {
-//	dim := Dim{}
-//	err := json.Unmarshal(content, &dim)
-//	if err != nil {
-//		incorrectNode()
-//	}
-//	fmt.Println(dim.Identifier)
-//	return string(content)
-//}
 
 func DeclareVariableRule(content json.RawMessage) string {
 	// Unmarshal the JSON content into a Dim struct
@@ -70,7 +60,7 @@ func DeclareVariableRule(content json.RawMessage) string {
 	}
 
 	// Convert the type using the mapping
-	csType, exists := vb_cs_types[dim.Type]
+	csType, exists := vb_cs_types[strings.ToLower(dim.Type)]
 	if !exists {
 		// If type not found, use the original type (might be a custom type)
 		csType = dim.Type
@@ -201,7 +191,7 @@ func SubStmtHandler(content json.RawMessage) string {
 	}
 	sb.WriteString("void " + sub.Identifier + "(")
 	for _, arg := range sub.Arguments {
-		sb.WriteString(vb_cs_types[arg.ArgumentType] + " " + arg.ArgumentName + ",")
+		sb.WriteString(vb_cs_types[strings.ToLower(arg.ArgumentType)] + " " + arg.ArgumentName + ",")
 	}
 	str := sb.String()
 	sb.Reset()
@@ -219,9 +209,9 @@ func FunctionHandler(content json.RawMessage) string {
 		incorrectNode()
 	}
 	var sb strings.Builder
-	sb.WriteString(fmt.Sprintf("%s %s %s (", strings.ToLower(funct.Visibility), vb_cs_types[funct.ReturnType], funct.Identifier))
+	sb.WriteString(fmt.Sprintf("%s %s %s (", strings.ToLower(funct.Visibility), vb_cs_types[strings.ToLower(funct.ReturnType)], funct.Identifier))
 	for _, arg := range funct.Arguments {
-		sb.WriteString(vb_cs_types[arg.ArgumentType] + " " + arg.ArgumentName + ",")
+		sb.WriteString(vb_cs_types[strings.ToLower(arg.ArgumentType)] + " " + arg.ArgumentName + ",")
 	}
 	str := sb.String()
 	sb.Reset()
