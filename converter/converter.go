@@ -37,7 +37,7 @@ func ConvertRule(rawMsg json.RawMessage) string {
 
 	action, ok := funcMap[raw.Type]
 	if !ok {
-		panic(raw.Type)
+		panic(raw.Type + " is unknown")
 	}
 	return action(rawMsg)
 }
