@@ -21,7 +21,7 @@ func init() {
 		"ElseIf":          ElseIfHandler,
 		"ElseBlock":       ElseHandler,
 		"ForNextStmt":     ForNextRule,
-		"Comment":     CommentHandler,
+		"CommentRule":     CommentHandler,
 	}
 }
 
@@ -360,11 +360,11 @@ func ForNextRule(content json.RawMessage) string {
 }
 
 func CommentHandler(content json.RawMessage) string {
-	print(content)
 	comment := Comment{}
 	err := json.Unmarshal(content, &comment)
 	if err != nil {
 		panic("Error: Incorrect node")
 	}
-	return fmt.Sprintf("// %s",comment.CommentText)
+	return fmt.Sprintf("// %s\n", comment.CommentText)
 }
+

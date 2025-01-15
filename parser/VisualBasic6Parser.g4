@@ -30,7 +30,6 @@ options {
 startRule
     : module EOF
     ;
-comment: COMMENT;
 
 
 module
@@ -139,8 +138,9 @@ cp_ControlType
 
 cp_ControlIdentifier
     : ambiguousIdentifier
-    ;
+   ;
 
+comment: COMMENT;
 // block ----------------------------------
 
 moduleBlock
@@ -157,7 +157,8 @@ block
 
 blockStmt
     : appActivateStmt
-    |  comment
+    | blockStmt comment
+    | comment
     | attributeStmt
     | beepStmt
     | chDirStmt

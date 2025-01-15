@@ -6,15 +6,13 @@ import (
 	"encoding/json"
 )
 
-func (s *TreeShapeListener) EnterComment(ctx *parser.CommentContext)  {
+func (s *TreeShapeListener) EnterComment(ctx *parser.CommentContext) {
 	comment := converter.Comment{}
+	comment.RuleType = "CommentRule"
 	comment.CommentText = ctx.GetText()
 	jsonData, err := json.Marshal(comment)
-	if err != nil{
+	if err != nil {
 		panic(err)
 	}
-	println(string(jsonData))
-	s.writer.WriteString(string(jsonData)+",")
+	s.writer.WriteString(string(jsonData) + ",")
 }
-
-

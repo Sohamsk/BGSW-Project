@@ -100,6 +100,8 @@ type ForNext struct {
 	Body           []json.RawMessage `json:"Body"`
 }
 
-type Comment struct{
+type Comment struct {
+	Rule
 	CommentText string `json:"CommentText"`
 }
+
