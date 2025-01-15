@@ -99,3 +99,8 @@ type ForNext struct {
 	Step           string            `json:"Step"`
 	Body           []json.RawMessage `json:"Body"`
 }
+
+type ReturnStmt struct {
+	Rule
+	ReturnVariableName string
+}

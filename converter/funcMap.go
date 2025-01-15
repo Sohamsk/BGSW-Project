@@ -21,6 +21,7 @@ func init() {
 		"ElseIf":          ElseIfHandler,
 		"ElseBlock":       ElseHandler,
 		"ForNextStmt":     ForNextRule,
+		"ReturnStatement": ReturmStmtHandler,
 	}
 }
 
@@ -202,6 +203,15 @@ func SubStmtHandler(content json.RawMessage) string {
 	return sb.String()
 }
 
+func handleBodyFunc(rules []json.RawMessage) string {
+	fmt.Println("in func")
+	var result string
+	for _, rule := range rules {
+		result += ConvertRule(rule)
+	}
+	return result
+}
+
 func FunctionHandler(content json.RawMessage) string {
 	funct := FuncDecl{}
 	err := json.Unmarshal(content, &funct)
@@ -215,7 +225,7 @@ func FunctionHandler(content json.RawMessage) string {
 	}
 	str := sb.String()
 	sb.Reset()
-	sb.WriteString(strings.Trim(str, ",") + "){" + handleBody(funct.Body) + "}") // need a seperate body handler to handle functions returning values as there is no return keyword in vb6
+	sb.WriteString(strings.Trim(str, ",") + "){" + handleBodyFunc(funct.Body) + "}") // need a seperate body handler to handle functions returning values as there is no return keyword in vb6
 	return sb.String()
 }
 
@@ -356,4 +366,8 @@ func ForNextRule(content json.RawMessage) string {
 	sb.WriteString("\n}")
 
 	return sb.String()
+}
+
+func ReturmStmtHandler(content json.RawMessage) string {
+	return ""
 }

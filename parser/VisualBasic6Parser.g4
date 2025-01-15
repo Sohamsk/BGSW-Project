@@ -314,11 +314,11 @@ eventStmt
     ;
 
 exitStmt
-    : EXIT_DO
-    | EXIT_FOR
-    | EXIT_FUNCTION
-    | EXIT_PROPERTY
-    | EXIT_SUB
+    : EXIT_DO         # Exit_Do
+    | EXIT_FOR        # Exit_For
+    | EXIT_FUNCTION   # Exit_Function
+    | EXIT_PROPERTY   # Exit_Property
+    | EXIT_SUB        # Exit_Sub
     ;
 
 filecopyStmt
