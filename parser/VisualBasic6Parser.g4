@@ -30,10 +30,13 @@ options {
 startRule
     : module EOF
     ;
+comment: COMMENT;
+
 
 module
     : WS? NEWLINE* (moduleHeader NEWLINE+)? moduleReferences? NEWLINE* controlProperties? NEWLINE* moduleConfig? NEWLINE* moduleAttributes? NEWLINE*
         moduleOptions? NEWLINE* moduleBody? NEWLINE* WS?
+
     ;
 
 moduleReferences
@@ -154,6 +157,7 @@ block
 
 blockStmt
     : appActivateStmt
+    |  comment
     | attributeStmt
     | beepStmt
     | chDirStmt

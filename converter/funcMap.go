@@ -21,6 +21,7 @@ func init() {
 		"ElseIf":          ElseIfHandler,
 		"ElseBlock":       ElseHandler,
 		"ForNextStmt":     ForNextRule,
+		"Comment":     CommentHandler,
 	}
 }
 
@@ -356,4 +357,14 @@ func ForNextRule(content json.RawMessage) string {
 	sb.WriteString("\n}")
 
 	return sb.String()
+}
+
+func CommentHandler(content json.RawMessage) string {
+	print(content)
+	comment := Comment{}
+	err := json.Unmarshal(content, &comment)
+	if err != nil {
+		panic("Error: Incorrect node")
+	}
+	return fmt.Sprintf("// %s",comment.CommentText)
 }

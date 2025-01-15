@@ -99,3 +99,7 @@ type ForNext struct {
 	Step           string            `json:"Step"`
 	Body           []json.RawMessage `json:"Body"`
 }
+
+type Comment struct{
+	CommentText string `json:"CommentText"`
+}
