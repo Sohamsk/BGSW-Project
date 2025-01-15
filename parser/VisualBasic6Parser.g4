@@ -31,9 +31,11 @@ startRule
     : module EOF
     ;
 
+
 module
     : WS? NEWLINE* (moduleHeader NEWLINE+)? moduleReferences? NEWLINE* controlProperties? NEWLINE* moduleConfig? NEWLINE* moduleAttributes? NEWLINE*
         moduleOptions? NEWLINE* moduleBody? NEWLINE* WS?
+
     ;
 
 moduleReferences
@@ -136,8 +138,9 @@ cp_ControlType
 
 cp_ControlIdentifier
     : ambiguousIdentifier
-    ;
+   ;
 
+comment: COMMENT;
 // block ----------------------------------
 
 moduleBlock
@@ -154,6 +157,8 @@ block
 
 blockStmt
     : appActivateStmt
+    | blockStmt comment
+    | comment
     | attributeStmt
     | beepStmt
     | chDirStmt

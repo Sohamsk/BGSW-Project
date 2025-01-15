@@ -22,6 +22,7 @@ func init() {
 		"ElseBlock":       ElseHandler,
 		"ForNextStmt":     ForNextRule,
 		"ReturnStatement": ReturnStmtHandler,
+		"CommentRule":     CommentHandler,
 	}
 }
 
@@ -379,3 +380,13 @@ func ReturnStmtHandler(content json.RawMessage) string {
 
 	return "return " + ret.ReturnVariableName + ";"
 }
+
+func CommentHandler(content json.RawMessage) string {
+	comment := Comment{}
+	err := json.Unmarshal(content, &comment)
+	if err != nil {
+		panic("Error: Incorrect node")
+	}
+	return fmt.Sprintf("// %s\n", comment.CommentText)
+}
+
