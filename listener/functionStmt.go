@@ -30,7 +30,6 @@ func (s *TreeShapeListener) EnterFunctionStmt(ctx *parser.FunctionStmtContext) {
 		case *parser.ArgListContext:
 			passedByRef := true
 			for _, grandchild := range child.GetChildren() {
-				fmt.Printf("arguments is: %T\n", grandchild)
 				if reflect.TypeOf(grandchild) == reflect.TypeOf(new(parser.ArgContext)) {
 					for _, greatGrandchild := range grandchild.GetChildren() {
 						switch greatGrandchild.(type) {
