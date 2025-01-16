@@ -23,6 +23,7 @@ func init() {
 		"ForNextStmt":     ForNextRule,
 		"ReturnStatement": ReturnStmtHandler,
 		"CommentRule":     CommentHandler,
+		"WithStatement":   WithStmtHandler,
 	}
 }
 
@@ -157,12 +158,7 @@ func FuncCallArg(content json.RawMessage) string {
 	return strings.Trim(sb.String(), ",") + ")"
 }
 
-func ExpressionRuleHandler(content json.RawMessage) string {
-	expr := ExpressionRule{}
-	err := json.Unmarshal(content, &expr)
-	if err != nil {
-		incorrectNode()
-	}
+func processExpressions(expr ExpressionRule) string {
 	var sb strings.Builder
 	for _, raw := range expr.Body {
 		arg := ArgType{}
@@ -175,10 +171,23 @@ func ExpressionRuleHandler(content json.RawMessage) string {
 		} else {
 			arg := Literal{}
 			json.Unmarshal(raw, &arg)
-			sb.WriteString(arg.Symbol)
+			if arg.Type == "literal" {
+				sb.WriteString("\"" + arg.Symbol + "\"")
+			} else {
+				sb.WriteString(arg.Symbol)
+			}
 		}
 	}
 	return sb.String() + ";"
+}
+
+func ExpressionRuleHandler(content json.RawMessage) string {
+	expr := ExpressionRule{}
+	err := json.Unmarshal(content, &expr)
+	if err != nil {
+		incorrectNode()
+	}
+	return processExpressions(expr)
 }
 
 func SubStmtHandler(content json.RawMessage) string {
@@ -390,3 +399,19 @@ func CommentHandler(content json.RawMessage) string {
 	return fmt.Sprintf("// %s\n", comment.CommentText)
 }
 
+func handleBodyWith(expressions []ExpressionRule, objectName string) string {
+	var result string
+	for _, expression := range expressions {
+		result += objectName + processExpressions(expression)
+	}
+	return result
+}
+
+func WithStmtHandler(content json.RawMessage) string {
+	withStmt := WithStmt{}
+	err := json.Unmarshal(content, &withStmt)
+	if err != nil {
+		incorrectNode()
+	}
+	return handleBodyWith(withStmt.Body, withStmt.Object)
+}

@@ -28,3 +28,33 @@ func (s *TreeShapeListener) EnterExit_Function(ctx *parser.Exit_FunctionContext)
 	}
 	s.writer.WriteString(string(jsonData) + ",")
 }
+
+func printBreak(s *TreeShapeListener) {
+	brk := converter.BreakStmt{}
+	brk.RuleType = "BreakStatement"
+	jsonData, err := json.Marshal(brk)
+	if err != nil {
+		panic(err)
+	}
+	s.writer.WriteString(string(jsonData) + ",")
+}
+
+func (s *TreeShapeListener) EnterExit_Do(ctx *parser.Exit_DoContext) {
+	printBreak(s)
+}
+
+func (s *TreeShapeListener) EnterExit_For(ctx *parser.Exit_ForContext) {
+	printBreak(s)
+}
+
+func (s *TreeShapeListener) EnterExit_Sub(ctx *parser.Exit_SubContext) {
+	ir := converter.ReturnStmt{}
+	ir.RuleType = "ReturnStatement"
+	ir.ReturnVariableName = ""
+
+	jsonData, err := json.Marshal(ir)
+	if err != nil {
+		panic(err)
+	}
+	s.writer.WriteString(string(jsonData) + ",")
+}
