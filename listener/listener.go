@@ -2,7 +2,6 @@ package listener
 
 import (
 	"bosch/parser"
-	"bosch/stack"
 	"bufio"
 	"bytes"
 	"strings"
@@ -14,14 +13,12 @@ type TreeShapeListener struct {
 	*parser.BaseVisualBasic6ParserListener
 	buf    *bytes.Buffer
 	writer *bufio.Writer
-	stack  stack.Stack
 }
 
 func NewTreeShapeListener(writer *bufio.Writer, buf *bytes.Buffer) *TreeShapeListener {
 	l := new(TreeShapeListener)
 	l.writer = writer
 	l.buf = buf
-	l.stack = *stack.InitStack()
 	return l
 }
 
