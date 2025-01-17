@@ -1,6 +1,7 @@
 package converter
 
 import (
+	"bosch/converter/models"
 	"encoding/json"
 	"fmt"
 	"strconv"
@@ -54,7 +55,7 @@ func incorrectArg() {
 
 func DeclareVariableRule(content json.RawMessage) string {
 	// Unmarshal the JSON content into a Dim struct
-	dim := Dim{}
+	dim := models.Dim{}
 	err := json.Unmarshal(content, &dim)
 	if err != nil {
 		// Handle incorrect JSON by calling a predefined error handler
@@ -101,7 +102,7 @@ func DeclareVariableRule(content json.RawMessage) string {
 }
 
 func FuncCallRule(content json.RawMessage) string {
-	fun := FuncRule{}
+	fun := models.FuncRule{}
 	err := json.Unmarshal(content, &fun)
 	if err != nil {
 		incorrectNode()
@@ -109,7 +110,7 @@ func FuncCallRule(content json.RawMessage) string {
 	var sb strings.Builder
 	sb.WriteString(fun.Identifier + "(")
 	for _, raw := range fun.Arguments {
-		arg := ArgType{}
+		arg := models.ArgType{}
 		err := json.Unmarshal(raw, &arg)
 		if err != nil {
 			incorrectArg()
@@ -117,7 +118,7 @@ func FuncCallRule(content json.RawMessage) string {
 		if arg.Type == "FunctionCall" {
 			sb.WriteString(FuncCallArg(raw))
 		} else {
-			arg := Literal{}
+			arg := models.Literal{}
 			json.Unmarshal(raw, &arg)
 			if arg.Type == "literal" {
 				sb.WriteString("\"" + arg.Symbol + "\",")
@@ -130,7 +131,7 @@ func FuncCallRule(content json.RawMessage) string {
 }
 
 func FuncCallArg(content json.RawMessage) string {
-	fun := FuncArg{}
+	fun := models.FuncArg{}
 	err := json.Unmarshal(content, &fun)
 	if err != nil {
 		incorrectNode()
@@ -138,7 +139,7 @@ func FuncCallArg(content json.RawMessage) string {
 	var sb strings.Builder
 	sb.WriteString(fun.Identifier + "(")
 	for _, raw := range fun.Arguments {
-		arg := ArgType{}
+		arg := models.ArgType{}
 		err := json.Unmarshal(raw, &arg)
 		if err != nil {
 			incorrectArg()
@@ -146,7 +147,7 @@ func FuncCallArg(content json.RawMessage) string {
 		if arg.Type == "FunctionCall" {
 			sb.WriteString(FuncCallArg(raw))
 		} else {
-			arg := Literal{}
+			arg := models.Literal{}
 			json.Unmarshal(raw, &arg)
 			if arg.Type == "literal" {
 				sb.WriteString("\"" + arg.Symbol + "\",")
@@ -158,10 +159,10 @@ func FuncCallArg(content json.RawMessage) string {
 	return strings.Trim(sb.String(), ",") + ")"
 }
 
-func processExpressions(expr ExpressionRule) string {
+func processExpressions(expr models.ExpressionRule) string {
 	var sb strings.Builder
 	for _, raw := range expr.Body {
-		arg := ArgType{}
+		arg := models.ArgType{}
 		err := json.Unmarshal(raw, &arg)
 		if err != nil {
 			incorrectArg()
@@ -169,7 +170,7 @@ func processExpressions(expr ExpressionRule) string {
 		if arg.Type == "FunctionCall" {
 			sb.WriteString(FuncCallArg(raw))
 		} else {
-			arg := Literal{}
+			arg := models.Literal{}
 			json.Unmarshal(raw, &arg)
 			if arg.Type == "literal" {
 				sb.WriteString("\"" + arg.Symbol + "\"")
@@ -182,7 +183,7 @@ func processExpressions(expr ExpressionRule) string {
 }
 
 func ExpressionRuleHandler(content json.RawMessage) string {
-	expr := ExpressionRule{}
+	expr := models.ExpressionRule{}
 	err := json.Unmarshal(content, &expr)
 	if err != nil {
 		incorrectNode()
@@ -191,7 +192,7 @@ func ExpressionRuleHandler(content json.RawMessage) string {
 }
 
 func SubStmtHandler(content json.RawMessage) string {
-	sub := SubStmt{}
+	sub := models.SubStmt{}
 	err := json.Unmarshal(content, &sub)
 	if err != nil {
 		incorrectNode()
@@ -225,7 +226,7 @@ func handleBodyFunc(rules []json.RawMessage, name, returnType string) string {
 }
 
 func FunctionHandler(content json.RawMessage) string {
-	funct := FuncDecl{}
+	funct := models.FuncDecl{}
 	err := json.Unmarshal(content, &funct)
 	if err != nil {
 		incorrectNode()
@@ -244,7 +245,7 @@ func FunctionHandler(content json.RawMessage) string {
 func ProcessCondition(parts []json.RawMessage) string {
 	var sb strings.Builder
 	for _, raw := range parts {
-		arg := ArgType{}
+		arg := models.ArgType{}
 		err := json.Unmarshal(raw, &arg)
 		if err != nil {
 			incorrectArg()
@@ -252,7 +253,7 @@ func ProcessCondition(parts []json.RawMessage) string {
 		if arg.Type == "FunctionCall" {
 			sb.WriteString(FuncCallArg(raw))
 		} else {
-			arg := Literal{}
+			arg := models.Literal{}
 			json.Unmarshal(raw, &arg)
 			if arg.Symbol == "=" {
 				sb.WriteString("==")
@@ -265,7 +266,7 @@ func ProcessCondition(parts []json.RawMessage) string {
 }
 
 func DoLoopStmtHandler(content json.RawMessage) string {
-	loop := DoloopStmt{}
+	loop := models.DoloopStmt{}
 	err := json.Unmarshal(content, &loop)
 	if err != nil {
 		incorrectNode()
@@ -297,7 +298,7 @@ func DoLoopStmtHandler(content json.RawMessage) string {
 	return sb.String()
 }
 func IfThenElseStmtHandler(content json.RawMessage) string {
-	var ifStmt IfThenElseStmtRule
+	var ifStmt models.IfThenElseStmtRule
 	err := json.Unmarshal(content, &ifStmt)
 	if err != nil {
 		incorrectNode()
@@ -316,7 +317,7 @@ func IfThenElseStmtHandler(content json.RawMessage) string {
 }
 
 func ElseIfHandler(content json.RawMessage) string {
-	var elseIfStmt ElseIfRule
+	var elseIfStmt models.ElseIfRule
 	err := json.Unmarshal(content, &elseIfStmt)
 	if err != nil {
 		incorrectNode()
@@ -335,7 +336,7 @@ func ElseIfHandler(content json.RawMessage) string {
 }
 
 func ElseHandler(content json.RawMessage) string {
-	var elseStmt ElseRule
+	var elseStmt models.ElseRule
 	err := json.Unmarshal(content, &elseStmt)
 	if err != nil {
 		incorrectNode()
@@ -350,7 +351,7 @@ func ElseHandler(content json.RawMessage) string {
 	return sb.String()
 }
 func ForNextRule(content json.RawMessage) string {
-	forNext := ForNext{}
+	forNext := models.ForNext{}
 	err := json.Unmarshal(content, &forNext)
 	if err != nil {
 		panic("Error: Incorrect node")
@@ -381,7 +382,7 @@ func ForNextRule(content json.RawMessage) string {
 }
 
 func ReturnStmtHandler(content json.RawMessage) string {
-	ret := ReturnStmt{}
+	ret := models.ReturnStmt{}
 	err := json.Unmarshal(content, &ret)
 	if err != nil {
 		incorrectNode()
@@ -391,7 +392,7 @@ func ReturnStmtHandler(content json.RawMessage) string {
 }
 
 func CommentHandler(content json.RawMessage) string {
-	comment := Comment{}
+	comment := models.Comment{}
 	err := json.Unmarshal(content, &comment)
 	if err != nil {
 		panic("Error: Incorrect node")
@@ -399,7 +400,7 @@ func CommentHandler(content json.RawMessage) string {
 	return fmt.Sprintf("// %s\n", comment.CommentText)
 }
 
-func handleBodyWith(expressions []ExpressionRule, objectName string) string {
+func handleBodyWith(expressions []models.ExpressionRule, objectName string) string {
 	var result string
 	for _, expression := range expressions {
 		result += objectName + processExpressions(expression)
@@ -408,7 +409,7 @@ func handleBodyWith(expressions []ExpressionRule, objectName string) string {
 }
 
 func WithStmtHandler(content json.RawMessage) string {
-	withStmt := WithStmt{}
+	withStmt := models.WithStmt{}
 	err := json.Unmarshal(content, &withStmt)
 	if err != nil {
 		incorrectNode()

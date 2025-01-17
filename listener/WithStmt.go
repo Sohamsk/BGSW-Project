@@ -1,7 +1,7 @@
 package listener
 
 import (
-	"bosch/converter"
+	"bosch/converter/models"
 	"bosch/parser"
 	"encoding/json"
 
@@ -9,7 +9,7 @@ import (
 )
 
 func (s *TreeShapeListener) EnterWithStmt(ctx *parser.WithStmtContext) {
-	with := converter.WithStmt{}
+	with := models.WithStmt{}
 	with.RuleType = "WithStatement"
 	r := ctx.GetChild(2)
 	with.Object = r.(antlr.RuleContext).GetText()
