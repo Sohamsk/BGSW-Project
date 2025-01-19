@@ -1,0 +1,1 @@
+class test4 {short counter;counter=1;do{counter=counter+1;}while(!(counter>5));}
