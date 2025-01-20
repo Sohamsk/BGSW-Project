@@ -31,9 +31,11 @@ startRule
     : module EOF
     ;
 
+
 module
     : WS? NEWLINE* (moduleHeader NEWLINE+)? moduleReferences? NEWLINE* controlProperties? NEWLINE* moduleConfig? NEWLINE* moduleAttributes? NEWLINE*
         moduleOptions? NEWLINE* moduleBody? NEWLINE* WS?
+
     ;
 
 moduleReferences
@@ -136,8 +138,9 @@ cp_ControlType
 
 cp_ControlIdentifier
     : ambiguousIdentifier
-    ;
+   ;
 
+comment: COMMENT;
 // block ----------------------------------
 
 moduleBlock
@@ -154,6 +157,8 @@ block
 
 blockStmt
     : appActivateStmt
+    | blockStmt comment
+    | comment
     | attributeStmt
     | beepStmt
     | chDirStmt
@@ -314,11 +319,11 @@ eventStmt
     ;
 
 exitStmt
-    : EXIT_DO
-    | EXIT_FOR
-    | EXIT_FUNCTION
-    | EXIT_PROPERTY
-    | EXIT_SUB
+    : EXIT_DO         # Exit_Do
+    | EXIT_FOR        # Exit_For
+    | EXIT_FUNCTION   # Exit_Function
+    | EXIT_PROPERTY   # Exit_Property
+    | EXIT_SUB        # Exit_Sub
     ;
 
 filecopyStmt

@@ -460,7 +460,10 @@ LINE_CONTINUATION: ' ' '_' '\r'? '\n' -> skip;
 
 NEWLINE: WS? ('\r'? '\n' | COLON ' ') WS?;
 
-COMMENT: WS? ('\'' | COLON? REM ' ') ( LINE_CONTINUATION | ~ ('\n' | '\r'))* -> skip;
+// COMMENT: WS? ('\'' | COLON? REM ' ') ( LINE_CONTINUATION | ~ ('\n' | '\r'))* -> skip;
+
+COMMENT: '\'' ~[\r\n]* | REM ~[\r\n]*;
+
 
 WS: [ \t]+;
 
