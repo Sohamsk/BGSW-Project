@@ -16,7 +16,7 @@ import (
 )
 
 func getFileDetails(inputFileName string) (string, string) {
-	filePath := strings.Split(inputFileName, "/")
+	filePath := strings.Split(inputFileName, "\\")
 	fileName := filePath[len(filePath)-1]
 
 	fileNameSlice := strings.Split(fileName, ".")
