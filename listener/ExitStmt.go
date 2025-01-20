@@ -1,7 +1,7 @@
 package listener
 
 import (
-	"bosch/converter"
+	"bosch/converter/models"
 	"bosch/parser"
 	"encoding/json"
 
@@ -18,9 +18,39 @@ func (s *TreeShapeListener) EnterExit_Function(ctx *parser.Exit_FunctionContext)
 	if parent == nil {
 		panic("Syntax error")
 	}
-	ir := converter.ReturnStmt{}
+	ir := models.ReturnStmt{}
 	ir.RuleType = "ReturnStatement"
 	ir.ReturnVariableName = parent.GetChild(2).(*parser.AmbiguousIdentifierContext).GetText()
+
+	jsonData, err := json.Marshal(ir)
+	if err != nil {
+		panic(err)
+	}
+	s.writer.WriteString(string(jsonData) + ",")
+}
+
+func printBreak(s *TreeShapeListener) {
+	brk := models.BreakStmt{}
+	brk.RuleType = "BreakStatement"
+	jsonData, err := json.Marshal(brk)
+	if err != nil {
+		panic(err)
+	}
+	s.writer.WriteString(string(jsonData) + ",")
+}
+
+func (s *TreeShapeListener) EnterExit_Do(ctx *parser.Exit_DoContext) {
+	printBreak(s)
+}
+
+func (s *TreeShapeListener) EnterExit_For(ctx *parser.Exit_ForContext) {
+	printBreak(s)
+}
+
+func (s *TreeShapeListener) EnterExit_Sub(ctx *parser.Exit_SubContext) {
+	ir := models.ReturnStmt{}
+	ir.RuleType = "ReturnStatement"
+	ir.ReturnVariableName = ""
 
 	jsonData, err := json.Marshal(ir)
 	if err != nil {

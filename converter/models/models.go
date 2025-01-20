@@ -1,4 +1,4 @@
-package converter
+package models
 
 import "encoding/json"
 
@@ -105,7 +105,17 @@ type ReturnStmt struct {
 	ReturnVariableName string
 }
 
+type BreakStmt struct {
+	Rule
+}
+
 type Comment struct {
 	Rule
 	CommentText string `json:"CommentText"`
+}
+
+type WithStmt struct {
+	Rule
+	Object string
+	Body   []ExpressionRule
 }

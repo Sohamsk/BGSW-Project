@@ -86,6 +86,7 @@ func main() {
 	var buf bytes.Buffer
 	writeToOutput(nil, &buf, fileName, fileExtension, tree)
 	jsonContent := buf.String()
+	//	fmt.Println(jsonContent)    //uncomment this while debugging json
 
 	convertedContent := converter.Convert(jsonContent)
 
@@ -93,5 +94,4 @@ func main() {
 	if err != nil {
 		log.Panic("Error writing output files")
 	}
-
 }
