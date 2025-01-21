@@ -4,7 +4,7 @@ Dim MyBool As Boolean
 IsVisible = True
 MyBool = True
 
-If IsVisible Then
+If IsVisible Then 'Block if then else
     Beep
     IsVisible = False
 ElseIf MyBool Then
@@ -12,4 +12,9 @@ ElseIf MyBool Then
 Else
     MyBool = False
 End If
+
+' Inline if then else'
+If MyBool Then MyBool = False ' without else'
+If MyBool Then myVar = False Else MyBool = False 
+'with else'
 

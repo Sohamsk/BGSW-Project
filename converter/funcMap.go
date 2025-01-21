@@ -289,7 +289,6 @@ func DoLoopStmtHandler(content json.RawMessage) string {
 	return sb.String()
 }
 func IfThenElseStmtHandler(content json.RawMessage) string {
-	fmt.Println("in")
 	var ifStmt IfThenElseStmtRule
 	err := json.Unmarshal(content, &ifStmt)
 	if err != nil {
@@ -324,7 +323,6 @@ func IfThenElseStmtHandler(content json.RawMessage) string {
 			sb.WriteString(action(ifStmt.IfBlock[0]) + "\n}")
 		}
 	}
-	fmt.Println("out")
 	return sb.String()
 }
 
