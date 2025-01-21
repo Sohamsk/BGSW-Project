@@ -100,6 +100,16 @@ type ForNext struct {
 	Body           []json.RawMessage `json:"Body"`
 }
 
+type ForEachStmt struct {
+	Item       string            `json:"Element"`
+	Collection string            `json:"collection"`
+	Body       []json.RawMessage `json:"body"`
+}
+
+type PrintStmt struct {
+	Arguments []string `json:"arguments"`
+}
+
 type ReturnStmt struct {
 	Rule
 	ReturnVariableName string

@@ -11,18 +11,20 @@ var funcMap map[string]func(json.RawMessage) string
 
 func init() {
 	funcMap = map[string]func(json.RawMessage) string{
-		"DeclareVariable": DeclareVariableRule,
-		"FunctionCall":    FuncCallRule,
-		"expression":      ExpressionRuleHandler,
-		"SubStatement":    SubStmtHandler,
-		"DoLoopStatement": DoLoopStmtHandler,
-		"FuncStatement":   FunctionHandler,
-		"IfThenElse":      IfThenElseStmtHandler,
-		"ElseIf":          ElseIfHandler,
-		"ElseBlock":       ElseHandler,
-		"ForNextStmt":     ForNextRule,
-		"ReturnStatement": ReturnStmtHandler,
-		"CommentRule":     CommentHandler,
+		"DeclareVariable":  DeclareVariableRule,
+		"FunctionCall":     FuncCallRule,
+		"expression":       ExpressionRuleHandler,
+		"SubStatement":     SubStmtHandler,
+		"DoLoopStatement":  DoLoopStmtHandler,
+		"FuncStatement":    FunctionHandler,
+		"IfThenElse":       IfThenElseStmtHandler,
+		"ElseIf":           ElseIfHandler,
+		"ElseBlock":        ElseHandler,
+		"ForNextStmt":      ForNextRule,
+		"ReturnStatement":  ReturnStmtHandler,
+		"CommentRule":      CommentHandler,
+		"ForEachStatement": ForEachRule,
+		"PrintStatement":   PrintRule,
 	}
 }
 
@@ -371,6 +373,62 @@ func ForNextRule(content json.RawMessage) string {
 	return sb.String()
 }
 
+//-----------------------------------------------------------------------
+
+func ForEachRule(content json.RawMessage) string {
+	// Unmarshal the content into ForEachStmt struct
+	forEach := ForEachStmt{}
+	err := json.Unmarshal(content, &forEach)
+	if err != nil {
+		panic("Error: Incorrect node") // Handling error similarly to ForNextRule
+	}
+
+	// Generate the loop representation for the foreach statement
+	elementType := vb_cs_types[strings.ToLower(forEach.Item)] // Map ElementType from vb_cs_types
+
+	// Create the foreach loop structure
+	loop := fmt.Sprintf("foreach (%s %s in %s)", elementType, forEach.Item, forEach.Collection)
+
+	// Build the C# representation of the foreach loop with its body
+	var sb strings.Builder
+	sb.WriteString(loop)
+	sb.WriteString(" {\n")
+	sb.WriteString(handleBody(forEach.Body)) // Handle the body of the loop
+	sb.WriteString("\n}")
+
+	return sb.String()
+}
+
+func PrintRule(content json.RawMessage) string {
+	fmt.Printf("Raw content: %s\n", string(content)) // Debugging line to print the raw input content
+
+	printStmt := struct {
+		Arguments []string `json:"arguments"`
+	}{}
+
+	err := json.Unmarshal(content, &printStmt)
+	if err != nil {
+		fmt.Printf("Error unmarshalling PrintStmt: %s\n", err)
+		incorrectNode() // Handling the error
+		return ""
+	}
+
+	var sb strings.Builder
+	sb.WriteString("Console.WriteLine(")
+
+	for i, arg := range printStmt.Arguments {
+		sb.WriteString(arg)
+		if i < len(printStmt.Arguments)-1 {
+			sb.WriteString(", ")
+		}
+	}
+
+	sb.WriteString(");")
+	return sb.String()
+}
+
+//---------------------------------------------------------------
+
 func ReturnStmtHandler(content json.RawMessage) string {
 	ret := ReturnStmt{}
 	err := json.Unmarshal(content, &ret)
@@ -389,4 +447,3 @@ func CommentHandler(content json.RawMessage) string {
 	}
 	return fmt.Sprintf("// %s\n", comment.CommentText)
 }
-
