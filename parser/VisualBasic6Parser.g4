@@ -361,8 +361,12 @@ goToStmt
     ;
 
 ifThenElseStmt
-    : IF WS ifConditionStmt WS THEN WS blockStmt (WS ELSE WS blockStmt)? # inlineIfThenElse
+    : IF WS ifConditionStmt WS THEN WS blockStmt WS inlineElseStmt?      # inlineIfThenElse
     | ifBlockStmt ifElseIfBlockStmt* ifElseBlockStmt? END_IF             # blockIfThenElse
+    ;
+
+inlineElseStmt
+    : ELSE WS blockStmt?
     ;
 
 ifBlockStmt

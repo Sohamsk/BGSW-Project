@@ -56,6 +56,31 @@ func (s *TreeShapeListener) EnterIfElseBlockStmt(ctx *parser.IfElseBlockStmtCont
 
 }
 
+// handling inline if else statement
+func (s *TreeShapeListener) EnterInlineIfThenElse(ctx *parser.InlineIfThenElseContext) {
+	nodes := ctx.GetChildren()
+	s.writer.WriteString("{\"RuleType\":\"IfThenElse\",")
+	for _, node := range nodes {
+		switch node := node.(type) {
+		case *parser.IfConditionStmtContext:
+			s.writer.WriteString("\"IsBlock\":false,")
+			var buffer bytes.Buffer
+			writer := bufio.NewWriter(&buffer)
+			handleLetExpression(node.GetChild(0).GetChildren(), writer)
+			writer.Flush()
+			s.writer.WriteString("\"Condition\": [" + strings.Trim(buffer.String(), ",") + "],")
+			s.writer.WriteString("\"IfBlock\": [")
+		}
+		
+	}
+}
+
+func (s *TreeShapeListener) EnterInlineElseStmt(ctx *parser.InlineElseStmtContext) {
+	s.writer.WriteString("{\"RuleType\":\"inlineElse\",")
+	s.writer.WriteString("\"Body\": [")
+
+}
+
 func (s *TreeShapeListener) ExitIfElseBlockStmt(ctx *parser.IfElseBlockStmtContext) {
 	s.exitContext()
 	s.writer.WriteString("},")
@@ -64,4 +89,13 @@ func (s *TreeShapeListener) ExitIfElseBlockStmt(ctx *parser.IfElseBlockStmtConte
 func (s *TreeShapeListener) ExitBlockIfThenElseStmt(ctx *parser.BlockIfThenElseContext) {
 	s.exitContext()
 	s.writer.WriteString("},")
+}
+
+func (s *TreeShapeListener) ExitInlineIfThenElse(ctx *parser.InlineIfThenElseContext){
+	s.exitContext()
+	s.writer.WriteString("},")	
+}
+func (s *TreeShapeListener) ExitInlineElseStmt(ctx *parser.InlineElseStmtContext){
+	s.exitContext()
+	s.writer.WriteString("},")	
 }

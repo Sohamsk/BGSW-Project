@@ -72,7 +72,7 @@ func main() {
 
 	input, err := antlr.NewFileStream(inputfileName)
 	if err != nil {
-		log.Panic("File error")
+		panic("File Not Found:" + err.Error())
 	}
 
 	fileName, fileExtension := getFileDetails(inputfileName)
@@ -86,6 +86,7 @@ func main() {
 	var buf bytes.Buffer
 	writeToOutput(nil, &buf, fileName, fileExtension, tree)
 	jsonContent := buf.String()
+	//println(jsonContent)
 
 	convertedContent := converter.Convert(jsonContent)
 

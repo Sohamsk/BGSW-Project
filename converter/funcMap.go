@@ -20,6 +20,7 @@ func init() {
 		"IfThenElse":      IfThenElseStmtHandler,
 		"ElseIf":          ElseIfHandler,
 		"ElseBlock":       ElseHandler,
+		"inlineElse":      ElseHandler,
 		"ForNextStmt":     ForNextRule,
 		"ReturnStatement": ReturnStmtHandler,
 		"CommentRule":     CommentHandler,
@@ -288,6 +289,7 @@ func DoLoopStmtHandler(content json.RawMessage) string {
 	return sb.String()
 }
 func IfThenElseStmtHandler(content json.RawMessage) string {
+	fmt.Println("in")
 	var ifStmt IfThenElseStmtRule
 	err := json.Unmarshal(content, &ifStmt)
 	if err != nil {
@@ -297,12 +299,32 @@ func IfThenElseStmtHandler(content json.RawMessage) string {
 	var sb strings.Builder
 
 	// Handle the `IfThenElseStmtRule`
-	sb.WriteString("if (")
-	sb.WriteString(ProcessCondition(ifStmt.Condition)) // Using handleBody for Condition
-	sb.WriteString(") {\n")
-	sb.WriteString(handleBody(ifStmt.IfBlock)) // Using handleBody for IfBlock
-	sb.WriteString("\n}")
+	if ifStmt.IsBlock {
 
+		sb.WriteString("if (")
+		sb.WriteString(ProcessCondition(ifStmt.Condition)) // Using handleBody for Condition
+		sb.WriteString(") {\n")
+		sb.WriteString(handleBody(ifStmt.IfBlock)) // Using handleBody for IfBlock
+		sb.WriteString("\n}")
+	} else {
+		// Handle the `inlineIfThenElseStmtRule`
+		sb.WriteString("if (" + ProcessCondition(ifStmt.Condition) + ") {\n")
+		rule := Rule{}
+		err := json.Unmarshal(ifStmt.IfBlock[0], &rule)
+		if err != nil {
+			panic("some bs")
+		}
+		action, ok := funcMap[rule.RuleType]
+		if !ok {
+			panic(ifStmt.RuleType + " is unknown")
+		}
+		if len(ifStmt.IfBlock) > 1 { // if else statement exists
+			sb.WriteString(action(ifStmt.IfBlock[0]) + "\n}" + ElseHandler(ifStmt.IfBlock[1]))
+		} else {
+			sb.WriteString(action(ifStmt.IfBlock[0]) + "\n}")
+		}
+	}
+	fmt.Println("out")
 	return sb.String()
 }
 
@@ -326,6 +348,7 @@ func ElseIfHandler(content json.RawMessage) string {
 }
 
 func ElseHandler(content json.RawMessage) string {
+
 	var elseStmt ElseRule
 	err := json.Unmarshal(content, &elseStmt)
 	if err != nil {
@@ -389,4 +412,3 @@ func CommentHandler(content json.RawMessage) string {
 	}
 	return fmt.Sprintf("// %s\n", comment.CommentText)
 }
-
