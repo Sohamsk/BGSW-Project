@@ -8,6 +8,12 @@ import (
 	"log"
 )
 
+type state struct {
+	FileType string
+}
+
+var global state
+
 func handleBody(rules []json.RawMessage) string {
 	var result string
 	for _, rule := range rules {
@@ -22,6 +28,7 @@ func handleBody(rules []json.RawMessage) string {
 func Convert(raw string) string {
 	context := models.FileContext{}
 	err := json.Unmarshal([]byte(raw), &context)
+	global.FileType = context.FileType
 	if err != nil {
 		// TODO: Return an error here to signify catastrophic failure
 		panic("Error: Error unmarshalling json")

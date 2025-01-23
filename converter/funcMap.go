@@ -197,6 +197,20 @@ func ExpressionRuleHandler(content json.RawMessage) string {
 	return processExpressions(expr)
 }
 
+func getVisibility(visibility string, sb *strings.Builder) {
+	if strings.ToLower(visibility) == "friend" {
+		sb.WriteString("internal ")
+	} else if visibility == "" {
+		if strings.ToLower(global.FileType) == "frm" {
+			sb.WriteString("private ")
+		} else {
+			sb.WriteString("public ")
+		}
+	} else {
+		sb.WriteString(strings.ToLower(visibility) + " ")
+	}
+}
+
 func SubStmtHandler(content json.RawMessage) string {
 	sub := models.SubStmt{}
 	err := json.Unmarshal(content, &sub)
@@ -205,9 +219,7 @@ func SubStmtHandler(content json.RawMessage) string {
 		return ""
 	}
 	var sb strings.Builder
-	if sub.Visibility == "Public" {
-		sb.WriteString("public ")
-	}
+	getVisibility(sub.Visibility, &sb)
 	sb.WriteString("void " + sub.Identifier + "(")
 	for _, arg := range sub.Arguments {
 		sb.WriteString(vb_cs_types[strings.ToLower(arg.ArgumentType)] + " " + arg.ArgumentName + ",")
@@ -243,7 +255,8 @@ func FunctionHandler(content json.RawMessage) string {
 		return ""
 	}
 	var sb strings.Builder
-	sb.WriteString(fmt.Sprintf("%s %s %s (", strings.ToLower(funct.Visibility), vb_cs_types[strings.ToLower(funct.ReturnType)], funct.Identifier))
+	getVisibility(funct.Visibility, &sb)
+	sb.WriteString(fmt.Sprintf("%s %s (", vb_cs_types[strings.ToLower(funct.ReturnType)], funct.Identifier))
 	for _, arg := range funct.Arguments {
 		sb.WriteString(vb_cs_types[strings.ToLower(arg.ArgumentType)] + " " + arg.ArgumentName + ",")
 	}
