@@ -4,9 +4,21 @@ import (
 	"bosch/converter/models"
 	"bosch/parser"
 	"encoding/json"
+	"log"
 
 	"github.com/antlr4-go/antlr/v4"
 )
+
+func printReturn(returnName string) string {
+	ir := models.ReturnStmt{}
+	ir.RuleType = "ReturnStatement"
+	ir.ReturnVariableName = returnName
+	jsonData, err := json.Marshal(ir)
+	if err != nil {
+		panic(err)
+	}
+	return string(jsonData)
+}
 
 func (s *TreeShapeListener) EnterExit_Function(ctx *parser.Exit_FunctionContext) {
 	rules := parser.VisualBasic6ParserParserStaticData.RuleNames
@@ -18,15 +30,11 @@ func (s *TreeShapeListener) EnterExit_Function(ctx *parser.Exit_FunctionContext)
 	if parent == nil {
 		panic("Syntax error")
 	}
-	ir := models.ReturnStmt{}
-	ir.RuleType = "ReturnStatement"
-	ir.ReturnVariableName = parent.GetChild(2).(*parser.AmbiguousIdentifierContext).GetText()
+	varName := parent.GetChild(2).(*parser.AmbiguousIdentifierContext).GetText()
 
-	jsonData, err := json.Marshal(ir)
-	if err != nil {
-		panic(err)
-	}
+	jsonData := printReturn(varName)
 	s.writer.WriteString(string(jsonData) + ",")
+	log.Println("ReturnStatement converted to IR")
 }
 
 func printBreak(s *TreeShapeListener) {
@@ -48,13 +56,7 @@ func (s *TreeShapeListener) EnterExit_For(ctx *parser.Exit_ForContext) {
 }
 
 func (s *TreeShapeListener) EnterExit_Sub(ctx *parser.Exit_SubContext) {
-	ir := models.ReturnStmt{}
-	ir.RuleType = "ReturnStatement"
-	ir.ReturnVariableName = ""
-
-	jsonData, err := json.Marshal(ir)
-	if err != nil {
-		panic(err)
-	}
+	jsonData := printReturn("")
 	s.writer.WriteString(string(jsonData) + ",")
+	log.Println("ReturnStatement converted to IR")
 }

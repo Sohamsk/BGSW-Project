@@ -119,3 +119,10 @@ type WithStmt struct {
 	Object string
 	Body   []ExpressionRule
 }
+
+type SetStmt struct {
+	Rule
+	Identifier string
+	IsNew      bool
+	Class      json.RawMessage
+}
