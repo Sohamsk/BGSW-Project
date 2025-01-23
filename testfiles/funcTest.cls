@@ -1,15 +1,9 @@
-Dim IsVisible As Boolean
-Dim MyBool As Boolean
+' multiplication function
+Function Mult(ByVal Factor1 As Integer, Factor2 As Integer)
+	' some comment
+	Mult = Factor1 * Factor2
+End Function 
 
-IsVisible = True
-MyBool = True
-
-If IsVisible Then
-    Beep
-    IsVisible = false
-ElseIf MyBool Then
-    Beep
-    Beep
-Else
-    MyBool = False
-End If
+Public Function Foo(a$, b&, c!, d#, e@, f$()) As Boolean
+	Dim asFoo$()
+End Function

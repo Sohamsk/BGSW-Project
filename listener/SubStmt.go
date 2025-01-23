@@ -13,7 +13,7 @@ func (s *TreeShapeListener) EnterSubStmt(ctx *parser.SubStmtContext) {
 	s.writer.WriteString("{\"RuleType\":\"SubStatement\",")
 	// handling arguments of a Sub
 	index := 1
-	Visibility := "Public"
+	Visibility := ""
 	var arguments []string
 	for _, child := range nodes {
 		switch child.(type) {

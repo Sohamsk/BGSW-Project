@@ -4,6 +4,7 @@ import (
 	"bosch/converter/models"
 	"bosch/parser"
 	"encoding/json"
+	"log"
 
 	"github.com/antlr4-go/antlr/v4"
 )
@@ -23,4 +24,5 @@ func (s *TreeShapeListener) EnterWithStmt(ctx *parser.WithStmtContext) {
 func (s *TreeShapeListener) ExitWithStmt(ctx *parser.WithStmtContext) {
 	s.exitContext()
 	s.writer.WriteString("},")
+	log.Println("Converted WithStmt to IR")
 }

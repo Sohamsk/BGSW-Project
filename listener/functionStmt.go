@@ -15,7 +15,7 @@ func (s *TreeShapeListener) EnterFunctionStmt(ctx *parser.FunctionStmtContext) {
 	s.writer.WriteString("{\"RuleType\": \"FuncStatement\",")
 	// handling arguments of a Sub
 	index := 1
-	Visibility := "Public"
+	Visibility := ""
 	var arguments []string
 	for _, child := range nodes {
 		switch child.(type) {

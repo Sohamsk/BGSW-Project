@@ -120,6 +120,13 @@ type WithStmt struct {
 	Body   []ExpressionRule
 }
 
+type SetStmt struct {
+	Rule
+	Identifier string
+	IsNew      bool
+	Class      json.RawMessage
+}
+
 type MultiLineComment struct { // This struct is for adding a MultiLineComment in C# code for part that's not converted
 	Rule
 	MultiLineComment string `json:"MultiLineComment"`
