@@ -219,7 +219,10 @@ func handleBodyFunc(rules []json.RawMessage, name, returnType string) string {
 	var result string
 	result += vb_cs_types[strings.ToLower(returnType)] + " " + name + ";"
 	for _, rule := range rules {
-		result += ConvertRule(rule)
+		inter, err := ConvertRule(rule)
+		if err == nil {
+			result += inter
+		}
 	}
 	result += "return " + name + ";"
 	return result

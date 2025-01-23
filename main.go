@@ -24,17 +24,10 @@ func getFileDetails(inputFileName string) (string, string) {
 	return fileName, fileExtension
 }
 
-func writeOutputFiles(fileName, fileExtension string, jsonContent string, convertedContent string) error {
-	// Create output directory if it doesn't exist
-	outputDir := "output"
-	err := os.MkdirAll(outputDir, 0755)
-	if err != nil {
-		return fmt.Errorf("failed to create output directory: %v", err)
-	}
-
+func writeOutputFiles(fileName, fileExtension, outputDir string, jsonContent string, convertedContent string) error {
 	// Write JSON output file
 	jsonFilePath := filepath.Join(outputDir, "op.json")
-	err = os.WriteFile(jsonFilePath, []byte(jsonContent), 0644)
+	err := os.WriteFile(jsonFilePath, []byte(jsonContent), 0644)
 	if err != nil {
 		return fmt.Errorf("failed to write JSON file: %v", err)
 	}
@@ -65,7 +58,7 @@ func main() {
 	}()
 
 	if len(os.Args) != 2 {
-		panic("File Not specified.")
+		log.Panic("File Not specified.")
 	}
 
 	inputfileName := os.Args[1]
@@ -74,6 +67,20 @@ func main() {
 	if err != nil {
 		log.Panic("File error")
 	}
+
+	// Create output directory if it doesn't exist
+	outputDir := "output"
+	err = os.MkdirAll(outputDir, 0755)
+	if err != nil {
+		panic(fmt.Errorf("failed to create output directory: %v", err))
+	}
+
+	// create a logs file
+	logfileName := filepath.Join(outputDir, "logs.log")
+	logFile, err := os.OpenFile(logfileName, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644)
+	defer logFile.Close()
+
+	log.SetOutput(logFile)
 
 	fileName, fileExtension := getFileDetails(inputfileName)
 
@@ -90,7 +97,7 @@ func main() {
 
 	convertedContent := converter.Convert(jsonContent)
 
-	err = writeOutputFiles(fileName, fileExtension, jsonContent, convertedContent)
+	err = writeOutputFiles(fileName, fileExtension, outputDir, jsonContent, convertedContent)
 	if err != nil {
 		log.Panic("Error writing output files")
 	}
