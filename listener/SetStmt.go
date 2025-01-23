@@ -8,7 +8,6 @@ import (
 	"github.com/antlr4-go/antlr/v4"
 )
 
-// EnterSetStmt is called when production setStmt is entered.
 func (s *TreeShapeListener) EnterSetStmt(ctx *parser.SetStmtContext) {
 	rules := parser.VisualBasic6ParserParserStaticData.RuleNames
 	children := ctx.GetChildren()
@@ -36,12 +35,7 @@ func (s *TreeShapeListener) EnterSetStmt(ctx *parser.SetStmtContext) {
 			}
 		}
 	}
-	print(string(id + " " + class))
-	if isNew {
-		println(" true")
-	} else {
-		println(" false")
-	}
+
 	var set models.SetStmt
 	set.RuleType = "SetStatement"
 	set.IsNew = isNew
