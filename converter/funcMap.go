@@ -25,6 +25,7 @@ func init() {
 		"ReturnStatement": ReturnStmtHandler,
 		"CommentRule":     CommentHandler,
 		"WithStatement":   WithStmtHandler,
+		"UnhandledRule":   MultiLineCommentHandler,
 	}
 }
 
@@ -400,6 +401,14 @@ func CommentHandler(content json.RawMessage) string {
 	return fmt.Sprintf("// %s\n", comment.CommentText)
 }
 
+func MultiLineCommentHandler(content json.RawMessage) string {
+	MultiLineComment := models.MultiLineComment{}
+	err := json.Unmarshal(content, &MultiLineComment)
+	if err != nil {
+		panic("Error: Incorrect node")
+	}
+	return fmt.Sprintf("/* \n" + MultiLineComment.MultiLineComment + "\n*/")
+}
 func handleBodyWith(expressions []models.ExpressionRule, objectName string) string {
 	var result string
 	for _, expression := range expressions {
