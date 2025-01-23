@@ -4,6 +4,7 @@ import (
 	"bosch/converter/models"
 	"encoding/json"
 	"fmt"
+	"log"
 	"strconv"
 	"strings"
 )
@@ -25,6 +26,7 @@ func init() {
 		"ReturnStatement": ReturnStmtHandler,
 		"CommentRule":     CommentHandler,
 		"WithStatement":   WithStmtHandler,
+		"SetStatement":    SetStatementHandler,
 	}
 }
 
@@ -46,11 +48,11 @@ var vb_cs_types = map[string]string{
 }
 
 func incorrectNode() {
-	panic("Error: Incorrect node")
+	log.Println("Error: Incorrect node")
 }
 
 func incorrectArg() {
-	panic("incorrect argument")
+	log.Println("incorrect argument")
 }
 
 func DeclareVariableRule(content json.RawMessage) string {
@@ -106,6 +108,7 @@ func FuncCallRule(content json.RawMessage) string {
 	err := json.Unmarshal(content, &fun)
 	if err != nil {
 		incorrectNode()
+		return ""
 	}
 	var sb strings.Builder
 	sb.WriteString(fun.Identifier + "(")
@@ -135,6 +138,7 @@ func FuncCallArg(content json.RawMessage) string {
 	err := json.Unmarshal(content, &fun)
 	if err != nil {
 		incorrectNode()
+		return ""
 	}
 	var sb strings.Builder
 	sb.WriteString(fun.Identifier + "(")
@@ -187,6 +191,7 @@ func ExpressionRuleHandler(content json.RawMessage) string {
 	err := json.Unmarshal(content, &expr)
 	if err != nil {
 		incorrectNode()
+		return ""
 	}
 	return processExpressions(expr)
 }
@@ -196,6 +201,7 @@ func SubStmtHandler(content json.RawMessage) string {
 	err := json.Unmarshal(content, &sub)
 	if err != nil {
 		incorrectNode()
+		return ""
 	}
 	var sb strings.Builder
 	if sub.Visibility == "Public" {
@@ -233,6 +239,7 @@ func FunctionHandler(content json.RawMessage) string {
 	err := json.Unmarshal(content, &funct)
 	if err != nil {
 		incorrectNode()
+		return ""
 	}
 	var sb strings.Builder
 	sb.WriteString(fmt.Sprintf("%s %s %s (", strings.ToLower(funct.Visibility), vb_cs_types[strings.ToLower(funct.ReturnType)], funct.Identifier))
@@ -273,6 +280,7 @@ func DoLoopStmtHandler(content json.RawMessage) string {
 	err := json.Unmarshal(content, &loop)
 	if err != nil {
 		incorrectNode()
+		return ""
 	}
 	var sb strings.Builder
 	if loop.BeforeLoop {
@@ -305,6 +313,7 @@ func IfThenElseStmtHandler(content json.RawMessage) string {
 	err := json.Unmarshal(content, &ifStmt)
 	if err != nil {
 		incorrectNode()
+		return ""
 	}
 
 	var sb strings.Builder
@@ -324,6 +333,7 @@ func ElseIfHandler(content json.RawMessage) string {
 	err := json.Unmarshal(content, &elseIfStmt)
 	if err != nil {
 		incorrectNode()
+		return ""
 	}
 
 	var sb strings.Builder
@@ -343,6 +353,7 @@ func ElseHandler(content json.RawMessage) string {
 	err := json.Unmarshal(content, &elseStmt)
 	if err != nil {
 		incorrectNode()
+		return ""
 	}
 
 	var sb strings.Builder
@@ -357,7 +368,8 @@ func ForNextRule(content json.RawMessage) string {
 	forNext := models.ForNext{}
 	err := json.Unmarshal(content, &forNext)
 	if err != nil {
-		panic("Error: Incorrect node")
+		incorrectNode()
+		return ""
 	}
 
 	// Convert start, end, and step to integers
@@ -389,6 +401,7 @@ func ReturnStmtHandler(content json.RawMessage) string {
 	err := json.Unmarshal(content, &ret)
 	if err != nil {
 		incorrectNode()
+		return ""
 	}
 
 	return "return " + ret.ReturnVariableName + ";"
@@ -398,7 +411,8 @@ func CommentHandler(content json.RawMessage) string {
 	comment := models.Comment{}
 	err := json.Unmarshal(content, &comment)
 	if err != nil {
-		panic("Error: Incorrect node")
+		incorrectNode()
+		return ""
 	}
 	return fmt.Sprintf("// %s\n", comment.CommentText)
 }
@@ -416,6 +430,25 @@ func WithStmtHandler(content json.RawMessage) string {
 	err := json.Unmarshal(content, &withStmt)
 	if err != nil {
 		incorrectNode()
+		return ""
 	}
 	return handleBodyWith(withStmt.Body, withStmt.Object)
+}
+
+func SetStatementHandler(content json.RawMessage) string {
+	set := models.SetStmt{}
+	err := json.Unmarshal(content, &set)
+	if err != nil {
+		incorrectNode()
+		return ""
+	}
+
+	var class string
+	if set.IsNew {
+		class = fmt.Sprintf("new %s()", strings.Trim(string(set.Class), "\""))
+	} else {
+		class = strings.Trim(string(set.Class), "\"")
+	}
+
+	return fmt.Sprintf("%s = %s;", set.Identifier, class)
 }
