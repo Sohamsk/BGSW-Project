@@ -49,8 +49,7 @@ func ConvertRule(rawMsg json.RawMessage) (string, error) {
 
 	action, ok := funcMap[raw.RuleType]
 	if !ok {
-		error := errors.New(raw.RuleType + " is unknown")
-		println(string("here"))
+		error := errors.New("Error:" + raw.RuleType + " is unknown")
 		log.Println(error)
 		return "", error
 	}

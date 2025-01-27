@@ -5,6 +5,7 @@ import (
 	"bosch/parser"
 	"bufio"
 	"bytes"
+	"fmt"
 
 	//	"encoding/json"
 	//	"fmt"
@@ -132,4 +133,22 @@ func (s *TreeShapeListener) EnterEveryRule(ctx antlr.ParserRuleContext) {
 	//	s.writer.WriteString(string(jsonData) + ",")
 	//
 	// }
+}
+
+func determineTypeFromHint(hint byte) (string, error) {
+	switch hint {
+	case '%':
+		return "Integer", nil
+	case '&':
+		return "Long", nil
+	case '!':
+		return "Single", nil
+	case '#':
+		return "Double", nil
+	case '@':
+		return "Currency", nil
+	case '$':
+		return "String", nil
+	}
+	return "", fmt.Errorf("Error: Unknown typehint")
 }
