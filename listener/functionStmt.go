@@ -16,6 +16,7 @@ func (s *TreeShapeListener) EnterFunctionStmt(ctx *parser.FunctionStmtContext) {
 	// handling arguments of a Sub
 	index := 1
 	Visibility := ""
+	var id string
 	var arguments []string
 	for _, child := range nodes {
 		switch child.(type) {
@@ -23,6 +24,7 @@ func (s *TreeShapeListener) EnterFunctionStmt(ctx *parser.FunctionStmtContext) {
 			Visibility = child.(antlr.ParseTree).GetText()
 		case *parser.AmbiguousIdentifierContext:
 			s.writer.WriteString("\"Identifier\": \"" + child.(antlr.ParseTree).GetText() + "\",")
+			id = child.(antlr.ParseTree).GetText()
 			s.writer.WriteString("\"Visibility\": \"" + Visibility + "\",")
 			s.writer.WriteString("\"Arguments\": [")
 		case *parser.AsTypeClauseContext:
@@ -60,6 +62,7 @@ func (s *TreeShapeListener) EnterFunctionStmt(ctx *parser.FunctionStmtContext) {
 	}
 	s.writer.WriteString("],")
 	s.writer.WriteString("\"ReturnType\":\"" + returnType + "\",")
+	s.SymTab["func:"+id] = returnType
 	s.writer.WriteString("\"Body\": [")
 }
 

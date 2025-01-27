@@ -17,12 +17,14 @@ type TreeShapeListener struct {
 	*parser.BaseVisualBasic6ParserListener
 	buf    *bytes.Buffer
 	writer *bufio.Writer
+	SymTab map[string]string
 }
 
 func NewTreeShapeListener(writer *bufio.Writer, buf *bytes.Buffer) *TreeShapeListener {
 	l := new(TreeShapeListener)
 	l.writer = writer
 	l.buf = buf
+	l.SymTab = make(map[string]string)
 	return l
 }
 

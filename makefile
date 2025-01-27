@@ -6,7 +6,7 @@ setup:
 
 .PHONY: build
 build:
-	go build -o ./dist/main main.go
+	go build -o ./dist/main .
 
 .PHONY: test
 test: build
