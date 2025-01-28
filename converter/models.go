@@ -107,7 +107,8 @@ type ForEachStmt struct {
 }
 
 type PrintStmt struct {
-	Arguments []string `json:"arguments"`
+	RuleType string `json:"RuleType"`
+	Data     string `json:"Data"`
 }
 
 type ReturnStmt struct {

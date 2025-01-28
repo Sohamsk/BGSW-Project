@@ -24,7 +24,7 @@ func init() {
 		"ReturnStatement":  ReturnStmtHandler,
 		"CommentRule":      CommentHandler,
 		"ForEachStatement": ForEachRule,
-		"PrintStatement":   PrintRule,
+		"PrintStatement":   PrintStmtRule,
 	}
 }
 
@@ -396,31 +396,26 @@ func ForEachRule(content json.RawMessage) string {
 
 //-----------------------------------------------------------------------
 
-func PrintRule(content json.RawMessage) string {
-	fmt.Printf("Raw content: %s\n", string(content)) // Debugging line to print the raw input content
-
-	printStmt := struct {
-		Arguments []string `json:"arguments"`
-	}{}
-
+func PrintStmtRule(content json.RawMessage) string {
+	printStmt := PrintStmt{}
 	err := json.Unmarshal(content, &printStmt)
 	if err != nil {
-		fmt.Printf("Error unmarshalling PrintStmt: %s\n", err)
-		incorrectNode() // Handling the error
-		return ""
+		panic("Error: Incorrect node")
 	}
+
+	// For simplicity, assume printStmt.Data is a comma-separated list of items to print
+	dataItems := strings.Split(printStmt.Data, ",")
+	var expressions []string
+	for _, item := range dataItems {
+		expressions = append(expressions, strings.TrimSpace(item)) // Trim spaces for clean formatting
+	}
+
+	// Create the C# equivalent of the print statement
+	loop := fmt.Sprintf("Console.WriteLine(%s);", strings.Join(expressions, ", "))
 
 	var sb strings.Builder
-	sb.WriteString("Console.WriteLine(")
+	sb.WriteString(loop)
 
-	for i, arg := range printStmt.Arguments {
-		sb.WriteString(arg)
-		if i < len(printStmt.Arguments)-1 {
-			sb.WriteString(", ")
-		}
-	}
-
-	sb.WriteString(");")
 	return sb.String()
 }
 
