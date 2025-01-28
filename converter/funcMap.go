@@ -26,6 +26,7 @@ func init() {
 		"CommentRule":     CommentHandler,
 		"WithStatement":   WithStmtHandler,
 		"UnhandledRule":   MultiLineCommentHandler,
+		"EnumerationRule": EnumsHandler,
 	}
 }
 
@@ -407,7 +408,7 @@ func MultiLineCommentHandler(content json.RawMessage) string {
 	if err != nil {
 		panic("Error: Incorrect node")
 	}
-	return fmt.Sprintf("/* \n" + MultiLineComment.MultiLineComment + "\n*/")
+	return fmt.Sprintf("/* \n" + MultiLineComment.MultiLineComment + "\n*/\n")
 }
 func handleBodyWith(expressions []models.ExpressionRule, objectName string) string {
 	var result string
@@ -424,4 +425,32 @@ func WithStmtHandler(content json.RawMessage) string {
 		incorrectNode()
 	}
 	return handleBodyWith(withStmt.Body, withStmt.Object)
+}
+
+func EnumsHandler(content json.RawMessage) string {
+	enumStmt := models.EnumStmt{}
+	err := json.Unmarshal(content, &enumStmt)
+	if err != nil {
+		panic("Error: Incorrect node")
+	}
+
+	// Start building the enum string with the enum name
+	var builder strings.Builder
+	builder.WriteString(fmt.Sprintf("public enum %s//change visibility as per requirement\n{\n", enumStmt.Name))
+
+	// Process each enum value
+	for i, value := range enumStmt.EnumValues {
+		// Convert the value to a string since it's currently type any
+		valueStr := fmt.Sprintf("%v", value)
+
+		// Add comma for all elements except the last one
+		if i < len(enumStmt.EnumValues)-1 {
+			builder.WriteString(fmt.Sprintf("    %s,\n", valueStr))
+		} else {
+			builder.WriteString(fmt.Sprintf("    %s\n", valueStr))
+		}
+	}
+
+	builder.WriteString("}\n")
+	return builder.String()
 }

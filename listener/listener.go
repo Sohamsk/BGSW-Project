@@ -1,13 +1,13 @@
 package listener
 
 import (
-	//	"bosch/converter/models"
+	"bosch/converter/models"
 	"bosch/parser"
 	"bufio"
 	"bytes"
 
-	//	"encoding/json"
-	//	"fmt"
+	"encoding/json"
+	// "fmt"
 	"strings"
 
 	"github.com/antlr4-go/antlr/v4"
@@ -114,20 +114,24 @@ var RuleMap = map[string]bool{ // map for handled rules
 }
 
 func (s *TreeShapeListener) EnterEveryRule(ctx antlr.ParserRuleContext) {
-	// rules := parser.VisualBasic6ParserParserStaticData.RuleNames
-	// //fmt.Println(rules[ctx.GetRuleIndex()])
-	// _, ok := RuleMap[rules[ctx.GetRuleIndex()]]
-	// //
-	// if !ok { // This means rule is not handled so we'll just send it to MultiLineComment
+	rules := parser.VisualBasic6ParserParserStaticData.RuleNames
+	//fmt.Println(rules[ctx.GetRuleIndex()])
+	context_Type := rules[ctx.GetRuleIndex()]
+	_, ok := RuleMap[context_Type]
 	//
-	//	UnhandledRule := models.MultiLineComment{}
-	//	UnhandledRule.RuleType = "UnhandledRule"
-	//	UnhandledRule.MultiLineComment = ctx.GetText()
-	//	jsonData, err := json.Marshal(UnhandledRule)
-	//	if err != nil {
-	//		panic(err)
-	//	}
-	//	s.writer.WriteString(string(jsonData) + ",")
-	//
-	// }
+	if !ok { // This means rule is not handled so we'll just send it to MultiLineComment
+
+		UnhandledRule := models.MultiLineComment{}
+		UnhandledRule.RuleType = "UnhandledRule"
+		if context_Type != "moduleBodyElement" || context_Type != "blockStmt" {
+			UnhandledRule.MultiLineComment = ctx.GetText()
+		}
+
+		jsonData, err := json.Marshal(UnhandledRule)
+		if err != nil {
+			panic(err)
+		}
+		s.writer.WriteString(string(jsonData) + ",")
+
+	}
 }

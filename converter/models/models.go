@@ -124,3 +124,10 @@ type MultiLineComment struct { // This struct is for adding a MultiLineComment i
 	Rule
 	MultiLineComment string `json:"MultiLineComment"`
 }
+
+type EnumStmt struct {
+	Rule
+	Visibility string   `json:"Visibility"`
+	Name       string   `json:"Name"`
+	EnumValues []string `json:"EnumValues"` // TODO: change this any later
+}
