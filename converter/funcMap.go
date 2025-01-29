@@ -24,7 +24,7 @@ func init() {
 		"ReturnStatement":  ReturnStmtHandler,
 		"CommentRule":      CommentHandler,
 		"ForEachStatement": ForEachRule,
-		"PrintStatement":   PrintStmtRule,
+		"PrintStmt":        PrintStmtRule,
 	}
 }
 
@@ -397,26 +397,37 @@ func ForEachRule(content json.RawMessage) string {
 //-----------------------------------------------------------------------
 
 func PrintStmtRule(content json.RawMessage) string {
-	printStmt := PrintStmt{}
+	printStmt := struct {
+		Data []string `json:"Data"`
+	}{}
+
 	err := json.Unmarshal(content, &printStmt)
 	if err != nil {
-		panic("Error: Incorrect node")
+		panic(fmt.Sprintf("Error unmarshalling PrintStmt JSON: %v", err))
 	}
-
-	// For simplicity, assume printStmt.Data is a comma-separated list of items to print
-	dataItems := strings.Split(printStmt.Data, ",")
-	var expressions []string
-	for _, item := range dataItems {
-		expressions = append(expressions, strings.TrimSpace(item)) // Trim spaces for clean formatting
-	}
-
-	// Create the C# equivalent of the print statement
-	loop := fmt.Sprintf("Console.WriteLine(%s);", strings.Join(expressions, ", "))
 
 	var sb strings.Builder
-	sb.WriteString(loop)
+	for _, data := range printStmt.Data {
+
+		if isVariable(data) {
+			sb.WriteString(fmt.Sprintf("Console.WriteLine(%s);\n", data))
+		} else {
+			escapedData := escapeString(data)
+			sb.WriteString(fmt.Sprintf("Console.WriteLine(\"%s\");\n", escapedData))
+		}
+	}
 
 	return sb.String()
+}
+
+func isVariable(data string) bool {
+	// A simple check could be to see if it contains spaces, or check for other specific patterns
+	return !strings.HasPrefix(data, "\"") && !strings.HasSuffix(data, "\"")
+}
+
+// Escape function for string literals
+func escapeString(str string) string {
+	return strings.ReplaceAll(str, "\"", "\\\"")
 }
 
 //---------------------------------------------------------------
