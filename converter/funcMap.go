@@ -29,6 +29,7 @@ func init() {
 		"SetStatement":    SetStatementHandler,
 		"UnhandledRule":   MultiLineCommentHandler,
 		"EnumerationRule": EnumsHandler,
+		"TypeStmtRule":    TypeStmtHandler,
 	}
 }
 
@@ -480,7 +481,8 @@ func EnumsHandler(content json.RawMessage) string {
 	enumStmt := models.EnumStmt{}
 	err := json.Unmarshal(content, &enumStmt)
 	if err != nil {
-		panic("Error: Incorrect node")
+		incorrectNode()
+		return ""
 	}
 
 	// Start building the enum string with the enum name
@@ -498,6 +500,29 @@ func EnumsHandler(content json.RawMessage) string {
 		} else {
 			builder.WriteString(fmt.Sprintf("    %s\n", valueStr))
 		}
+	}
+
+	builder.WriteString("}\n")
+	return builder.String()
+}
+
+func TypeStmtHandler(content json.RawMessage) string {
+	typeStmt := models.TypeStmt{}
+	err := json.Unmarshal(content, &typeStmt)
+	if err != nil {
+		incorrectNode()
+		return ""
+	}
+
+	// Start building the enum string with the enum name
+	var builder strings.Builder
+	builder.WriteString(fmt.Sprintf("public struct %s//change visibility as per requirement\n{\n", typeStmt.Name))
+
+	// Process each enum value
+	for _, value := range typeStmt.TypeElements {
+		// Convert the value to a string since it's currently type any
+		valueStr := DeclareVariableRule(value)
+		builder.WriteString(fmt.Sprintf("    %s\n", valueStr))
 	}
 
 	builder.WriteString("}\n")

@@ -138,3 +138,10 @@ type EnumStmt struct {
 	Name       string   `json:"Name"`
 	EnumValues []string `json:"EnumValues"` // TODO: change this any later
 }
+
+type TypeStmt struct {
+	Rule
+	Visibility   string            `json:"Visibility"`
+	Name         string            `json:"Name"`
+	TypeElements []json.RawMessage `json:"TypeElements"` // TODO: change this any later
+}
