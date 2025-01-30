@@ -43,7 +43,7 @@ moduleReferences
     ;
 
 moduleReference
-    : OBJECT WS? EQ WS? moduleReferenceValue (SEMICOLON WS? moduleReferenceComponent)? NEWLINE*
+    : OBJECT WS? EQ WS? moduleReferenceValue (SEMICOLON WS? moduleReferenceComponent)? comment? NEWLINE*
     ;
 
 moduleReferenceValue
@@ -59,19 +59,19 @@ moduleHeader
     ;
 
 moduleConfig
-    : BEGIN NEWLINE+ moduleConfigElement+ END NEWLINE+
+    : BEGIN NEWLINE+ moduleConfigElement+ END comment? NEWLINE+
     ;
 
 moduleConfigElement
-    : ambiguousIdentifier WS? EQ WS? literal NEWLINE
+    : ambiguousIdentifier WS? EQ WS? literal comment? NEWLINE
     ;
 
 moduleAttributes
-    : (attributeStmt NEWLINE+)+
+    : (attributeStmt comment? NEWLINE+)+
     ;
 
 moduleOptions
-    : (moduleOption NEWLINE+)+
+    : (moduleOption comment? NEWLINE+)+
     ;
 
 moduleOption
@@ -82,11 +82,12 @@ moduleOption
     ;
 
 moduleBody
-    : moduleBodyElement (NEWLINE+ moduleBodyElement)*
+    : moduleBodyElement comment? (NEWLINE+ moduleBodyElement)*
     ;
 
 moduleBodyElement
     : moduleBlock
+    | moduleBodyElement comment
     | moduleOption
     | declareStmt
     | enumerationStmt
@@ -1032,4 +1033,4 @@ octalLiteral
 
 doubleLiteral
     : (PLUS | MINUS)* DOUBLELITERAL
-    ;
+    ;   

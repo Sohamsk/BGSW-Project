@@ -1,4 +1,4 @@
-TARGET?=./testfiles/exitTest.cls
+TARGET?=./testfiles/property_test.cls
 .PHONY: setup
 setup:
 	curl https://www.antlr.org/download/antlr-4.13.2-complete.jar -o ./parser/antlr.jar
@@ -6,11 +6,13 @@ setup:
 
 .PHONY: build
 build:
-	go build -o ./dist/main main.go
+	go build -o ./dist/main .
 
 .PHONY: test
 test: build
 	./dist/main $(TARGET)
+	@echo "**logs**"
+	@cat ./output/logs.log
 
 .PHONY: clean
 clean:
