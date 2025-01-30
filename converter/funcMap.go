@@ -594,3 +594,60 @@ func TypeStmtHandler(content json.RawMessage) string {
 	builder.WriteString("}\n")
 	return builder.String()
 }
+
+func ForEachRule(content json.RawMessage) string {
+	// Unmarshal the content into ForEachStmt struct
+	forEach := models.ForEachStmt{}
+	err := json.Unmarshal(content, &forEach)
+	if err != nil {
+		panic("Error: Incorrect node")
+	}
+
+	elementType := vb_cs_types[strings.ToLower(forEach.Item)]
+
+	loop := fmt.Sprintf("foreach (%s %s in %s)", elementType, forEach.Item, forEach.Collection)
+
+	var sb strings.Builder
+	sb.WriteString(loop)
+	sb.WriteString(" {\n")
+	sb.WriteString(handleBody(forEach.Body))
+	sb.WriteString("\n}")
+
+	return sb.String()
+}
+
+//-----------------------------------------------------------------------
+
+func PrintStmtRule(content json.RawMessage) string {
+	printStmt := struct {
+		Data []string `json:"Data"`
+	}{}
+
+	err := json.Unmarshal(content, &printStmt)
+	if err != nil {
+		panic(fmt.Sprintf("Error unmarshalling PrintStmt JSON: %v", err))
+	}
+
+	var sb strings.Builder
+	for _, data := range printStmt.Data {
+
+		if isVariable(data) {
+			sb.WriteString(fmt.Sprintf("Console.WriteLine(%s);\n", data))
+		} else {
+			escapedData := escapeString(data)
+			sb.WriteString(fmt.Sprintf("Console.WriteLine(\"%s\");\n", escapedData))
+		}
+	}
+
+	return sb.String()
+}
+
+func isVariable(data string) bool {
+	// A simple check could be to see if it contains spaces, or check for other specific patterns
+	return !strings.HasPrefix(data, "\"") && !strings.HasSuffix(data, "\"")
+}
+
+// Escape function for string literals
+func escapeString(str string) string {
+	return strings.ReplaceAll(str, "\"", "\\\"")
+}

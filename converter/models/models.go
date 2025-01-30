@@ -155,3 +155,14 @@ type TypeStmt struct {
 	Name         string            `json:"Name"`
 	TypeElements []json.RawMessage `json:"TypeElements"` // TODO: change this any later
 }
+
+type ForEachStmt struct {
+	Item       string            `json:"Element"`
+	Collection string            `json:"collection"`
+	Body       []json.RawMessage `json:"body"`
+}
+
+type PrintStmt struct {
+	RuleType string   `json:"RuleType"`
+	Data     []string `json:"Data"`
+}
