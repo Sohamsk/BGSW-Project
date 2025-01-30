@@ -6,6 +6,7 @@ import (
 	"bufio"
 	"bytes"
 	"fmt"
+	"log"
 
 	"encoding/json"
 	// "fmt"
@@ -81,11 +82,13 @@ var RuleMap = map[string]bool{ // map for handled rules
 	"baseType":                      true,
 	"blockStmt":                     true,
 	"block":                         true,
+	"certainIdentifier":             true,
 	"comment":                       true,
 	"complexType":                   true,
 	"deftypeStmt":                   true,
 	"doLoopStmt":                    true,
 	"doubleLiteral":                 true,
+	"eCS_ProcedureCall":             true,
 	"enumerationStmt":               true,
 	"exitStmt":                      true,
 	"forEachStmt":                   true,
@@ -93,12 +96,15 @@ var RuleMap = map[string]bool{ // map for handled rules
 	"functionStmt":                  true,
 	"iCS_S_ProcedureOrArrayCall":    true,
 	"iCS_S_VariableOrProcedureCall": true,
+	"iCS_B_MemberOrProcedureCall":   true,
+	"iCS_B_ProcedureCall":           true,
 	"ifBlockStmt":                   true,
 	"ifConditionStmt":               true,
 	"ifElseBlockStmt":               true,
 	"ifElseIfBlockStmt":             true,
 	"ifThenElseStmt":                true,
 	"implicitCallStmt_InStmt":       true,
+	"implicitCallStmt_InBlock":      true,
 	"integerLiteral":                true,
 	"letStmt":                       true,
 	"literal":                       true,
@@ -116,6 +122,7 @@ var RuleMap = map[string]bool{ // map for handled rules
 	"subStmt":                       true,
 	"setStmt":                       true,
 	"type_":                         true,
+	"typeHint":                      true,
 	"typeStmt":                      true,
 	"valueStmt":                     true,
 	"variableListStmt":              true,
@@ -144,6 +151,7 @@ func (s *TreeShapeListener) EnterEveryRule(ctx antlr.ParserRuleContext) {
 			panic(err)
 		}
 		s.writer.WriteString(string(jsonData) + ",")
+		log.Println("Warning: Not converting the rule:", context_Type)
 
 	}
 }

@@ -7,3 +7,5 @@ End Function
 Public Function Foo(a$, b&, c!, d#, e@, f$()) As Boolean
 	Dim asFoo$()
 End Function
+
+Mult 3, 4
