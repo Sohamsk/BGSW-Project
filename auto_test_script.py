@@ -67,7 +67,7 @@ if __name__ == "__main__":
     TESTFILES_DIR = "testfiles"  
     OUTPUT_DIR = "output"  
     EXPECTED_DIR= "expected_output"
-    MAIN_GO_PATH = "main.go"
+    MAIN_GO_PATH = "."
     
     convert_all_testfiles(TESTFILES_DIR, OUTPUT_DIR, MAIN_GO_PATH)
     compare_test_cases(EXPECTED_DIR, OUTPUT_DIR)
