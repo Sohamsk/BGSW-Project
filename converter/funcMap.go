@@ -10,25 +10,30 @@ import (
 )
 
 var funcMap map[string]func(json.RawMessage) string
+var propsRegister map[string]string
 
 func init() {
 	funcMap = map[string]func(json.RawMessage) string{
-		"DeclareVariable": DeclareVariableRule,
-		"FunctionCall":    FuncCallRule,
-		"expression":      ExpressionRuleHandler,
-		"SubStatement":    SubStmtHandler,
-		"DoLoopStatement": DoLoopStmtHandler,
-		"FuncStatement":   FunctionHandler,
-		"IfThenElse":      IfThenElseStmtHandler,
-		"ElseIf":          ElseIfHandler,
-		"ElseBlock":       ElseHandler,
-		"ForNextStmt":     ForNextRule,
-		"ReturnStatement": ReturnStmtHandler,
-		"CommentRule":     CommentHandler,
-		"WithStatement":   WithStmtHandler,
-		"SetStatement":    SetStatementHandler,
-		"UnhandledRule":   MultiLineCommentHandler,
+		"DeclareVariable":      DeclareVariableRule,
+		"FunctionCall":         FuncCallRule,
+		"expression":           ExpressionRuleHandler,
+		"SubStatement":         SubStmtHandler,
+		"DoLoopStatement":      DoLoopStmtHandler,
+		"FuncStatement":        FunctionHandler,
+		"IfThenElse":           IfThenElseStmtHandler,
+		"ElseIf":               ElseIfHandler,
+		"ElseBlock":            ElseHandler,
+		"ForNextStmt":          ForNextRule,
+		"ReturnStatement":      ReturnStmtHandler,
+		"CommentRule":          CommentHandler,
+		"WithStatement":        WithStmtHandler,
+		"SetStatement":         SetStatementHandler,
+		"UnhandledRule":        MultiLineCommentHandler,
+		"PropertyGetStatement": PropertyGetHandler,
+		"PropertyLetStatement": PropertySetHandler,
+		"PropertySetStatement": PropertySetHandler,
 	}
+	propsRegister = make(map[string]string)
 }
 
 var vb_cs_types = map[string]string{
@@ -233,17 +238,20 @@ func SubStmtHandler(content json.RawMessage) string {
 	return sb.String()
 }
 
-func handleBodyFunc(rules []json.RawMessage, name, returnType string) string {
-	fmt.Println("in func")
+func handleBodyFunc(rules []json.RawMessage, name, returnType string, isSet bool) string {
 	var result string
-	result += vb_cs_types[strings.ToLower(returnType)] + " " + name + ";"
+	if !isSet {
+		result += vb_cs_types[strings.ToLower(returnType)] + " " + name + ";"
+	}
 	for _, rule := range rules {
 		inter, err := ConvertRule(rule)
 		if err == nil {
 			result += inter
 		}
 	}
-	result += "return " + name + ";"
+	if !isSet {
+		result += "return " + name + ";"
+	}
 	return result
 }
 
@@ -262,7 +270,7 @@ func FunctionHandler(content json.RawMessage) string {
 	}
 	str := sb.String()
 	sb.Reset()
-	sb.WriteString(strings.Trim(str, ",") + "){" + handleBodyFunc(funct.Body, funct.Identifier, funct.ReturnType) + "}") // need a seperate body handler to handle functions returning values as there is no return keyword in vb6
+	sb.WriteString(strings.Trim(str, ",") + "){" + handleBodyFunc(funct.Body, funct.Identifier, funct.ReturnType, false) + "}") // need a seperate body handler to handle functions returning values as there is no return keyword in vb6
 	return sb.String()
 }
 
@@ -473,4 +481,66 @@ func SetStatementHandler(content json.RawMessage) string {
 	}
 
 	return fmt.Sprintf("%s = %s;", set.Identifier, class)
+}
+
+func makeProp(get, set string) string {
+	return get + set
+}
+
+func PropertyGetHandler(context json.RawMessage) string {
+	prop := models.PropertyStatement{}
+	err := json.Unmarshal(context, &prop)
+	if err != nil {
+		incorrectNode()
+		return ""
+	}
+
+	var sb strings.Builder
+	sb.WriteString("get {")
+	sb.WriteString(handleBodyFunc(prop.Body, prop.Identifier, prop.ReturnType, false))
+	sb.WriteString("}")
+	get := sb.String()
+
+	_, existsSym := global.Symtab["prop:set:"+prop.Identifier]
+	set, existsProp := propsRegister["prop:set:"+prop.Identifier]
+	if existsSym && !existsProp {
+		//  NOTE: If the other property exists and is empty push this into a set and then when the other property is found write them together
+		propsRegister["prop:get:"+prop.Identifier] = get
+		return ""
+	} else if existsProp {
+		result := fmt.Sprint(vb_cs_types[strings.ToLower(prop.ReturnType)] + " " + prop.Identifier + "{" + makeProp(get, set) + "}")
+		return result
+	}
+
+	result := fmt.Sprint(vb_cs_types[strings.ToLower(prop.ReturnType)] + " " + prop.Identifier + "{" + get + "}")
+	return result
+}
+
+func PropertySetHandler(context json.RawMessage) string {
+	prop := models.PropertyStatement{}
+	err := json.Unmarshal(context, &prop)
+	if err != nil {
+		incorrectNode()
+		return ""
+	}
+
+	var sb strings.Builder
+	sb.WriteString("set {")
+	sb.WriteString(handleBodyFunc(prop.Body, prop.Identifier, prop.ReturnType, true))
+	sb.WriteString("}")
+	set := sb.String()
+
+	_, existsSym := global.Symtab["prop:get:"+prop.Identifier]
+	get, existsProp := propsRegister["prop:get:"+prop.Identifier]
+	if existsSym && !existsProp {
+		//  NOTE: If the other property exists and is empty push this into a set and then when the other property is found write them together
+		propsRegister["prop:set:"+prop.Identifier] = set
+		return ""
+	} else if existsProp {
+		result := fmt.Sprint(vb_cs_types[strings.ToLower(prop.ReturnType)] + " " + prop.Identifier + "{" + makeProp(get, set) + "}")
+		return result
+	}
+
+	result := fmt.Sprint(vb_cs_types[strings.ToLower(prop.ReturnType)] + " " + prop.Identifier + "{" + set + "}")
+	return result
 }

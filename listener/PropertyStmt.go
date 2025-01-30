@@ -10,11 +10,11 @@ import (
 	"github.com/antlr4-go/antlr/v4"
 )
 
-func (s *TreeShapeListener) EnterPropertyGetStmt(ctx *parser.PropertyGetStmtContext) {
+func (s *TreeShapeListener) handleFuncLikeDecl(ctx antlr.ParserRuleContext, ruleType string, isProp bool, propType string) {
 	nodes := ctx.GetChildren()
 	prop := models.PropertyStatement{}
 	prop.ReturnType = "Variant"
-	prop.RuleType = "PropertyStatement"
+	prop.RuleType = ruleType
 	index := 1
 	prop.Visibility = ""
 	for _, child := range nodes {
@@ -54,18 +54,38 @@ func (s *TreeShapeListener) EnterPropertyGetStmt(ctx *parser.PropertyGetStmtCont
 			}
 		}
 	}
-	s.SymTab["func:"+prop.Identifier] = prop.ReturnType
+	if isProp {
+		s.SymTab["prop:"+propType+":"+prop.Identifier] = ""
+	} else {
+		s.SymTab["func:"+prop.Identifier] = prop.ReturnType
+	}
 	str, _ := json.Marshal(prop)
 	s.writer.WriteString(string(str)[:len(str)-5] + "[")
-
 }
+
+func (s *TreeShapeListener) EnterPropertyGetStmt(ctx *parser.PropertyGetStmtContext) {
+	s.handleFuncLikeDecl(ctx, "PropertyGetStatement", true, "get")
+}
+
 func (s *TreeShapeListener) ExitPropertyGetStmt(ctx *parser.PropertyGetStmtContext) {
 	s.exitContext()
 	s.writer.WriteString("},")
 }
 
-func (s *TreeShapeListener) EnterPropertySetStmt(ctx *parser.PropertySetStmtContext) {}
-func (s *TreeShapeListener) ExitPropertySetStmt(ctx *parser.PropertySetStmtContext)  {}
+func (s *TreeShapeListener) EnterPropertySetStmt(ctx *parser.PropertySetStmtContext) {
+	s.handleFuncLikeDecl(ctx, "PropertySetStatement", true, "set")
+}
 
-func (s *TreeShapeListener) EnterPropertyLetStmt(ctx *parser.PropertyLetStmtContext) {}
-func (s *TreeShapeListener) ExitPropertyLetStmt(ctx *parser.PropertyLetStmtContext)  {}
+func (s *TreeShapeListener) ExitPropertySetStmt(ctx *parser.PropertySetStmtContext) {
+	s.exitContext()
+	s.writer.WriteString("},")
+}
+
+func (s *TreeShapeListener) EnterPropertyLetStmt(ctx *parser.PropertyLetStmtContext) {
+	s.handleFuncLikeDecl(ctx, "PropertyLetStatement", true, "set")
+}
+
+func (s *TreeShapeListener) ExitPropertyLetStmt(ctx *parser.PropertyLetStmtContext) {
+	s.exitContext()
+	s.writer.WriteString("},")
+}

@@ -11,6 +11,8 @@ build:
 .PHONY: test
 test: build
 	./dist/main $(TARGET)
+	@echo "**logs**"
+	@cat ./output/logs.log
 
 .PHONY: clean
 clean:

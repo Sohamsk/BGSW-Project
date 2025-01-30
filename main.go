@@ -67,7 +67,10 @@ func main() {
 	}
 	// stop debug
 
-	convertedContent := converter.Convert(jsonContent)
+	convertedContent, err := converter.Convert(jsonContent, listen.SymTab)
+	if err != nil {
+		panic(err)
+	}
 
 	err = writeOutputFiles(fileName, fileExtension, outputDir, jsonContent, convertedContent)
 	if err != nil {
