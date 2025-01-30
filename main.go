@@ -15,6 +15,7 @@ import (
 )
 
 func main() {
+
 	defer func() {
 		if r := recover(); r != nil {
 			fmt.Printf("\033[31m%s\033[0m\n", r)
@@ -74,7 +75,6 @@ func main() {
 	if err != nil {
 		log.Panic(err)
 	}
-
 	err = writeOutputFiles(fileName, fileExtension, outputDir, jsonContent, convertedContent)
 	if err != nil {
 		log.Panic("Error writing output files")

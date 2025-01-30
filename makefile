@@ -6,14 +6,14 @@ setup:
 
 .PHONY: build
 build:
-	go build -o ./dist/main .
+	go build -o ./dist/main.exe .
 
 .PHONY: test
 test: build
-	./dist/main $(TARGET)
-	@echo "**logs**"
-	@cat ./output/logs.log
+	./dist/main.exe $(TARGET)
+	
 
 .PHONY: clean
 clean:
-	rm -rf ./output ./dist
+	rm -r .\output
+	rm -r .\dist
