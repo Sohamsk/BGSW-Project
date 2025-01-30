@@ -32,7 +32,7 @@ func (s *TreeShapeListener) EnterPrintStmt(ctx *parser.PrintStmtContext) {
 		panic("Error: Failed to marshal PrintStmt JSON")
 	}
 
-	s.writer.WriteString(string(jsonData))
+	s.writer.WriteString(string(jsonData) + ",")
 }
 
 // Helper function to traverse and collect identifiers

@@ -34,6 +34,7 @@ func init() {
 		"PropertySetStatement": PropertySetHandler,
 		"EnumerationRule":      EnumsHandler,
 		"TypeStmtRule":         TypeStmtHandler,
+		"PrintStmt":            PrintStmtRule,
 	}
 	propsRegister = make(map[string]string)
 }
