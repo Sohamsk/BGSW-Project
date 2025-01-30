@@ -42,10 +42,13 @@ func main() {
 	// create a logs file
 	logfileName := filepath.Join(outputDir, "logs.log")
 	logFile, err := os.OpenFile(logfileName, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644)
+	if err != nil {
+		fmt.Println("Could not create log file but program execution will continue")
+	}
 	defer logFile.Close()
-
-	log.SetOutput(logFile)
-
+	if err == nil {
+		log.SetOutput(logFile)
+	}
 	fileName, fileExtension := getFileDetails(inputfileName)
 
 	lexer := parser.NewVisualBasic6Lexer(input)
@@ -76,4 +79,9 @@ func main() {
 	if err != nil {
 		log.Panic("Error writing output files")
 	}
+	absPath, err := filepath.Abs(outputDir)
+	if err != nil {
+		panic("couldn't find output directory absolute path")
+	}
+	fmt.Println("The tool ran successfully, find output files in ", absPath)
 }
