@@ -1,4 +1,4 @@
-package converter
+package models
 
 import "encoding/json"
 
@@ -98,4 +98,71 @@ type ForNext struct {
 	End            string            `json:"End"`
 	Step           string            `json:"Step"`
 	Body           []json.RawMessage `json:"Body"`
+}
+
+type ReturnStmt struct {
+	Rule
+	ReturnVariableName string
+}
+
+type BreakStmt struct {
+	Rule
+}
+
+type Comment struct {
+	Rule
+	CommentText string `json:"CommentText"`
+}
+
+type WithStmt struct {
+	Rule
+	Object string
+	Body   []ExpressionRule
+}
+
+type SetStmt struct {
+	Rule
+	Identifier string
+	IsNew      bool
+	Class      json.RawMessage
+}
+
+type MultiLineComment struct { // This struct is for adding a MultiLineComment in C# code for part that's not converted
+	Rule
+	MultiLineComment string `json:"MultiLineComment"`
+}
+
+// this is very similar to functions
+type PropertyStatement struct {
+	Rule
+	Identifier string
+	Visibility string
+	Arguments  []DeclArg
+	ReturnType string
+	Body       []json.RawMessage
+}
+
+type EnumStmt struct {
+	Rule
+	Visibility string   `json:"Visibility"`
+	Name       string   `json:"Name"`
+	EnumValues []string `json:"EnumValues"` // TODO: change this any later
+}
+
+type TypeStmt struct {
+	Rule
+	Visibility   string            `json:"Visibility"`
+	Name         string            `json:"Name"`
+	TypeElements []json.RawMessage `json:"TypeElements"` // TODO: change this any later
+}
+
+type ForEachStmt struct {
+	Item       string            `json:"Element"`
+	Collection string            `json:"collection"`
+	Body       []json.RawMessage `json:"body"`
+}
+
+type PrintStmt struct {
+	RuleType string   `json:"RuleType"`
+	Data     []string `json:"Data"`
 }

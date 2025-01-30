@@ -10,52 +10,9 @@ import (
 	"log"
 	"os"
 	"path/filepath"
-	"strings"
 
 	"github.com/antlr4-go/antlr/v4"
 )
-
-func getFileDetails(inputFileName string) (string, string) {
-	filePath := strings.Split(inputFileName, "/")
-	fileName := filePath[len(filePath)-1]
-
-	fileNameSlice := strings.Split(fileName, ".")
-	fileName, fileExtension := fileNameSlice[0], fileNameSlice[1]
-	return fileName, fileExtension
-}
-
-func writeOutputFiles(fileName, fileExtension string, jsonContent string, convertedContent string) error {
-	// Create output directory if it doesn't exist
-	outputDir := "output"
-	err := os.MkdirAll(outputDir, 0755)
-	if err != nil {
-		return fmt.Errorf("failed to create output directory: %v", err)
-	}
-
-	// Write JSON output file
-	jsonFilePath := filepath.Join(outputDir, "op.json")
-	err = os.WriteFile(jsonFilePath, []byte(jsonContent), 0644)
-	if err != nil {
-		return fmt.Errorf("failed to write JSON file: %v", err)
-	}
-
-	// Write converted CS file
-	csFilePath := filepath.Join(outputDir, fileName+".cs")
-	err = os.WriteFile(csFilePath, []byte(convertedContent), 0644)
-	if err != nil {
-		return fmt.Errorf("failed to write CS file: %v", err)
-	}
-
-	return nil
-}
-
-func writeToOutput(file *os.File, buf *bytes.Buffer, fileName string, fileExtension string, tree parser.IStartRuleContext) {
-	buf.WriteString("{\"FileName\":\"" + fileName + "\", \"FileType\": \"" + fileExtension + "\",")
-	writer := bufio.NewWriter(buf)
-	antlr.ParseTreeWalkerDefault.Walk(listener.NewTreeShapeListener(writer, buf), tree)
-	writer.Flush()
-	buf.WriteString("}")
-}
 
 func main() {
 	defer func() {
@@ -65,7 +22,7 @@ func main() {
 	}()
 
 	if len(os.Args) != 2 {
-		panic("File Not specified.")
+		log.Panic("File Not specified.")
 	}
 
 	inputfileName := os.Args[1]
@@ -75,6 +32,23 @@ func main() {
 		log.Panic("File error")
 	}
 
+	// Create output directory if it doesn't exist
+	outputDir := "output"
+	err = os.MkdirAll(outputDir, 0755)
+	if err != nil {
+		panic(fmt.Errorf("failed to create output directory: %v", err))
+	}
+
+	// create a logs file
+	logfileName := filepath.Join(outputDir, "logs.log")
+	logFile, err := os.OpenFile(logfileName, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644)
+	if err != nil {
+		fmt.Println("Could not create log file but program execution will continue")
+	}
+	defer logFile.Close()
+	if err == nil {
+		log.SetOutput(logFile)
+	}
 	fileName, fileExtension := getFileDetails(inputfileName)
 
 	lexer := parser.NewVisualBasic6Lexer(input)
@@ -84,14 +58,30 @@ func main() {
 	tree := p.StartRule()
 
 	var buf bytes.Buffer
-	writeToOutput(nil, &buf, fileName, fileExtension, tree)
+	writer := bufio.NewWriter(&buf)
+	listen := listener.NewTreeShapeListener(writer, &buf)
+	writeToOutput(listen, writer, &buf, fileName, fileExtension, tree)
 	jsonContent := buf.String()
+	//	fmt.Println(jsonContent) //uncomment this while debugging json
+	//
+	//	// start debug
+	//	for key, val := range listen.SymTab {
+	//		fmt.Printf("%s: %s\n", key, val)
+	//	}
+	//	// stop debug
 
-	convertedContent := converter.Convert(jsonContent)
+	convertedContent, err := converter.Convert(jsonContent, listen.SymTab)
+	if err != nil {
+		log.Panic(err)
+	}
 
-	err = writeOutputFiles(fileName, fileExtension, jsonContent, convertedContent)
+	err = writeOutputFiles(fileName, fileExtension, outputDir, jsonContent, convertedContent)
 	if err != nil {
 		log.Panic("Error writing output files")
 	}
-
+	absPath, err := filepath.Abs(outputDir)
+	if err != nil {
+		panic("couldn't find output directory absolute path")
+	}
+	fmt.Println("The tool ran successfully, find output files in ", absPath)
 }

@@ -31,9 +31,11 @@ startRule
     : module EOF
     ;
 
+
 module
     : WS? NEWLINE* (moduleHeader NEWLINE+)? moduleReferences? NEWLINE* controlProperties? NEWLINE* moduleConfig? NEWLINE* moduleAttributes? NEWLINE*
         moduleOptions? NEWLINE* moduleBody? NEWLINE* WS?
+
     ;
 
 moduleReferences
@@ -41,7 +43,7 @@ moduleReferences
     ;
 
 moduleReference
-    : OBJECT WS? EQ WS? moduleReferenceValue (SEMICOLON WS? moduleReferenceComponent)? NEWLINE*
+    : OBJECT WS? EQ WS? moduleReferenceValue (SEMICOLON WS? moduleReferenceComponent)? comment? NEWLINE*
     ;
 
 moduleReferenceValue
@@ -57,19 +59,19 @@ moduleHeader
     ;
 
 moduleConfig
-    : BEGIN NEWLINE+ moduleConfigElement+ END NEWLINE+
+    : BEGIN NEWLINE+ moduleConfigElement+ END comment? NEWLINE+
     ;
 
 moduleConfigElement
-    : ambiguousIdentifier WS? EQ WS? literal NEWLINE
+    : ambiguousIdentifier WS? EQ WS? literal comment? NEWLINE
     ;
 
 moduleAttributes
-    : (attributeStmt NEWLINE+)+
+    : (attributeStmt comment? NEWLINE+)+
     ;
 
 moduleOptions
-    : (moduleOption NEWLINE+)+
+    : (moduleOption comment? NEWLINE+)+
     ;
 
 moduleOption
@@ -80,11 +82,12 @@ moduleOption
     ;
 
 moduleBody
-    : moduleBodyElement (NEWLINE+ moduleBodyElement)*
+    : moduleBodyElement comment? (NEWLINE+ moduleBodyElement)*
     ;
 
 moduleBodyElement
     : moduleBlock
+    | moduleBodyElement comment
     | moduleOption
     | declareStmt
     | enumerationStmt
@@ -136,8 +139,9 @@ cp_ControlType
 
 cp_ControlIdentifier
     : ambiguousIdentifier
-    ;
+   ;
 
+comment: COMMENT;
 // block ----------------------------------
 
 moduleBlock
@@ -154,6 +158,8 @@ block
 
 blockStmt
     : appActivateStmt
+    | blockStmt comment
+    | comment
     | attributeStmt
     | beepStmt
     | chDirStmt
@@ -314,11 +320,11 @@ eventStmt
     ;
 
 exitStmt
-    : EXIT_DO
-    | EXIT_FOR
-    | EXIT_FUNCTION
-    | EXIT_PROPERTY
-    | EXIT_SUB
+    : EXIT_DO         # Exit_Do
+    | EXIT_FOR        # Exit_For
+    | EXIT_FUNCTION   # Exit_Function
+    | EXIT_PROPERTY   # Exit_Property
+    | EXIT_SUB        # Exit_Sub
     ;
 
 filecopyStmt
@@ -1027,4 +1033,4 @@ octalLiteral
 
 doubleLiteral
     : (PLUS | MINUS)* DOUBLELITERAL
-    ;
+    ;   

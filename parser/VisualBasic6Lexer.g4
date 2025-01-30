@@ -456,11 +456,13 @@ IDENTIFIER: LETTER LETTERORDIGIT*;
 
 // whitespace, line breaks, comments, ...
 
-LINE_CONTINUATION: ' ' '_' '\r'? '\n' -> skip;
+LINE_CONTINUATION: ' ' '_' '\r'? '\n';
 
 NEWLINE: WS? ('\r'? '\n' | COLON ' ') WS?;
 
-COMMENT: WS? ('\'' | COLON? REM ' ') ( LINE_CONTINUATION | ~ ('\n' | '\r'))* -> skip;
+COMMENT: WS? ('\'' | COLON? REM ' ') ( LINE_CONTINUATION | ~ ('\n' | '\r'))*;
+//COMMENT: '\'' ~[\r\n]* | REM ~[\r\n]*;
+
 
 WS: [ \t]+;
 
