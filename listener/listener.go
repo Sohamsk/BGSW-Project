@@ -1,14 +1,14 @@
 package listener
 
 import (
-	//	"bosch/converter/models"
+	"bosch/converter/models"
 	"bosch/parser"
 	"bufio"
 	"bytes"
 	"fmt"
 
-	//	"encoding/json"
-	//	"fmt"
+	"encoding/json"
+	// "fmt"
 	"strings"
 
 	"github.com/antlr4-go/antlr/v4"
@@ -71,68 +71,81 @@ func fetchParentOfTerminal(someTree antlr.Tree) string {
 }
 
 var RuleMap = map[string]bool{ // map for handled rules
-	"startRule":                     true,
-	"ifThenElseStmt":                true,
-	"letStmt":                       true,
+	"ambiguousIdentifier":           true,
+	"ambiguousKeyword":              true,
+	"argCall":                       true,
+	"argList":                       true,
+	"argsCall":                      true,
+	"arg":                           true,
+	"asTypeClause":                  true,
+	"baseType":                      true,
+	"blockStmt":                     true,
+	"block":                         true,
+	"comment":                       true,
+	"complexType":                   true,
+	"deftypeStmt":                   true,
+	"doLoopStmt":                    true,
+	"doubleLiteral":                 true,
+	"enumerationStmt":               true,
+	"exitStmt":                      true,
 	"forEachStmt":                   true,
 	"forNextStmt":                   true,
-	"blockStmt":                     true,
-	"doLoopStmt":                    true,
-	"selectCaseStmt":                true,
 	"functionStmt":                  true,
-	"withStmt":                      true,
-	"variableStmt":                  true,
-	"deftypeStmt":                   true,
-	"printStmt":                     true,
-	"comment":                       true,
-	"subStmt":                       true,
-	"exitStmt":                      true,
+	"iCS_S_ProcedureOrArrayCall":    true,
+	"iCS_S_VariableOrProcedureCall": true,
 	"ifBlockStmt":                   true,
 	"ifConditionStmt":               true,
-	"ifElseIfBlockStmt":             true,
 	"ifElseBlockStmt":               true,
-	"iCS_S_VariableOrProcedureCall": true,
+	"ifElseIfBlockStmt":             true,
+	"ifThenElseStmt":                true,
 	"implicitCallStmt_InStmt":       true,
-	"iCS_S_ProcedureOrArrayCall":    true,
-	"argCall":                       true,
-	"argsCall":                      true,
-	"literal":                       true,
 	"integerLiteral":                true,
-	"ambiguousIdentifier":           true,
-	"variableListStmt":              true,
-	"variableSubStmt":               true,
-	"asTypeClause":                  true,
-	"arg":                           true,
-	"argList":                       true,
-	"type_":                         true,
-	"baseType":                      true,
-	"module":                        true,
-	"moduleBody":                    true,
-	"moduleBodyElement":             true,
+	"letStmt":                       true,
+	"literal":                       true,
 	"moduleBlock":                   true,
-	"block":                         true,
-	"valueStmt":                     true,
+	"moduleBodyElement":             true,
+	"moduleBody":                    true,
+	"module":                        true,
 	"octalLiteral":                  true,
-	"doubleLiteral":                 true,
+	"printStmt":                     true,
+	"propertyGetStmt":               true,
+	"propertySetStmt":               true,
+	"propertyLetStmt":               true,
+	"selectCaseStmt":                true,
+	"startRule":                     true,
+	"subStmt":                       true,
+	"setStmt":                       true,
+	"type_":                         true,
+	"typeStmt":                      true,
+	"valueStmt":                     true,
+	"variableListStmt":              true,
+	"variableStmt":                  true,
+	"variableSubStmt":               true,
+	"visibility":                    true,
+	"withStmt":                      true,
 }
 
 func (s *TreeShapeListener) EnterEveryRule(ctx antlr.ParserRuleContext) {
-	// rules := parser.VisualBasic6ParserParserStaticData.RuleNames
-	// //fmt.Println(rules[ctx.GetRuleIndex()])
-	// _, ok := RuleMap[rules[ctx.GetRuleIndex()]]
-	// //
-	// if !ok { // This means rule is not handled so we'll just send it to MultiLineComment
+	rules := parser.VisualBasic6ParserParserStaticData.RuleNames
+	//fmt.Println(rules[ctx.GetRuleIndex()])
+	context_Type := rules[ctx.GetRuleIndex()]
+	_, ok := RuleMap[context_Type]
 	//
-	//	UnhandledRule := models.MultiLineComment{}
-	//	UnhandledRule.RuleType = "UnhandledRule"
-	//	UnhandledRule.MultiLineComment = ctx.GetText()
-	//	jsonData, err := json.Marshal(UnhandledRule)
-	//	if err != nil {
-	//		panic(err)
-	//	}
-	//	s.writer.WriteString(string(jsonData) + ",")
-	//
-	// }
+	if !ok { // This means rule is not handled so we'll just send it to MultiLineComment
+
+		UnhandledRule := models.MultiLineComment{}
+		UnhandledRule.RuleType = "UnhandledRule"
+		if context_Type != "moduleBodyElement" || context_Type != "blockStmt" {
+			UnhandledRule.MultiLineComment = ctx.GetText()
+		}
+
+		jsonData, err := json.Marshal(UnhandledRule)
+		if err != nil {
+			panic(err)
+		}
+		s.writer.WriteString(string(jsonData) + ",")
+
+	}
 }
 
 func determineTypeFromHint(hint byte) (string, error) {
