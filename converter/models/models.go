@@ -132,6 +132,16 @@ type MultiLineComment struct { // This struct is for adding a MultiLineComment i
 	MultiLineComment string `json:"MultiLineComment"`
 }
 
+// this is very similar to functions
+type PropertyStatement struct {
+	Rule
+	Identifier string
+	Visibility string
+	Arguments  []DeclArg
+	ReturnType string
+	Body       []json.RawMessage
+}
+
 type EnumStmt struct {
 	Rule
 	Visibility string   `json:"Visibility"`

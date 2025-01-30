@@ -5,6 +5,8 @@ import (
 	"bosch/parser"
 	"bufio"
 	"bytes"
+	"fmt"
+	"log"
 
 	"encoding/json"
 	// "fmt"
@@ -17,12 +19,14 @@ type TreeShapeListener struct {
 	*parser.BaseVisualBasic6ParserListener
 	buf    *bytes.Buffer
 	writer *bufio.Writer
+	SymTab map[string]string
 }
 
 func NewTreeShapeListener(writer *bufio.Writer, buf *bytes.Buffer) *TreeShapeListener {
 	l := new(TreeShapeListener)
 	l.writer = writer
 	l.buf = buf
+	l.SymTab = make(map[string]string)
 	return l
 }
 
@@ -68,49 +72,64 @@ func fetchParentOfTerminal(someTree antlr.Tree) string {
 }
 
 var RuleMap = map[string]bool{ // map for handled rules
-	"startRule":                     true,
-	"ifThenElseStmt":                true,
-	"letStmt":                       true,
+	"ambiguousIdentifier":           true,
+	"ambiguousKeyword":              true,
+	"argCall":                       true,
+	"argList":                       true,
+	"argsCall":                      true,
+	"arg":                           true,
+	"asTypeClause":                  true,
+	"baseType":                      true,
+	"blockStmt":                     true,
+	"block":                         true,
+	"certainIdentifier":             true,
+	"comment":                       true,
+	"complexType":                   true,
+	"deftypeStmt":                   true,
+	"doLoopStmt":                    true,
+	"doubleLiteral":                 true,
+	"eCS_ProcedureCall":             true,
+	"enumerationStmt":               true,
+	"exitStmt":                      true,
 	"forEachStmt":                   true,
 	"forNextStmt":                   true,
-	"blockStmt":                     true,
-	"doLoopStmt":                    true,
-	"selectCaseStmt":                true,
 	"functionStmt":                  true,
-	"withStmt":                      true,
-	"variableStmt":                  true,
-	"deftypeStmt":                   true,
-	"printStmt":                     true,
-	"comment":                       true,
-	"subStmt":                       true,
-	"exitStmt":                      true,
+	"iCS_S_ProcedureOrArrayCall":    true,
+	"iCS_S_VariableOrProcedureCall": true,
+	"iCS_B_MemberOrProcedureCall":   true,
+	"iCS_B_ProcedureCall":           true,
 	"ifBlockStmt":                   true,
 	"ifConditionStmt":               true,
-	"ifElseIfBlockStmt":             true,
 	"ifElseBlockStmt":               true,
-	"iCS_S_VariableOrProcedureCall": true,
+	"ifElseIfBlockStmt":             true,
+	"ifThenElseStmt":                true,
 	"implicitCallStmt_InStmt":       true,
-	"iCS_S_ProcedureOrArrayCall":    true,
-	"argCall":                       true,
-	"argsCall":                      true,
-	"literal":                       true,
+	"implicitCallStmt_InBlock":      true,
 	"integerLiteral":                true,
-	"ambiguousIdentifier":           true,
-	"variableListStmt":              true,
-	"variableSubStmt":               true,
-	"asTypeClause":                  true,
-	"arg":                           true,
-	"argList":                       true,
-	"type_":                         true,
-	"baseType":                      true,
-	"module":                        true,
-	"moduleBody":                    true,
-	"moduleBodyElement":             true,
+	"letStmt":                       true,
+	"literal":                       true,
 	"moduleBlock":                   true,
-	"block":                         true,
-	"valueStmt":                     true,
+	"moduleBodyElement":             true,
+	"moduleBody":                    true,
+	"module":                        true,
 	"octalLiteral":                  true,
-	"doubleLiteral":                 true,
+	"printStmt":                     true,
+	"propertyGetStmt":               true,
+	"propertySetStmt":               true,
+	"propertyLetStmt":               true,
+	"selectCaseStmt":                true,
+	"startRule":                     true,
+	"subStmt":                       true,
+	"setStmt":                       true,
+	"type_":                         true,
+	"typeHint":                      true,
+	"typeStmt":                      true,
+	"valueStmt":                     true,
+	"variableListStmt":              true,
+	"variableStmt":                  true,
+	"variableSubStmt":               true,
+	"visibility":                    true,
+	"withStmt":                      true,
 }
 
 func (s *TreeShapeListener) EnterEveryRule(ctx antlr.ParserRuleContext) {
@@ -132,6 +151,25 @@ func (s *TreeShapeListener) EnterEveryRule(ctx antlr.ParserRuleContext) {
 			panic(err)
 		}
 		s.writer.WriteString(string(jsonData) + ",")
+		log.Println("Warning: Not converting the rule:", context_Type)
 
 	}
+}
+
+func determineTypeFromHint(hint byte) (string, error) {
+	switch hint {
+	case '%':
+		return "Integer", nil
+	case '&':
+		return "Long", nil
+	case '!':
+		return "Single", nil
+	case '#':
+		return "Double", nil
+	case '@':
+		return "Currency", nil
+	case '$':
+		return "String", nil
+	}
+	return "", fmt.Errorf("Error: Unknown typehint")
 }

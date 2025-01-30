@@ -10,6 +10,7 @@ import (
 
 type state struct {
 	FileType string
+	Symtab   map[string]string
 }
 
 var global state
@@ -25,16 +26,16 @@ func handleBody(rules []json.RawMessage) string {
 	return result
 }
 
-func Convert(raw string) string {
+func Convert(raw string, symtab map[string]string) (string, error) {
 	context := models.FileContext{}
 	err := json.Unmarshal([]byte(raw), &context)
 	global.FileType = context.FileType
+	global.Symtab = symtab
 	if err != nil {
-		// TODO: Return an error here to signify catastrophic failure
-		panic("Error: Error unmarshalling json")
+		return "", fmt.Errorf("Error: %s", err)
 	}
 	converted := fmt.Sprintf("class %s {%s}", context.FileName, handleBody(context.Body))
-	return converted
+	return converted, nil
 }
 
 // the converter should take the json string and the project context which we'll get on parsing the vbp file
@@ -49,8 +50,7 @@ func ConvertRule(rawMsg json.RawMessage) (string, error) {
 
 	action, ok := funcMap[raw.RuleType]
 	if !ok {
-		error := errors.New(raw.RuleType + " is unknown")
-		println(string("here"))
+		error := errors.New("Error:" + raw.RuleType + " is unknown")
 		log.Println(error)
 		return "", error
 	}

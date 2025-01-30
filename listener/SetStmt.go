@@ -30,7 +30,6 @@ func (s *TreeShapeListener) EnterSetStmt(ctx *parser.SetStmtContext) {
 			} else {
 				isNew = true
 				child := node_val.GetChild(2)
-				// TODO: handle function calls that deliver the object
 				class = child.(antlr.RuleContext).GetText()
 			}
 		}
