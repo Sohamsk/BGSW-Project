@@ -5,9 +5,12 @@ setup:
 	go generate .\...
 
 .PHONY: build
-build:
+
+devbuild:
 	go build -o ./dist/main.exe .
 
+build:
+	go build -o ./builds/vb2sharp.exe .
 .PHONY: test
 test: build
 	./dist/main.exe $(TARGET)
