@@ -91,6 +91,10 @@ type IfThenElseStmtRule struct {
 	Condition []json.RawMessage
 	IfBlock   []json.RawMessage
 }
+type EndIf struct { // This is for ending the MacroIfThenElse using #endif in C#
+	Rule
+}
+
 type ForNext struct {
 	Rule
 	IdentifierName string            `json:"IdentifierName"`

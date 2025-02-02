@@ -21,8 +21,12 @@ func init() {
 		"DoLoopStatement":      DoLoopStmtHandler,
 		"FuncStatement":        FunctionHandler,
 		"IfThenElse":           IfThenElseStmtHandler,
+		"MacroIfBlock":         MacroIfStmtHandler,
 		"ElseIf":               ElseIfHandler,
+		"MacroElseIf":          MacroElseIfHandler,
 		"ElseBlock":            ElseHandler,
+		"MacroElseBlock":       MacroElseHandler,
+		"EndIf":                MacroEndIfHander,
 		"ForNextStmt":          ForNextRule,
 		"ReturnStatement":      ReturnStmtHandler,
 		"CommentRule":          CommentHandler,
@@ -389,6 +393,72 @@ func ElseHandler(content json.RawMessage) string {
 	sb.WriteString("\n}")
 	return sb.String()
 }
+
+func MacroIfStmtHandler(content json.RawMessage) string {
+	var ifStmt models.IfThenElseStmtRule
+	err := json.Unmarshal(content, &ifStmt)
+	if err != nil {
+		incorrectNode()
+		return ""
+	}
+
+	var sb strings.Builder
+
+	// Handle the `IfThenElseStmtRule`
+	sb.WriteString("\n#if (")
+	sb.WriteString(ProcessCondition(ifStmt.Condition)) // Using handleBody for Condition
+	sb.WriteString(")\n{")
+	sb.WriteString(handleBody(ifStmt.IfBlock)) // Using handleBody for IfBlock
+	sb.WriteString("\n}\n")
+
+	return sb.String()
+}
+
+func MacroElseIfHandler(content json.RawMessage) string {
+	var elseIfStmt models.ElseIfRule
+	err := json.Unmarshal(content, &elseIfStmt)
+	if err != nil {
+		incorrectNode()
+		return ""
+	}
+
+	var sb strings.Builder
+
+	// Handle the `ElseIfRule`
+	sb.WriteString("#elif (")
+	sb.WriteString(ProcessCondition(elseIfStmt.Condition)) // Using handleBody for Condition
+	sb.WriteString(") \n{")
+	sb.WriteString(handleBody(elseIfStmt.ElseIfBlock)) // Using handleBody for ElseIfBlock
+	sb.WriteString("\n}\n")
+
+	return sb.String()
+}
+
+func MacroElseHandler(content json.RawMessage) string {
+	var elseStmt models.ElseRule
+	err := json.Unmarshal(content, &elseStmt)
+	if err != nil {
+		incorrectNode()
+		return ""
+	}
+
+	var sb strings.Builder
+
+	// Handle the `ElseRule`
+	sb.WriteString("#else \n{")
+	sb.WriteString(handleBody(elseStmt.Body)) // Using handleBody for ElseBlock
+	sb.WriteString("\n}\n")
+	return sb.String()
+}
+func MacroEndIfHander(content json.RawMessage) string {
+	endif := models.EndIf{}
+	err := json.Unmarshal(content, &endif)
+	if err != nil {
+		incorrectNode()
+		return ""
+	}
+	return "#endif\n"
+}
 func ForNextRule(content json.RawMessage) string {
 	forNext := models.ForNext{}
 	err := json.Unmarshal(content, &forNext)
@@ -448,7 +518,7 @@ func MultiLineCommentHandler(content json.RawMessage) string {
 	if err != nil {
 		panic("Error: Incorrect node")
 	}
-	return fmt.Sprintf("/* \n" + MultiLineComment.MultiLineComment + "\n*/\n")
+	return fmt.Sprintf("/* \n %s \n*/\n", MultiLineComment.MultiLineComment)
 }
 func handleBodyWith(expressions []models.ExpressionRule, objectName string) string {
 	var result string

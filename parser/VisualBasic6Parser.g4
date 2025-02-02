@@ -415,7 +415,7 @@ lsetStmt
     ;
 
 macroIfThenElseStmt
-    : macroIfBlockStmt macroElseIfBlockStmt* macroElseBlockStmt? MACRO_END_IF
+    : macroIfBlockStmt macroElseIfBlockStmt* macroElseBlockStmt? macroEndIfStmt
     ;
 
 macroIfBlockStmt
@@ -428,6 +428,10 @@ macroElseIfBlockStmt
 
 macroElseBlockStmt
     : MACRO_ELSE NEWLINE+ (moduleBody NEWLINE+)?
+    ;
+
+macroEndIfStmt
+    : MACRO_END_IF
     ;
 
 midStmt
