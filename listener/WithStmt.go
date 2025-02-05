@@ -19,9 +19,11 @@ func (s *TreeShapeListener) EnterWithStmt(ctx *parser.WithStmtContext) {
 		panic(err)
 	}
 	s.writer.WriteString(string(jsonData)[:len(jsonData)-5] + "[")
+	st.Push(with.Object)
 }
 
 func (s *TreeShapeListener) ExitWithStmt(ctx *parser.WithStmtContext) {
+	st.Pop()
 	s.exitContext()
 	s.writer.WriteString("},")
 	log.Println("Converted WithStmt to IR")

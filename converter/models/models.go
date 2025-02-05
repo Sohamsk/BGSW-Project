@@ -117,7 +117,7 @@ type Comment struct {
 type WithStmt struct {
 	Rule
 	Object string
-	Body   []ExpressionRule
+	Body   []json.RawMessage
 }
 
 type SetStmt struct {

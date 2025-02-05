@@ -4,7 +4,6 @@ import (
 	"bosch/parser"
 	"bufio"
 	"bytes"
-	//	"fmt"
 	"strings"
 
 	"github.com/antlr4-go/antlr/v4"
@@ -32,6 +31,9 @@ func handleLetExpression(nodes []antlr.Tree, w *bufio.Writer) {
 				single := node.GetChild(0).GetChild(0)
 				_, holds := single.(antlr.TerminalNode)
 				if holds {
+					//					if strings.HasPrefix(strings.Trim(single.(antlr.TerminalNode).GetText(), "\""), ".") {
+					//						fmt.Println("candidate1")
+					//					}
 					w.WriteString("{\"Type\": \"" + fetchParentOfTerminal(node) + "\",\"Symbol\": \"" + strings.Trim(single.(antlr.TerminalNode).GetText(), "\"") + "\"},")
 				} else if parser.VisualBasic6ParserParserStaticData.RuleNames[single.(antlr.RuleContext).GetRuleIndex()] == "iCS_S_ProcedureOrArrayCall" {
 					w.WriteString("{\"Type\": \"FunctionCall\",")
@@ -39,7 +41,14 @@ func handleLetExpression(nodes []antlr.Tree, w *bufio.Writer) {
 				} else {
 					// find type of a node that is not a func call or and expression
 					//					fmt.Println("fetch " + fetchParentOfTerminal(node.GetChild(0)))
-					w.WriteString("{\"Type\":\"" + fetchParentOfTerminal(node) + "\", \"Symbol\":\"" + node.GetText() + "\"},")
+					sym := node.GetText()
+					if strings.HasPrefix(node.GetText(), ".") {
+						obj, exists := st.Peek()
+						if exists {
+							sym = obj + sym
+						}
+					}
+					w.WriteString("{\"Type\":\"" + fetchParentOfTerminal(node) + "\", \"Symbol\":\"" + sym + "\"},")
 				}
 			} else {
 				//				fmt.Println("nest")

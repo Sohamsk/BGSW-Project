@@ -450,16 +450,6 @@ func MultiLineCommentHandler(content json.RawMessage) string {
 	}
 	return fmt.Sprintf("/* \n" + MultiLineComment.MultiLineComment + "\n*/\n")
 }
-func handleBodyWith(expressions []models.ExpressionRule, objectName string) string {
-	var result string
-	for _, expression := range expressions {
-		if expression.RuleType == "UnhandledRule" {
-			continue
-		}
-		result += objectName + processExpressions(expression)
-	}
-	return result
-}
 
 func WithStmtHandler(content json.RawMessage) string {
 	withStmt := models.WithStmt{}
@@ -468,7 +458,7 @@ func WithStmtHandler(content json.RawMessage) string {
 		incorrectNode()
 		return ""
 	}
-	return handleBodyWith(withStmt.Body, withStmt.Object)
+	return handleBody(withStmt.Body)
 }
 
 func SetStatementHandler(content json.RawMessage) string {
