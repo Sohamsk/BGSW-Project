@@ -21,8 +21,12 @@ func init() {
 		"DoLoopStatement":      DoLoopStmtHandler,
 		"FuncStatement":        FunctionHandler,
 		"IfThenElse":           IfThenElseStmtHandler,
+		"MacroIfBlock":         MacroIfStmtHandler,
 		"ElseIf":               ElseIfHandler,
+		"MacroElseIf":          MacroElseIfHandler,
 		"ElseBlock":            ElseHandler,
+		"MacroElseBlock":       MacroElseHandler,
+		"EndIf":                MacroEndIfHander,
 		"ForNextStmt":          ForNextRule,
 		"ReturnStatement":      ReturnStmtHandler,
 		"CommentRule":          CommentHandler,
@@ -35,6 +39,7 @@ func init() {
 		"EnumerationRule":      EnumsHandler,
 		"TypeStmtRule":         TypeStmtHandler,
 		"BreakStatement":       BreakStmtHandler,
+		"PrintStmt":            PrintStmtRule,
 	}
 	propsRegister = make(map[string]string)
 }
@@ -389,6 +394,72 @@ func ElseHandler(content json.RawMessage) string {
 	sb.WriteString("\n}")
 	return sb.String()
 }
+
+func MacroIfStmtHandler(content json.RawMessage) string {
+	var ifStmt models.IfThenElseStmtRule
+	err := json.Unmarshal(content, &ifStmt)
+	if err != nil {
+		incorrectNode()
+		return ""
+	}
+
+	var sb strings.Builder
+
+	// Handle the `IfThenElseStmtRule`
+	sb.WriteString("\n#if (")
+	sb.WriteString(ProcessCondition(ifStmt.Condition)) // Using handleBody for Condition
+	sb.WriteString(")\n{")
+	sb.WriteString(handleBody(ifStmt.IfBlock)) // Using handleBody for IfBlock
+	sb.WriteString("\n}\n")
+
+	return sb.String()
+}
+
+func MacroElseIfHandler(content json.RawMessage) string {
+	var elseIfStmt models.ElseIfRule
+	err := json.Unmarshal(content, &elseIfStmt)
+	if err != nil {
+		incorrectNode()
+		return ""
+	}
+
+	var sb strings.Builder
+
+	// Handle the `ElseIfRule`
+	sb.WriteString("#elif (")
+	sb.WriteString(ProcessCondition(elseIfStmt.Condition)) // Using handleBody for Condition
+	sb.WriteString(") \n{")
+	sb.WriteString(handleBody(elseIfStmt.ElseIfBlock)) // Using handleBody for ElseIfBlock
+	sb.WriteString("\n}\n")
+
+	return sb.String()
+}
+
+func MacroElseHandler(content json.RawMessage) string {
+	var elseStmt models.ElseRule
+	err := json.Unmarshal(content, &elseStmt)
+	if err != nil {
+		incorrectNode()
+		return ""
+	}
+
+	var sb strings.Builder
+
+	// Handle the `ElseRule`
+	sb.WriteString("#else \n{")
+	sb.WriteString(handleBody(elseStmt.Body)) // Using handleBody for ElseBlock
+	sb.WriteString("\n}\n")
+	return sb.String()
+}
+func MacroEndIfHander(content json.RawMessage) string {
+	endif := models.EndIf{}
+	err := json.Unmarshal(content, &endif)
+	if err != nil {
+		incorrectNode()
+		return ""
+	}
+	return "#endif\n"
+}
 func ForNextRule(content json.RawMessage) string {
 	forNext := models.ForNext{}
 	err := json.Unmarshal(content, &forNext)
@@ -448,7 +519,7 @@ func MultiLineCommentHandler(content json.RawMessage) string {
 	if err != nil {
 		panic("Error: Incorrect node")
 	}
-	return fmt.Sprintf("/* \n" + MultiLineComment.MultiLineComment + "\n*/\n")
+	return fmt.Sprintf("/* \n %s \n*/\n", MultiLineComment.MultiLineComment)
 }
 
 func WithStmtHandler(content json.RawMessage) string {
@@ -591,4 +662,61 @@ func TypeStmtHandler(content json.RawMessage) string {
 
 func BreakStmtHandler(content json.RawMessage) string {
 	return "break;"
+}
+
+func ForEachRule(content json.RawMessage) string {
+	// Unmarshal the content into ForEachStmt struct
+	forEach := models.ForEachStmt{}
+	err := json.Unmarshal(content, &forEach)
+	if err != nil {
+		panic("Error: Incorrect node")
+	}
+
+	elementType := vb_cs_types[strings.ToLower(forEach.Item)]
+
+	loop := fmt.Sprintf("foreach (%s %s in %s)", elementType, forEach.Item, forEach.Collection)
+
+	var sb strings.Builder
+	sb.WriteString(loop)
+	sb.WriteString(" {\n")
+	sb.WriteString(handleBody(forEach.Body))
+	sb.WriteString("\n}")
+
+	return sb.String()
+}
+
+//-----------------------------------------------------------------------
+
+func PrintStmtRule(content json.RawMessage) string {
+	printStmt := struct {
+		Data []string `json:"Data"`
+	}{}
+
+	err := json.Unmarshal(content, &printStmt)
+	if err != nil {
+		panic(fmt.Sprintf("Error unmarshalling PrintStmt JSON: %v", err))
+	}
+
+	var sb strings.Builder
+	for _, data := range printStmt.Data {
+
+		if isVariable(data) {
+			sb.WriteString(fmt.Sprintf("Console.WriteLine(%s);\n", data))
+		} else {
+			escapedData := escapeString(data)
+			sb.WriteString(fmt.Sprintf("Console.WriteLine(\"%s\");\n", escapedData))
+		}
+	}
+
+	return sb.String()
+}
+
+func isVariable(data string) bool {
+	// A simple check could be to see if it contains spaces, or check for other specific patterns
+	return !strings.HasPrefix(data, "\"") && !strings.HasSuffix(data, "\"")
+}
+
+// Escape function for string literals
+func escapeString(str string) string {
+	return strings.ReplaceAll(str, "\"", "\\\"")
 }

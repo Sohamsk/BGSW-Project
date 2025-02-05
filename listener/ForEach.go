@@ -24,6 +24,7 @@ func (s *TreeShapeListener) EnterForEachStmt(ctx *parser.ForEachStmtContext) {
 		}
 	}
 
+	// Write JSON structure
 	s.writer.WriteString("\"Element\": \"" + variable + "\",")
 	s.writer.WriteString("\"Collection\": \"" + collection + "\",")
 	s.writer.WriteString("\"Body\": [")

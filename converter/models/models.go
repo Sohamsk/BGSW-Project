@@ -91,6 +91,10 @@ type IfThenElseStmtRule struct {
 	Condition []json.RawMessage
 	IfBlock   []json.RawMessage
 }
+type EndIf struct { // This is for ending the MacroIfThenElse using #endif in C#
+	Rule
+}
+
 type ForNext struct {
 	Rule
 	IdentifierName string            `json:"IdentifierName"`
@@ -154,4 +158,15 @@ type TypeStmt struct {
 	Visibility   string            `json:"Visibility"`
 	Name         string            `json:"Name"`
 	TypeElements []json.RawMessage `json:"TypeElements"` // TODO: change this any later
+}
+
+type ForEachStmt struct {
+	Item       string            `json:"Element"`
+	Collection string            `json:"collection"`
+	Body       []json.RawMessage `json:"body"`
+}
+
+type PrintStmt struct {
+	RuleType string   `json:"RuleType"`
+	Data     []string `json:"Data"`
 }
