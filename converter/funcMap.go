@@ -34,6 +34,7 @@ func init() {
 		"PropertySetStatement": PropertySetHandler,
 		"EnumerationRule":      EnumsHandler,
 		"TypeStmtRule":         TypeStmtHandler,
+		"BreakStatement":       BreakStmtHandler,
 	}
 	propsRegister = make(map[string]string)
 }
@@ -452,6 +453,9 @@ func MultiLineCommentHandler(content json.RawMessage) string {
 func handleBodyWith(expressions []models.ExpressionRule, objectName string) string {
 	var result string
 	for _, expression := range expressions {
+		if expression.RuleType == "UnhandledRule" {
+			continue
+		}
 		result += objectName + processExpressions(expression)
 	}
 	return result
@@ -593,4 +597,8 @@ func TypeStmtHandler(content json.RawMessage) string {
 
 	builder.WriteString("}\n")
 	return builder.String()
+}
+
+func BreakStmtHandler(content json.RawMessage) string {
+	return "break;"
 }
