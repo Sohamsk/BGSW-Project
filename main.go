@@ -39,7 +39,7 @@ func main() {
 		panic(fmt.Errorf("failed to create output directory: %v", err))
 	}
 
-	// create a logs file
+	// Create a logs file
 	logfileName := filepath.Join(outputDir, "logs.log")
 	logFile, err := os.OpenFile(logfileName, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644)
 	defer logFile.Close()
@@ -48,8 +48,18 @@ func main() {
 
 	fileName, fileExtension := getFileDetails(inputfileName)
 
+	// Initialize lexer and get all tokens
 	lexer := parser.NewVisualBasic6Lexer(input)
 	stream := antlr.NewCommonTokenStream(lexer, 0)
+	stream.Fill() // Fill the stream with all tokens
+
+	// Get the total number of tokens
+	totalTokens := len(stream.GetAllTokens())
+
+	// Reset the stream for parsing
+	stream.Seek(0)
+
+	// Initialize parser
 	p := parser.NewVisualBasic6Parser(stream)
 	p.BuildParseTrees = true
 	tree := p.StartRule()
@@ -59,13 +69,11 @@ func main() {
 	listen := listener.NewTreeShapeListener(writer, &buf)
 	writeToOutput(listen, writer, &buf, fileName, fileExtension, tree)
 	jsonContent := buf.String()
-	//	fmt.Println(jsonContent) //uncomment this while debugging json
-	//
-	//	// start debug
-	//	for key, val := range listen.SymTab {
-	//		fmt.Printf("%s: %s\n", key, val)
-	//	}
-	//	// stop debug
+
+	// Calculate the percentage of tokens processed
+	processedTokens := stream.Index()
+	conversionPercentage := float64(processedTokens) / float64(totalTokens) * 100
+	fmt.Printf("Conversion Progress: %.2f%%\n", conversionPercentage)
 
 	convertedContent, err := converter.Convert(jsonContent, listen.SymTab)
 	if err != nil {

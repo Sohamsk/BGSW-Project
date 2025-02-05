@@ -35,6 +35,7 @@ func init() {
 		"EnumerationRule":      EnumsHandler,
 		"TypeStmtRule":         TypeStmtHandler,
 		"PrintStmt":            PrintStmtRule,
+		"ForEachStatement":     ForEachRule,
 	}
 	propsRegister = make(map[string]string)
 }
