@@ -117,6 +117,7 @@ func DeclareVariableRule(content json.RawMessage) string {
 	return declaration
 }
 
+// broken
 func FuncCallRule(content json.RawMessage) string {
 	fun := models.FuncRule{}
 	err := json.Unmarshal(content, &fun)

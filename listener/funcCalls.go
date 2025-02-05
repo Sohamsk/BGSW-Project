@@ -28,7 +28,6 @@ func handleFuncCalls(single antlr.Tree) string {
 						break
 					case antlr.RuleNode:
 						var some antlr.Tree
-						var parent antlr.Tree
 						proc := false
 						some = node.GetChild(0)
 					outer:
@@ -36,7 +35,6 @@ func handleFuncCalls(single antlr.Tree) string {
 							some = some.GetChild(0)
 							switch some := some.(type) {
 							case antlr.TerminalNode:
-								parent = some.GetParent()
 								break outer
 							case antlr.RuleContext:
 								if rules[some.GetRuleIndex()] == "iCS_S_ProcedureOrArrayCall" {
@@ -47,7 +45,12 @@ func handleFuncCalls(single antlr.Tree) string {
 						if proc {
 							w.WriteString("{\"Type\": \"FunctionCall\"," + handleFuncCalls(node.GetChild(0).GetChild(0).GetChild(0)) + "},")
 						} else {
-							w.WriteString("{\"type\":\"" + rules[parent.(antlr.RuleContext).GetRuleIndex()] + "\", \"Symbol\": \"" + strings.Trim(node.GetText(), "\"") + "\"},")
+							var buf1 bytes.Buffer
+							wr := bufio.NewWriter(&buf1)
+							w.WriteString("{\"Type\":\"Expression\", \"body\":[")
+							handleLetExpression(node.GetChildren(), wr)
+							wr.Flush()
+							w.WriteString(strings.Trim(string(buf1.Bytes()), ",") + "]},")
 						}
 					}
 				}
@@ -95,7 +98,6 @@ func handleMethodCalls(single antlr.Tree) string {
 						break
 					case antlr.RuleNode:
 						var some antlr.Tree
-						var parent antlr.Tree
 						proc := false
 						some = node.GetChild(0)
 					outer:
@@ -103,7 +105,6 @@ func handleMethodCalls(single antlr.Tree) string {
 							some = some.GetChild(0)
 							switch some := some.(type) {
 							case antlr.TerminalNode:
-								parent = some.GetParent()
 								break outer
 							case antlr.RuleContext:
 								if rules[some.GetRuleIndex()] == "iCS_S_ProcedureOrArrayCall" {
@@ -115,7 +116,12 @@ func handleMethodCalls(single antlr.Tree) string {
 							// figure out if this is func or method and use accordingly
 							w.WriteString("{\"Type\": \"FunctionCall\"," + handleFuncCalls(node.GetChild(0).GetChild(0).GetChild(0)) + "},")
 						} else {
-							w.WriteString("{\"type\":\"" + rules[parent.(antlr.RuleContext).GetRuleIndex()] + "\", \"Symbol\": \"" + strings.Trim(node.GetText(), "\"") + "\"},")
+							var buf1 bytes.Buffer
+							wr := bufio.NewWriter(&buf1)
+							w.WriteString("{\"Type\":\"Expression\", \"body\":[")
+							handleLetExpression(node.GetChildren(), wr)
+							wr.Flush()
+							w.WriteString(strings.Trim(string(buf1.Bytes()), ",") + "]},")
 						}
 					}
 				}
