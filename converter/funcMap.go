@@ -80,10 +80,10 @@ func DeclareVariableRule(content json.RawMessage) string {
 	}
 
 	// Convert the type using the mapping
-	csType, exists := vb_cs_types[strings.ToLower(dim.Type)]
+	csType, exists := vb_cs_types[strings.ToLower(global.Symtab[dim.Identifier])]
 	if !exists {
 		// If type not found, use the original type (might be a custom type)
-		csType = dim.Type
+		csType = global.Symtab[dim.Identifier]
 	}
 
 	// Construct the C# variable declaration
@@ -242,7 +242,12 @@ func SubStmtHandler(content json.RawMessage) string {
 	getVisibility(sub.Visibility, &sb)
 	sb.WriteString("void " + sub.Identifier + "(")
 	for _, arg := range sub.Arguments {
-		sb.WriteString(vb_cs_types[strings.ToLower(arg.ArgumentType)] + " " + arg.ArgumentName + ",")
+		csType, exists := vb_cs_types[strings.ToLower(arg.ArgumentType)]
+		if !exists {
+			// If type not found, use the original type (might be a custom type)
+			csType = arg.ArgumentType
+		}
+		sb.WriteString(csType + " " + arg.ArgumentName + ",")
 	}
 	str := sb.String()
 	sb.Reset()
@@ -256,7 +261,11 @@ func SubStmtHandler(content json.RawMessage) string {
 func handleBodyFunc(rules []json.RawMessage, name, returnType string, isSet bool) string {
 	var result string
 	if !isSet {
-		result += vb_cs_types[strings.ToLower(returnType)] + " " + name + ";"
+		t, exists := vb_cs_types[strings.ToLower(returnType)]
+		if !exists {
+			t = returnType
+		}
+		result += t + " " + name + ";"
 	}
 	for _, rule := range rules {
 		inter, err := ConvertRule(rule)
@@ -279,9 +288,17 @@ func FunctionHandler(content json.RawMessage) string {
 	}
 	var sb strings.Builder
 	getVisibility(funct.Visibility, &sb)
-	sb.WriteString(fmt.Sprintf("%s %s (", vb_cs_types[strings.ToLower(funct.ReturnType)], funct.Identifier))
+	t, exists := vb_cs_types[strings.ToLower(funct.ReturnType)]
+	if !exists {
+		t = funct.ReturnType
+	}
+	sb.WriteString(fmt.Sprintf("%s %s (", t, funct.Identifier))
 	for _, arg := range funct.Arguments {
-		sb.WriteString(vb_cs_types[strings.ToLower(arg.ArgumentType)] + " " + arg.ArgumentName + ",")
+		argType, exists := vb_cs_types[strings.ToLower(arg.ArgumentType)]
+		if !exists {
+			argType = arg.ArgumentType
+		}
+		sb.WriteString(argType + " " + arg.ArgumentName + ",")
 	}
 	str := sb.String()
 	sb.Reset()
@@ -579,13 +596,22 @@ func PropertyGetHandler(context json.RawMessage) string {
 	if existsSym && !existsProp {
 		//  NOTE: If the other property exists and is empty push this into a set and then when the other property is found write them together
 		propsRegister["prop:get:"+prop.Identifier] = get
+		propsRegister["prop:get:"+prop.Identifier+":type"] = prop.ReturnType
+
 		return ""
 	} else if existsProp {
-		result := fmt.Sprint(vb_cs_types[strings.ToLower(prop.ReturnType)] + " " + prop.Identifier + "{" + makeProp(get, set) + "}")
+		csType, exists := vb_cs_types[strings.ToLower(prop.ReturnType)]
+		if !exists {
+			csType = prop.ReturnType
+		}
+		result := fmt.Sprint(csType + " " + prop.Identifier + "{" + makeProp(get, set) + "}")
 		return result
 	}
-
-	result := fmt.Sprint(vb_cs_types[strings.ToLower(prop.ReturnType)] + " " + prop.Identifier + "{" + get + "}")
+	csType, exists := vb_cs_types[strings.ToLower(prop.ReturnType)]
+	if !exists {
+		csType = prop.ReturnType
+	}
+	result := fmt.Sprint(csType + " " + prop.Identifier + "{" + get + "}")
 	return result
 }
 
@@ -609,7 +635,12 @@ func PropertySetHandler(context json.RawMessage) string {
 		propsRegister["prop:set:"+prop.Identifier] = set
 		return ""
 	} else if existsProp {
-		result := fmt.Sprint(vb_cs_types[strings.ToLower(prop.ReturnType)] + " " + prop.Identifier + "{" + makeProp(get, set) + "}")
+		ret := propsRegister["prop:get:"+prop.Identifier+":type"]
+		fRet, exists := vb_cs_types[strings.ToLower(ret)]
+		if !exists {
+			fRet = ret
+		}
+		result := fmt.Sprint(fRet + " " + prop.Identifier + "{" + makeProp(get, set) + "}")
 		return result
 	}
 

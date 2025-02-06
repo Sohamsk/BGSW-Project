@@ -1,5 +1,5 @@
 Sub Main()
-    Dim myCar As Car
+    Dim myCar As Object
     Set myCar = New Car
 
     ' Using With statements

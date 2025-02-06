@@ -63,12 +63,11 @@ func main() {
 	writeToOutput(listen, writer, &buf, fileName, fileExtension, tree)
 	jsonContent := buf.String()
 	// fmt.Println(jsonContent) //uncomment this while debugging json
-	//
-	//	// start debug
-	//	for key, val := range listen.SymTab {
-	//		fmt.Printf("%s: %s\n", key, val)
-	//	}
-	//	// stop debug
+	// start debug
+	//for key, val := range listen.SymTab {
+	//	fmt.Printf("%s: %s\n", key, val)
+	//}
+	// stop debug
 
 	convertedContent, err := converter.Convert(jsonContent, listen.SymTab)
 	if err != nil {

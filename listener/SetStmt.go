@@ -43,5 +43,7 @@ func (s *TreeShapeListener) EnterSetStmt(ctx *parser.SetStmtContext) {
 
 	jsonData, _ := json.Marshal(set)
 	s.writer.WriteString(string(jsonData) + ",")
-
+	if isNew {
+		s.SymTab[id] = class
+	}
 }
