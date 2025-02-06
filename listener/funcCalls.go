@@ -4,7 +4,6 @@ import (
 	"bosch/parser"
 	"bufio"
 	"bytes"
-	"fmt"
 	"log"
 	"strings"
 
@@ -56,12 +55,20 @@ func handleFuncCalls(single antlr.Tree) string {
 				}
 			} else {
 				sym := val.GetText()
-				if strings.HasPrefix(sym, ".") {
-
+				// make it iterative such that till it gets the proper name without leading . it keeps trying
+				var local []string
+				for strings.HasPrefix(sym, ".") {
 					obj, exists := st.Peek()
+					local = append(local, obj)
+					st.Pop()
 					if exists {
 						sym = obj + sym
+					} else {
+						log.Println("Error: There may be a syntax error")
 					}
+				}
+				for i := len(local) - 1; i >= 0; i-- {
+					st.Push(local[i])
 				}
 				w.WriteString("\"Identifier\": \"" + sym + "\", \"Arguments\": [")
 			}
@@ -141,7 +148,6 @@ func handleMethodCalls(single antlr.Tree) string {
 					}
 				}
 				for i := len(local) - 1; i >= 0; i-- {
-					fmt.Println(i)
 					st.Push(local[i])
 				}
 			}

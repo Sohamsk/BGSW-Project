@@ -4,6 +4,7 @@ import (
 	"bosch/parser"
 	"bufio"
 	"bytes"
+	"log"
 	"strings"
 
 	"github.com/antlr4-go/antlr/v4"
@@ -42,11 +43,19 @@ func handleLetExpression(nodes []antlr.Tree, w *bufio.Writer) {
 					// find type of a node that is not a func call or and expression
 					//					fmt.Println("fetch " + fetchParentOfTerminal(node.GetChild(0)))
 					sym := node.GetText()
-					if strings.HasPrefix(node.GetText(), ".") {
+					var local []string
+					for strings.HasPrefix(sym, ".") {
 						obj, exists := st.Peek()
+						local = append(local, obj)
+						st.Pop()
 						if exists {
 							sym = obj + sym
+						} else {
+							log.Println("Error: There may be a syntax error")
 						}
+					}
+					for i := len(local) - 1; i >= 0; i-- {
+						st.Push(local[i])
 					}
 					w.WriteString("{\"Type\":\"" + fetchParentOfTerminal(node) + "\", \"Symbol\":\"" + sym + "\"},")
 				}

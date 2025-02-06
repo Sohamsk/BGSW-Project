@@ -44,6 +44,11 @@ type ExpressionRule struct {
 	Body []json.RawMessage
 }
 
+type ExpressionArg struct {
+	ArgType
+	Body []json.RawMessage
+}
+
 type DeclArg struct {
 	ArgumentName  string
 	ArgumentType  string

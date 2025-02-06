@@ -136,13 +136,13 @@ func FuncCallRule(content json.RawMessage) string {
 		if arg.Type == "FunctionCall" {
 			sb.WriteString(FuncCallArg(raw))
 		} else {
-			arg := models.Literal{}
-			json.Unmarshal(raw, &arg)
-			if arg.Type == "literal" {
-				sb.WriteString("\"" + arg.Symbol + "\",")
-			} else {
-				sb.WriteString(arg.Symbol + ",")
+			expr := models.ExpressionArg{}
+			err := json.Unmarshal(raw, &expr)
+			if err != nil {
+				incorrectArg()
+				continue
 			}
+			sb.WriteString(strings.Trim(processExpressions(models.ExpressionRule{Body: expr.Body}), ";"))
 		}
 	}
 	return strings.Trim(sb.String(), ",") + ");"
@@ -193,6 +193,12 @@ func processExpressions(expr models.ExpressionRule) string {
 			json.Unmarshal(raw, &arg)
 			if arg.Type == "literal" {
 				sb.WriteString("\"" + arg.Symbol + "\"")
+			} else if arg.Type == "Operator" {
+				if arg.Symbol == "&" {
+					sb.WriteString("+")
+					continue
+				}
+				sb.WriteString(arg.Symbol)
 			} else {
 				sb.WriteString(arg.Symbol)
 			}
