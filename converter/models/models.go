@@ -172,6 +172,13 @@ type ForEachStmt struct {
 }
 
 type PrintStmt struct {
-	RuleType string   `json:"RuleType"`
+	RuleType string   `json:"RuleType"` // NOTE: This needs to be changed to use the Rule as defined above
 	Data     []string `json:"Data"`
+}
+
+type EventStatement struct {
+	Rule
+	Identifier string
+	Visibility string
+	Arguments  []DeclArg
 }

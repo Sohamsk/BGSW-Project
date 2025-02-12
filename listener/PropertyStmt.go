@@ -15,7 +15,6 @@ func (s *TreeShapeListener) handleFuncLikeDecl(ctx antlr.ParserRuleContext, rule
 	prop := models.PropertyStatement{}
 	prop.ReturnType = "Variant"
 	prop.RuleType = ruleType
-	index := 1
 	prop.Visibility = ""
 	for _, child := range nodes {
 		switch child.(type) {
@@ -37,7 +36,6 @@ func (s *TreeShapeListener) handleFuncLikeDecl(ctx antlr.ParserRuleContext, rule
 							}
 						case *parser.AmbiguousIdentifierContext:
 							decl.ArgumentName = greatGrandchild.(antlr.ParseTree).GetText()
-							index++
 						case *parser.AsTypeClauseContext:
 							decl.ArgumentType = greatGrandchild.GetChild(2).(antlr.ParseTree).GetText()
 						case *parser.TypeHintContext:

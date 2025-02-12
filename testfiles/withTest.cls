@@ -1,3 +1,11 @@
+Public Sub DisplayPersonDetails(ByVal person As Person)
+    With person
+        Debug.Print "Name: " & .Name
+        Debug.Print "Age: " & .Age
+        Debug.Print "Role: " & .Role
+    End With
+End Sub
+
 Sub Main()
     Dim myCar As Object
     Set myCar = New Car

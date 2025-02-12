@@ -40,6 +40,7 @@ func init() {
 		"TypeStmtRule":         TypeStmtHandler,
 		"BreakStatement":       BreakStmtHandler,
 		"PrintStmt":            PrintStmtRule,
+		"EventStatement":       HandleEvents,
 	}
 	propsRegister = make(map[string]string)
 }
@@ -757,4 +758,10 @@ func isVariable(data string) bool {
 // Escape function for string literals
 func escapeString(str string) string {
 	return strings.ReplaceAll(str, "\"", "\\\"")
+}
+
+// ----------------------------Events-------------------------------------------
+func HandleEvents(context json.RawMessage) string {
+	fmt.Println("in Event converter")
+	return ""
 }
