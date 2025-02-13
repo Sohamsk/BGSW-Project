@@ -1,5 +1,6 @@
-Public Event SomeEvent()
+Public Event Completed(timeStamp As String)
 
-Public Event SomeOtherEvent(ByVal Message As String)
-
-Event SomeEvent(a$)
+Public Sub DoWork()
+    'Do work
+    RaiseEvent Completed(Now)
+End Sub

@@ -14,6 +14,8 @@ import (
 	"github.com/antlr4-go/antlr/v4"
 )
 
+// TODO: Handle inbuilt functions
+
 func main() {
 	defer func() {
 		if r := recover(); r != nil {

@@ -118,7 +118,6 @@ func DeclareVariableRule(content json.RawMessage) string {
 	return declaration
 }
 
-// broken
 func FuncCallRule(content json.RawMessage) string {
 	fun := models.FuncRule{}
 	err := json.Unmarshal(content, &fun)
@@ -762,6 +761,30 @@ func escapeString(str string) string {
 
 // ----------------------------Events-------------------------------------------
 func HandleEvents(context json.RawMessage) string {
-	fmt.Println("in Event converter")
-	return ""
+	event := models.EventStatement{}
+	err := json.Unmarshal(context, &event)
+	if err != nil {
+		log.Println("Error:", err)
+		return ""
+	}
+
+	var types []string
+	for _, arg := range event.Arguments {
+		csType, exists := vb_cs_types[strings.ToLower(arg.ArgumentType)]
+		if !exists {
+			csType = arg.ArgumentType
+		}
+		types = append(types, csType)
+	}
+
+	csTypeList := strings.Join(types, ",")
+
+	var sb strings.Builder
+	getVisibility(event.Visibility, &sb)
+	if len(types) == 0 {
+		sb.WriteString("event Action " + event.Identifier + ";")
+	} else {
+		sb.WriteString("event Action<" + csTypeList + "> " + event.Identifier + ";")
+	}
+	return sb.String()
 }
