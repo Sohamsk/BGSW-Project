@@ -1,87 +1,63 @@
 package main
 
 import (
-	"bosch/converter"
-	"bosch/listener"
-	"bosch/parser"
 	"bufio"
-	"bytes"
 	"fmt"
-	"log"
 	"os"
-	"path/filepath"
-
-	"github.com/antlr4-go/antlr/v4"
+	"strings"
 )
 
-func main() {
-	defer func() {
-		if r := recover(); r != nil {
-			fmt.Printf("\033[31m%s\033[0m\n", r)
+// countLOC counts total lines and multi-line comment lines
+func countLOC(filename string) (int, int, float64) {
+	file, err := os.Open(filename)
+	if err != nil {
+		fmt.Println("Error opening file:", err)
+		return 0, 0, 0.0
+	}
+	defer file.Close()
+
+	totalLines := 0
+	multiCommentLines := 0
+
+	scanner := bufio.NewScanner(file)
+	for scanner.Scan() {
+		line := strings.TrimSpace(scanner.Text())
+		totalLines++
+
+		// Check if the line is a VB6 comment (starts with ' or Rem)
+		if strings.HasPrefix(line, "'") || strings.HasPrefix(strings.ToLower(line), "rem ") {
+			multiCommentLines++
 		}
-	}()
+	}
 
+	if err := scanner.Err(); err != nil {
+		fmt.Println("Error reading file:", err)
+		return 0, 0, 0.0
+	}
+
+	// Calculate the percentage of multi-line comments
+	var percentage float64
+	if totalLines > 0 {
+		percentage = (float64(multiCommentLines) / float64(totalLines)) * 100
+	}
+
+	// Compute the final result (100 - percentage)
+	finalResult := 100 - percentage
+
+	return totalLines, multiCommentLines, finalResult
+}
+
+func main() {
 	if len(os.Args) != 2 {
-		log.Panic("File Not specified.")
+		fmt.Println("Usage: go run main.go <converted_vb6_file>")
+		return
 	}
 
-	inputfileName := os.Args[1]
+	filename := os.Args[1]
+	totalLOC, multiCommentLOC, finalPercentage := countLOC(filename)
 
-	input, err := antlr.NewFileStream(inputfileName)
-	if err != nil {
-		log.Panic("File error")
-	}
-
-	// Create output directory if it doesn't exist
-	outputDir := "output"
-	err = os.MkdirAll(outputDir, 0755)
-	if err != nil {
-		panic(fmt.Errorf("failed to create output directory: %v", err))
-	}
-
-	// Create a logs file
-	logfileName := filepath.Join(outputDir, "logs.log")
-	logFile, err := os.OpenFile(logfileName, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644)
-	defer logFile.Close()
-
-	log.SetOutput(logFile)
-
-	fileName, fileExtension := getFileDetails(inputfileName)
-
-	// Initialize lexer and get all tokens
-	lexer := parser.NewVisualBasic6Lexer(input)
-	stream := antlr.NewCommonTokenStream(lexer, 0)
-	stream.Fill() // Fill the stream with all tokens
-
-	// Get the total number of tokens
-	totalTokens := len(stream.GetAllTokens())
-
-	// Reset the stream for parsing
-	stream.Seek(0)
-
-	// Initialize parser
-	p := parser.NewVisualBasic6Parser(stream)
-	p.BuildParseTrees = true
-	tree := p.StartRule()
-
-	var buf bytes.Buffer
-	writer := bufio.NewWriter(&buf)
-	listen := listener.NewTreeShapeListener(writer, &buf)
-	writeToOutput(listen, writer, &buf, fileName, fileExtension, tree)
-	jsonContent := buf.String()
-
-	// Calculate the percentage of tokens processed
-	processedTokens := stream.Index()
-	conversionPercentage := float64(processedTokens) / float64(totalTokens) * 100
-	fmt.Printf("Conversion Progress: %.2f%%\n", conversionPercentage)
-
-	convertedContent, err := converter.Convert(jsonContent, listen.SymTab)
-	if err != nil {
-		log.Panic(err)
-	}
-
-	err = writeOutputFiles(fileName, fileExtension, outputDir, jsonContent, convertedContent)
-	if err != nil {
-		log.Panic("Error writing output files")
-	}
+	fmt.Printf("Total Lines of Code (LOC): %d\n", totalLOC)
+	fmt.Printf("Multi-line Comment LOC: %d\n", multiCommentLOC)
+	fmt.Printf("Percentage of Multi-line Comments: %.2f%%\n", 100-finalPercentage)
+	fmt.Printf("Final Result (100 - Multi-line Comment %%): %.2f%%\n", finalPercentage)
 }
