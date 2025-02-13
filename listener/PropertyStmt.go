@@ -13,7 +13,11 @@ import (
 func (s *TreeShapeListener) handleFuncLikeDecl(ctx antlr.ParserRuleContext, ruleType string, isProp bool, propType string) {
 	nodes := ctx.GetChildren()
 	prop := models.PropertyStatement{}
-	prop.ReturnType = "Variant"
+	if ruleType == "SubStatement" {
+		prop.ReturnType = ""
+	} else {
+		prop.ReturnType = "Variant"
+	}
 	prop.RuleType = ruleType
 	index := 1
 	prop.Visibility = ""

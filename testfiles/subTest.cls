@@ -1,7 +1,8 @@
-Function Mult(ByVal Factor1 As Integer, Factor2 As Integer)
-    if Factor1 = 0 then
-        Mult = 0
-        Exit function
-    End if
-    Mult = Factor1 * Factor2
-End function
+Sub Mult(ByVal Factor1 As Integer, Factor2 As Integer)
+	Dim Product
+	Product = Factor1 * Factor2
+	Debug.Print Product
+End Sub 
+
+Public Sub Foo(a$, b&, c!, d#, e@)
+End Sub

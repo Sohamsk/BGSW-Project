@@ -6,10 +6,9 @@ Function AddNumbers(a As Integer, b As Integer) As Integer
     AddNumbers = a + b
 End Function
 
-Sub Mult(ByVal Factor1 As Integer, Factor2 As Integer)
-	Dim Product
-  Product = Factor1 * Factor2
-End Sub
+Function Mult(ByVal Factor1 As Integer, Factor2 As Integer) As Integer
+  Mult = Factor1 * Factor2
+End Function 
 
 
 Sub Demo()

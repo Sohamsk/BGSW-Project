@@ -17,7 +17,7 @@ func init() {
 		"DeclareVariable":      DeclareVariableRule,
 		"FunctionCall":         FuncCallRule,
 		"expression":           ExpressionRuleHandler,
-		"SubStatement":         SubStmtHandler,
+		"SubStatement":         FunctionHandler, //SubStmtHandler,
 		"DoLoopStatement":      DoLoopStmtHandler,
 		"FuncStatement":        FunctionHandler,
 		"IfThenElse":           IfThenElseStmtHandler,
@@ -261,6 +261,16 @@ func handleBodyFunc(rules []json.RawMessage, name, returnType string, isSet bool
 	}
 	return result
 }
+func handleBodySub(rules []json.RawMessage) string {
+	var result string
+	for _, rule := range rules {
+		inter, err := ConvertRule(rule)
+		if err == nil {
+			result += inter
+		}
+	}
+	return result
+}
 
 func FunctionHandler(content json.RawMessage) string {
 	funct := models.FuncDecl{}
@@ -271,13 +281,22 @@ func FunctionHandler(content json.RawMessage) string {
 	}
 	var sb strings.Builder
 	getVisibility(funct.Visibility, &sb)
-	sb.WriteString(fmt.Sprintf("%s %s (", vb_cs_types[strings.ToLower(funct.ReturnType)], funct.Identifier))
+	if funct.ReturnType == "" {
+		sb.WriteString(fmt.Sprintf("%s %s (", "void", funct.Identifier))
+	} else {
+
+		sb.WriteString(fmt.Sprintf("%s %s (", vb_cs_types[strings.ToLower(funct.ReturnType)], funct.Identifier))
+	}
 	for _, arg := range funct.Arguments {
 		sb.WriteString(vb_cs_types[strings.ToLower(arg.ArgumentType)] + " " + arg.ArgumentName + ",")
 	}
 	str := sb.String()
 	sb.Reset()
-	sb.WriteString(strings.Trim(str, ",") + "){" + handleBodyFunc(funct.Body, funct.Identifier, funct.ReturnType, false) + "}") // need a seperate body handler to handle functions returning values as there is no return keyword in vb6
+	if funct.ReturnType == "" {
+		sb.WriteString(strings.Trim(str, ",") + "){" + handleBodySub(funct.Body) + "}") // need a seperate body handler to handle void functions
+	} else {
+		sb.WriteString(strings.Trim(str, ",") + "){" + handleBodyFunc(funct.Body, funct.Identifier, funct.ReturnType, false) + "}") // need a seperate body handler to handle functions returning values as there is no return keyword in vb6
+	}
 	return sb.String()
 }
 
