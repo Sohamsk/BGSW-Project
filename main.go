@@ -1,11 +1,6 @@
 package main
 
 import (
-	"bosch/converter"
-	"bosch/listener"
-	"bosch/parser"
-	"bufio"
-	"bytes"
 	"fmt"
 	"log"
 	"os"
@@ -27,8 +22,8 @@ func main() {
 		log.Panic("File Not specified.")
 	}
 
+	// TODO: check if .vbp file is given (if it is then parse it seperately and get a list of all modules, classes and forms.
 	inputfileName := os.Args[1]
-
 	input, err := antlr.NewFileStream(inputfileName)
 	if err != nil {
 		log.Panic("File error")
@@ -51,38 +46,12 @@ func main() {
 	if err == nil {
 		log.SetOutput(logFile)
 	}
-	fileName, fileExtension := getFileDetails(inputfileName)
 
-	lexer := parser.NewVisualBasic6Lexer(input)
-	stream := antlr.NewCommonTokenStream(lexer, 0)
-	p := parser.NewVisualBasic6Parser(stream)
-	p.BuildParseTrees = true
-	tree := p.StartRule()
+	parseFile(input, inputfileName, outputDir)
 
-	var buf bytes.Buffer
-	writer := bufio.NewWriter(&buf)
-	listen := listener.NewTreeShapeListener(writer, &buf)
-	writeToOutput(listen, writer, &buf, fileName, fileExtension, tree)
-	jsonContent := buf.String()
-	// fmt.Println(jsonContent) //uncomment this while debugging json
-	// start debug
-	//for key, val := range listen.SymTab {
-	//	fmt.Printf("%s: %s\n", key, val)
-	//}
-	// stop debug
-
-	convertedContent, err := converter.Convert(jsonContent, listen.SymTab)
-	if err != nil {
-		log.Panic(err)
-	}
-
-	err = writeOutputFiles(fileName, fileExtension, outputDir, jsonContent, convertedContent)
-	if err != nil {
-		log.Panic("Error writing output files")
-	}
 	absPath, err := filepath.Abs(outputDir)
 	if err != nil {
-		panic("couldn't find output directory absolute path")
+		log.Panic("couldn't find output directory absolute path")
 	}
 	fmt.Println("The tool ran successfully, find output files in ", absPath)
 }
