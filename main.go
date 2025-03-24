@@ -23,54 +23,40 @@ func main() {
 	}()
 
 	if len(os.Args) != 2 {
-		log.Panic("File Not specified.")
+		log.Panic("Usage: go run main.go <VB6File>")
 	}
 
-	inputfileName := os.Args[1]
+	vb6File := os.Args[1]
+	csharpFile := generateCSharpFile(vb6File)
 
-	// Count total lines and multi-line comments
-	totalLines, multiLineCommentLines := countLinesAndComments(inputfileName)
-	percentageMultiLineComments := 0.0
-	if totalLines > 0 {
-		percentageMultiLineComments = (float64(multiLineCommentLines) / float64(totalLines)) * 100
-	}
-	finalResult := 100 - percentageMultiLineComments
+	// Count LOC and comments for VB6
+	vb6Total, vb6Comments := countVB6LinesAndComments(vb6File)
 
-	fmt.Printf("Total Lines of Code (LOC): %d\n", totalLines)
-	fmt.Printf("Multi-line Comment LOC: %d\n", multiLineCommentLines)
-	fmt.Printf("Percentage of Multi-line Comments: %.2f%%\n", percentageMultiLineComments)
-	fmt.Printf("Final Result (100 - Multi-line Comment %%): %.2f%%\n", finalResult)
+	// Count LOC and comments for C#
+	csharpTotal, _, csharpMultiComments := countCSharpLinesAndComments(csharpFile)
+	csharpFinalResult := ((float64(csharpTotal-csharpMultiComments) / float64(csharpTotal)) * 100)
 
-	input, err := antlr.NewFileStream(inputfileName)
+	fmt.Printf("VB6 - File: %s\n", filepath.Base(vb6File))
+	fmt.Printf("  Total LOC: %d, Comment LOC: %d, Code LOC: %d\n", vb6Total, vb6Comments, vb6Total-vb6Comments)
+
+	fmt.Printf("C# - File: %s\n", filepath.Base(csharpFile))
+	fmt.Printf("  Total LOC: %d, Multi-line Comments: %d, Code LOC: %d, Final Result: %.2f%%\n", csharpTotal, csharpMultiComments, csharpTotal-csharpMultiComments, csharpFinalResult)
+}
+
+func generateCSharpFile(vb6File string) string {
+	input, err := antlr.NewFileStream(vb6File)
 	if err != nil {
 		log.Panic("File error")
 	}
 
-	// Create output directory if it doesn't exist
 	outputDir := "output"
-	err = os.MkdirAll(outputDir, 0755)
-	if err != nil {
-		panic(fmt.Errorf("failed to create output directory: %v", err))
-	}
+	os.MkdirAll(outputDir, 0755)
 
-	// Create a logs file
-	logfileName := filepath.Join(outputDir, "logs.log")
-	logFile, err := os.OpenFile(logfileName, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644)
-	if err != nil {
-		log.Panic("Failed to create log file")
-	}
-	defer logFile.Close()
+	fileName := strings.TrimSuffix(filepath.Base(vb6File), filepath.Ext(vb6File))
+	csharpFile := filepath.Join(outputDir, fileName+".cs")
 
-	log.SetOutput(logFile)
-
-	fileName, fileExtension := getFileDetails(inputfileName)
-
-	// Initialize lexer and get all tokens
 	lexer := parser.NewVisualBasic6Lexer(input)
 	stream := antlr.NewCommonTokenStream(lexer, 0)
-	stream.Fill() // Fill the stream with all tokens
-
-	// Initialize parser
 	p := parser.NewVisualBasic6Parser(stream)
 	p.BuildParseTrees = true
 	tree := p.StartRule()
@@ -78,46 +64,66 @@ func main() {
 	var buf bytes.Buffer
 	writer := bufio.NewWriter(&buf)
 	listen := listener.NewTreeShapeListener(writer, &buf)
-	writeToOutput(listen, writer, &buf, fileName, fileExtension, tree)
-	jsonContent := buf.String()
+	writeToOutput(listen, writer, &buf, fileName, ".cs", tree)
 
-	convertedContent, err := converter.Convert(jsonContent, listen.SymTab)
+	convertedContent, err := converter.Convert(buf.String(), listen.SymTab)
 	if err != nil {
 		log.Panic(err)
 	}
 
-	err = writeOutputFiles(fileName, fileExtension, outputDir, jsonContent, convertedContent)
-	if err != nil {
-		log.Panic("Error writing output files")
-	}
+	os.WriteFile(csharpFile, []byte(convertedContent), 0644)
+	return csharpFile
 }
 
-// countLinesAndComments counts the total lines and comment lines in a VB6 file
-func countLinesAndComments(filename string) (int, int) {
+func countVB6LinesAndComments(filename string) (int, int) {
 	file, err := os.Open(filename)
 	if err != nil {
-		log.Panic("Cannot open file")
+		log.Panic("Cannot open VB6 file")
 	}
 	defer file.Close()
 
 	scanner := bufio.NewScanner(file)
+	totalLines, commentLines := 0, 0
 
-	totalLines := 0
-	multiLineCommentLines := 0
+	for scanner.Scan() {
+		line := strings.TrimSpace(scanner.Text())
+		totalLines++
+		if strings.HasPrefix(line, "'") {
+			commentLines++
+		}
+	}
+
+	return totalLines, commentLines
+}
+
+func countCSharpLinesAndComments(filename string) (int, int, int) {
+	file, err := os.Open(filename)
+	if err != nil {
+		log.Panic("Cannot open C# file")
+	}
+	defer file.Close()
+
+	scanner := bufio.NewScanner(file)
+	totalLines, singleLineComments, multiLineComments := 0, 0, 0
+	inMultiLineComment := false
 
 	for scanner.Scan() {
 		line := strings.TrimSpace(scanner.Text())
 		totalLines++
 
-		// Single-line comments in VB6 start with a single quote '
-		if strings.HasPrefix(line, "'") {
-			multiLineCommentLines++
+		if inMultiLineComment {
+			multiLineComments++
+			if strings.Contains(line, "*/") {
+				inMultiLineComment = false
+			}
+			continue
+		}
+
+		if strings.HasPrefix(line, "/*") {
+			multiLineComments++
+			inMultiLineComment = true
 		}
 	}
 
-	if err := scanner.Err(); err != nil {
-		log.Panic("Error reading file")
-	}
-
-	return totalLines, multiLineCommentLines
+	return totalLines, singleLineComments, multiLineComments
 }

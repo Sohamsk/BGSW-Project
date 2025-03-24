@@ -3,6 +3,3 @@ For i = 1 To 3
       count += 1
     Next j
 Next i
-
-
-
