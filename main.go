@@ -5,12 +5,10 @@ import (
 	"log"
 	"os"
 	"path/filepath"
-
-	"github.com/antlr4-go/antlr/v4"
+	"strings"
 )
 
 // TODO: Handle inbuilt functions
-
 func main() {
 	defer func() {
 		if r := recover(); r != nil {
@@ -24,9 +22,19 @@ func main() {
 
 	// TODO: check if .vbp file is given (if it is then parse it seperately and get a list of all modules, classes and forms.
 	inputfileName := os.Args[1]
-	input, err := antlr.NewFileStream(inputfileName)
-	if err != nil {
-		log.Panic("File error")
+
+	var vbp VBPFile
+	var err error
+
+	files := []string{}
+	_, ext := getFileDetails(inputfileName)
+	if strings.ToLower(ext) == ".vbp" {
+		vbp, err = ParseVBPFile(inputfileName)
+		if err != nil {
+			log.Panic(err)
+		}
+	} else {
+		files = append(files, inputfileName)
 	}
 
 	// Create output directory if it doesn't exist
@@ -46,8 +54,12 @@ func main() {
 	if err == nil {
 		log.SetOutput(logFile)
 	}
+	files = append(files, vbp.Classes...)
+	files = append(files, vbp.Forms...)
 
-	parseFile(input, inputfileName, outputDir)
+	for _, file := range files {
+		parseFile(file, outputDir)
+	}
 
 	absPath, err := filepath.Abs(outputDir)
 	if err != nil {

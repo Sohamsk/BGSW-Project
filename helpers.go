@@ -49,8 +49,13 @@ func writeToOutput(listen *listener.TreeShapeListener, writer *bufio.Writer, buf
 	buf.WriteString("}")
 }
 
-func parseFile(input *antlr.FileStream, inputfileName string, outputDir string) {
+func parseFile(inputfileName string, outputDir string) {
 	fileName, fileExtension := getFileDetails(inputfileName)
+
+	input, err := antlr.NewFileStream(inputfileName)
+	if err != nil {
+		log.Panic("File error")
+	}
 
 	lexer := parser.NewVisualBasic6Lexer(input)
 	stream := antlr.NewCommonTokenStream(lexer, 0)
