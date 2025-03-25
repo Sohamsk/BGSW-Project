@@ -34,7 +34,7 @@ func Convert(raw string, symtab map[string]string) (string, error) {
 	if err != nil {
 		return "", fmt.Errorf("Error: %s", err)
 	}
-	converted := fmt.Sprintf("class %s {%s}", context.FileName, handleBody(context.Body))
+	converted := fmt.Sprintf("using System;\nclass %s { \n%s \npublic static void Main(string[] args){}\n }", context.FileName, handleBody(context.Body))
 	return converted, nil
 }
 

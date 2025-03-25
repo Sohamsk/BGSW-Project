@@ -13,7 +13,7 @@ End Sub
 
 
 Sub Demo()
-    Dim i As String
+    ' Dim i As String
     Dim sum As Integer
     sum = 0
     
