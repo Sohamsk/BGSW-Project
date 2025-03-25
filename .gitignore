@@ -9,3 +9,9 @@
 /parser/*.tokens
 /parser/*.go
 !/parser/generate.go
+NUL
+compilation_results/
+dotnet-install.sh
+output1/
+packages-microsoft-prod.deb
+
