@@ -6,6 +6,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"sync"
 )
 
 // TODO: Handle inbuilt functions
@@ -57,9 +58,15 @@ func main() {
 	files = append(files, vbp.Classes...)
 	files = append(files, vbp.Forms...)
 
+	var wg sync.WaitGroup
 	for _, file := range files {
-		parseFile(file, outputDir)
+		wg.Add(1)
+		go func(file string) {
+			defer wg.Done()
+			parseFile(file, outputDir)
+		}(file)
 	}
+	wg.Wait()
 
 	absPath, err := filepath.Abs(outputDir)
 	if err != nil {
