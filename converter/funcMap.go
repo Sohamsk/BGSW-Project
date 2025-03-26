@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"regexp"
 	"strconv"
 	"strings"
 )
@@ -554,16 +555,15 @@ func EnumsHandler(content json.RawMessage) string {
 		incorrectNode()
 		return ""
 	}
-	// Start building the enum string with the enum name
+	hexRegex := regexp.MustCompile(`&H([0-9A-Fa-f]+)&`)
+
 	var builder strings.Builder
 	builder.WriteString(fmt.Sprintf("public enum %s//change visibility as per requirement\n{\n", enumStmt.Name))
 
-	// Process each enum value
 	for i, value := range enumStmt.EnumValues {
-		// Convert the value to a string since it's currently type any
 		valueStr := fmt.Sprintf("%v", value)
+		valueStr = hexRegex.ReplaceAllString(valueStr, "0x${1}")
 
-		// Add comma for all elements except the last one
 		if i < len(enumStmt.EnumValues)-1 {
 			builder.WriteString(fmt.Sprintf("    %s,\n", valueStr))
 		} else {
