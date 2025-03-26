@@ -11,6 +11,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"github.com/antlr4-go/antlr/v4"
 )
@@ -27,20 +28,37 @@ func main() {
 	}
 
 	vb6File := os.Args[1]
+
+	// Start total conversion timer
+	startTotal := time.Now()
+
+	// Start parsing timer
+	startParsing := time.Now()
 	csharpFile := generateCSharpFile(vb6File)
+	parsingDuration := time.Since(startParsing)
 
 	// Count LOC and comments for VB6
 	vb6Total, vb6Comments := countVB6LinesAndComments(vb6File)
 
 	// Count LOC and comments for C#
-	csharpTotal, _, csharpMultiComments := countCSharpLinesAndComments(csharpFile)
+	csharpTotal, csharpSingleComments, csharpMultiComments := countCSharpLinesAndComments(csharpFile)
+
 	csharpFinalResult := ((float64(csharpTotal-csharpMultiComments) / float64(csharpTotal)) * 100)
+
+	// Calculate total conversion time
+	totalDuration := time.Since(startTotal)
 
 	fmt.Printf("VB6 - File: %s\n", filepath.Base(vb6File))
 	fmt.Printf("  Total LOC: %d, Comment LOC: %d, Code LOC: %d\n", vb6Total, vb6Comments, vb6Total-vb6Comments)
 
 	fmt.Printf("C# - File: %s\n", filepath.Base(csharpFile))
-	fmt.Printf("  Total LOC: %d, Multi-line Comments: %d, Code LOC: %d, Final Result: %.2f%%\n", csharpTotal, csharpMultiComments, csharpTotal-csharpMultiComments, csharpFinalResult)
+	fmt.Printf("  Total LOC: %d, Single-line Comments: %d, Multi-line Comments: %d, Code LOC: %d, Final Result: %.2f%%\n",
+		csharpTotal, csharpSingleComments, csharpMultiComments, csharpTotal-(csharpSingleComments+csharpMultiComments), csharpFinalResult)
+
+	// Time measurements
+	fmt.Printf("\nTime Measurements:\n")
+	fmt.Printf("  Parsing and Conversion Duration: %v\n", parsingDuration)
+	fmt.Printf("  Total Conversion Duration: %v\n", totalDuration)
 }
 
 func generateCSharpFile(vb6File string) string {
@@ -108,7 +126,7 @@ func countCSharpLinesAndComments(filename string) (int, int, int) {
 	inMultiLineComment := false
 
 	for scanner.Scan() {
-		line := strings.TrimSpace(scanner.Text())
+		line := strings.TrimSpace(scanner.Text()) // Remove leading/trailing spaces
 		totalLines++
 
 		if inMultiLineComment {
@@ -119,7 +137,10 @@ func countCSharpLinesAndComments(filename string) (int, int, int) {
 			continue
 		}
 
-		if strings.HasPrefix(line, "/*") {
+		// ✅ More reliable check for single-line comments
+		if strings.HasPrefix(line, "//") || strings.Contains(line, "// ") {
+			singleLineComments++
+		} else if strings.HasPrefix(line, "/*") {
 			multiLineComments++
 			inMultiLineComment = true
 		}
