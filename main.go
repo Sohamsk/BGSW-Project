@@ -28,15 +28,11 @@ func main() {
 	}
 
 	vb6File := os.Args[1]
-<<<<<<< Updated upstream
 	startTotal := time.Now()
 
 	startParsing := time.Now()
 	csharpFile := generateCSharpFile(vb6File)
 	parsingDuration := time.Since(startParsing)
-=======
-	csharpFile, jsonFile := generateCSharpAndJSONFile(vb6File)
->>>>>>> Stashed changes
 
 	// Count LOC and comments for VB6
 	vb6Total, vb6Comments := countVB6LinesAndComments(vb6File)
@@ -53,7 +49,6 @@ func main() {
 	fmt.Printf("  Total LOC: %d, Comment LOC: %d, Code LOC: %d\n", vb6Total, vb6Comments, vb6Total-vb6Comments)
 
 	fmt.Printf("C# - File: %s\n", filepath.Base(csharpFile))
-<<<<<<< Updated upstream
 	fmt.Printf("  Total LOC: %d, Single-line Comments: %d, Multi-line Comments: %d, Code LOC: %d, Final Result: %.2f%%\n",
 		csharpTotal, csharpSingleComments, csharpMultiComments, csharpCodeLOC, csharpFinalResult)
 
@@ -61,14 +56,9 @@ func main() {
 	fmt.Printf("\nTime Measurements:\n")
 	fmt.Printf("  Parsing and Conversion Duration: %v\n", parsingDuration)
 	fmt.Printf("  Total Conversion Duration: %v\n", totalDuration)
-=======
-	fmt.Printf("  Total LOC: %d, Multi-line Comments: %d, Code LOC: %d, Final Result: %.2f%%\n", csharpTotal, csharpMultiComments, csharpTotal-csharpMultiComments, csharpFinalResult)
-
-	fmt.Printf("JSON - File: %s\n", filepath.Base(jsonFile))
->>>>>>> Stashed changes
 }
 
-func generateCSharpAndJSONFile(vb6File string) (string, string) {
+func generateCSharpFile(vb6File string) string {
 	input, err := antlr.NewFileStream(vb6File)
 	if err != nil {
 		log.Panic("File error")
@@ -79,7 +69,6 @@ func generateCSharpAndJSONFile(vb6File string) (string, string) {
 
 	fileName := strings.TrimSuffix(filepath.Base(vb6File), filepath.Ext(vb6File))
 	csharpFile := filepath.Join(outputDir, fileName+".cs")
-	jsonFile := filepath.Join(outputDir, fileName+".json")
 
 	lexer := parser.NewVisualBasic6Lexer(input)
 	stream := antlr.NewCommonTokenStream(lexer, 0)
@@ -92,27 +81,13 @@ func generateCSharpAndJSONFile(vb6File string) (string, string) {
 	listen := listener.NewTreeShapeListener(writer, &buf)
 	writeToOutput(listen, writer, &buf, fileName, ".cs", tree)
 
-	jsonContent := buf.String()
-	generateJSONFile(jsonFile, jsonContent)
-
-	convertedContent, err := converter.Convert(jsonContent, listen.SymTab)
+	convertedContent, err := converter.Convert(buf.String(), listen.SymTab)
 	if err != nil {
 		log.Panic(err)
 	}
 
-	err = os.WriteFile(csharpFile, []byte(convertedContent), 0644)
-	if err != nil {
-		log.Panic("Error writing C# file")
-	}
-
-	return csharpFile, jsonFile
-}
-
-func generateJSONFile(jsonFile, jsonContent string) {
-	err := os.WriteFile(jsonFile, []byte(jsonContent), 0644)
-	if err != nil {
-		log.Panic("Error writing JSON file")
-	}
+	os.WriteFile(csharpFile, []byte(convertedContent), 0644)
+	return csharpFile
 }
 
 func countVB6LinesAndComments(filename string) (int, int) {
