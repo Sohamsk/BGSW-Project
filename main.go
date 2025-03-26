@@ -28,11 +28,8 @@ func main() {
 	}
 
 	vb6File := os.Args[1]
-
-	// Start total conversion timer
 	startTotal := time.Now()
 
-	// Start parsing timer
 	startParsing := time.Now()
 	csharpFile := generateCSharpFile(vb6File)
 	parsingDuration := time.Since(startParsing)
@@ -40,12 +37,12 @@ func main() {
 	// Count LOC and comments for VB6
 	vb6Total, vb6Comments := countVB6LinesAndComments(vb6File)
 
-	// Count LOC and comments for C#
 	csharpTotal, csharpSingleComments, csharpMultiComments := countCSharpLinesAndComments(csharpFile)
 
-	csharpFinalResult := ((float64(csharpTotal-csharpMultiComments) / float64(csharpTotal)) * 100)
+	csharpCodeLOC := csharpTotal - csharpMultiComments
 
-	// Calculate total conversion time
+	csharpFinalResult := (float64(csharpCodeLOC) / float64(csharpTotal)) * 100
+
 	totalDuration := time.Since(startTotal)
 
 	fmt.Printf("VB6 - File: %s\n", filepath.Base(vb6File))
@@ -53,7 +50,7 @@ func main() {
 
 	fmt.Printf("C# - File: %s\n", filepath.Base(csharpFile))
 	fmt.Printf("  Total LOC: %d, Single-line Comments: %d, Multi-line Comments: %d, Code LOC: %d, Final Result: %.2f%%\n",
-		csharpTotal, csharpSingleComments, csharpMultiComments, csharpTotal-(csharpSingleComments+csharpMultiComments), csharpFinalResult)
+		csharpTotal, csharpSingleComments, csharpMultiComments, csharpCodeLOC, csharpFinalResult)
 
 	// Time measurements
 	fmt.Printf("\nTime Measurements:\n")
@@ -126,7 +123,7 @@ func countCSharpLinesAndComments(filename string) (int, int, int) {
 	inMultiLineComment := false
 
 	for scanner.Scan() {
-		line := strings.TrimSpace(scanner.Text()) // Remove leading/trailing spaces
+		line := strings.TrimSpace(scanner.Text())
 		totalLines++
 
 		if inMultiLineComment {
@@ -137,12 +134,14 @@ func countCSharpLinesAndComments(filename string) (int, int, int) {
 			continue
 		}
 
-		// ✅ More reliable check for single-line comments
-		if strings.HasPrefix(line, "//") || strings.Contains(line, "// ") {
-			singleLineComments++
-		} else if strings.HasPrefix(line, "/*") {
+		if strings.HasPrefix(line, "/*") {
 			multiLineComments++
 			inMultiLineComment = true
+			continue
+		}
+
+		if strings.HasPrefix(line, "//") || strings.Contains(line, "// ") {
+			singleLineComments++
 		}
 	}
 
