@@ -18,13 +18,23 @@ var global state
 func handleBody(rules []json.RawMessage) string {
 	var result string
 	for _, rule := range rules {
+		raw := models.Rule{}
+		json.Unmarshal(rule, &raw)
+		
+		// Skip functions in Execute()
+		if raw.RuleType == "FuncStatement" {
+			continue
+		}
+
 		inter, err := ConvertRule(rule)
 		if err == nil {
-			result += inter
+			result += inter + "\n"
 		}
 	}
 	return result
 }
+
+
 
 func Convert(raw string, symtab map[string]string) (string, error) {
 	context := models.FileContext{}
@@ -34,8 +44,43 @@ func Convert(raw string, symtab map[string]string) (string, error) {
 	if err != nil {
 		return "", fmt.Errorf("Error: %s", err)
 	}
-	converted := fmt.Sprintf("using System;\nclass %s { \n%s \npublic static void Main(string[] args){}\n }", context.FileName, handleBody(context.Body))
+
+	// Separate functions and statements
+	functions := handleFunctions(context.Body)  
+	otherStatements := handleBody(context.Body) 
+
+	// Build the C# class with functions outside execute
+	converted := fmt.Sprintf(`using System;
+class %s { 
+%s 
+
+public static void Execute() { 
+%s 
+} 
+
+public static void Main(string[] args) { 
+Execute(); 
+}
+}`, context.FileName, functions, otherStatements)
+
 	return converted, nil
+}
+
+func handleFunctions(rules []json.RawMessage) string {
+	var result string
+	for _, rule := range rules {
+		raw := models.Rule{}
+		json.Unmarshal(rule, &raw)
+		
+		// Check if this rule is a function (based on heuristic)
+		if raw.RuleType == "FuncStatement" {
+			inter, err := ConvertRule(rule)
+			if err == nil {
+				result += inter + "\n" // Add the function separately
+			}
+		}
+	}
+	return result
 }
 
 // the converter should take the json string and the project context which we'll get on parsing the vbp file
