@@ -206,8 +206,8 @@ def main():
                        help="Convert and compile all VB6 files in the testfiles directory")
     
     # Optional output and temp directories
-    parser.add_argument("-o", "--output", type=str, default="output1", 
-                        help="Output directory for converted C# files (default: output1)")
+    parser.add_argument("-o", "--output", type=str, default="output", 
+                        help="Output directory for converted C# files (default: output)")
     parser.add_argument("-t", "--temp", type=str, default="compilation_results", 
                         help="Temporary directory for compilation logs (default: compilation_results)")
     
