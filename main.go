@@ -31,7 +31,7 @@ func main() {
 	startTotal := time.Now()
 
 	startParsing := time.Now()
-	csharpFile := generateCSharpFile(vb6File)
+	csharpFile, jsonFile := generateCSharpAndJSONFile(vb6File)
 	parsingDuration := time.Since(startParsing)
 
 	// Count LOC and comments for VB6
@@ -40,7 +40,6 @@ func main() {
 	csharpTotal, csharpSingleComments, csharpMultiComments := countCSharpLinesAndComments(csharpFile)
 
 	csharpCodeLOC := csharpTotal - csharpMultiComments
-
 	csharpFinalResult := (float64(csharpCodeLOC) / float64(csharpTotal)) * 100
 
 	totalDuration := time.Since(startTotal)
@@ -52,13 +51,20 @@ func main() {
 	fmt.Printf("  Total LOC: %d, Single-line Comments: %d, Multi-line Comments: %d, Code LOC: %d, Final Result: %.2f%%\n",
 		csharpTotal, csharpSingleComments, csharpMultiComments, csharpCodeLOC, csharpFinalResult)
 
+	// Display JSON File Information
+	fmt.Printf("JSON - File: %s\n", filepath.Base(jsonFile))
+
+	
+	
+
 	// Time measurements
 	fmt.Printf("\nTime Measurements:\n")
 	fmt.Printf("  Parsing and Conversion Duration: %v\n", parsingDuration)
 	fmt.Printf("  Total Conversion Duration: %v\n", totalDuration)
 }
 
-func generateCSharpFile(vb6File string) string {
+
+func generateCSharpAndJSONFile(vb6File string) (string, string) {
 	input, err := antlr.NewFileStream(vb6File)
 	if err != nil {
 		log.Panic("File error")
@@ -69,6 +75,7 @@ func generateCSharpFile(vb6File string) string {
 
 	fileName := strings.TrimSuffix(filepath.Base(vb6File), filepath.Ext(vb6File))
 	csharpFile := filepath.Join(outputDir, fileName+".cs")
+	jsonFile := filepath.Join(outputDir, fileName+".json")
 
 	lexer := parser.NewVisualBasic6Lexer(input)
 	stream := antlr.NewCommonTokenStream(lexer, 0)
@@ -81,13 +88,27 @@ func generateCSharpFile(vb6File string) string {
 	listen := listener.NewTreeShapeListener(writer, &buf)
 	writeToOutput(listen, writer, &buf, fileName, ".cs", tree)
 
-	convertedContent, err := converter.Convert(buf.String(), listen.SymTab)
+	jsonContent := buf.String()
+	generateJSONFile(jsonFile, jsonContent)
+
+	convertedContent, err := converter.Convert(jsonContent, listen.SymTab)
 	if err != nil {
 		log.Panic(err)
 	}
 
-	os.WriteFile(csharpFile, []byte(convertedContent), 0644)
-	return csharpFile
+	err = os.WriteFile(csharpFile, []byte(convertedContent), 0644)
+	if err != nil {
+		log.Panic("Error writing C# file")
+	}
+
+	return csharpFile, jsonFile
+}
+
+func generateJSONFile(jsonFile, jsonContent string) {
+	err := os.WriteFile(jsonFile, []byte(jsonContent), 0644)
+	if err != nil {
+		log.Panic("Error writing JSON file")
+	}
 }
 
 func countVB6LinesAndComments(filename string) (int, int) {
@@ -131,16 +152,15 @@ func countCSharpLinesAndComments(filename string) (int, int, int) {
 			if strings.Contains(line, "*/") {
 				inMultiLineComment = false
 			}
+		
 			continue
 		}
 
 		if strings.HasPrefix(line, "/*") {
 			multiLineComments++
 			inMultiLineComment = true
-			continue
 		}
-
-		if strings.HasPrefix(line, "//") || strings.Contains(line, "// ") {
+		if strings.HasPrefix(line, "//") {
 			singleLineComments++
 		}
 	}
