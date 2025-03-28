@@ -52,8 +52,7 @@ class VB6ConversionApp(App):
         border: tall $background;
         padding: 1;
         width: 100%;
-        height: 50%;
-        overflow-y: auto;
+        height: 100%;
         background: $panel;
         color: $text;
     }

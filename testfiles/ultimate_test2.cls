@@ -23,9 +23,9 @@ End Sub
 
 ' Subroutine demonstrating loops and conditionals (without flag)
 Public Sub ProcessData()
-    Dim i As Integer
-    Dim j As Integer
     Dim total As Integer
+    Dim count As Integer
+    Dim statusCode as Integer
     total = 10  
 
     ' Conditional checks without using a flag variable

@@ -15,14 +15,17 @@ type state struct {
 
 var global state
 
-func handleBody(rules []json.RawMessage) string {
+func handleBody(rules []json.RawMessage, fromSub bool) string {
 	var result string
 	for _, rule := range rules {
 		raw := models.Rule{}
 		json.Unmarshal(rule, &raw)
 		
 		// Skip functions in Execute()
-		if raw.RuleType == "FuncStatement" {
+		if raw.RuleType == "FuncStatement" || raw.RuleType=="SubStatement" {
+			continue
+		}
+		if !fromSub && raw.RuleType == "DeclareVariable" {
 			continue
 		}
 
@@ -42,15 +45,16 @@ func Convert(raw string, symtab map[string]string) (string, error) {
 	global.FileType = context.FileType
 	global.Symtab = symtab
 	if err != nil {
-		return "", fmt.Errorf("Error: %s", err)
+		return "", err
 	}
 
 	// Separate functions and statements
 	functions := handleFunctions(context.Body)  
-	otherStatements := handleBody(context.Body) 
+	otherStatements := handleBody(context.Body, false) 
 
 	// Build the C# class with functions outside execute
 	converted := fmt.Sprintf(`using System;
+
 class %s { 
 %s 
 
@@ -59,12 +63,13 @@ public static void Execute() {
 } 
 
 public static void Main(string[] args) { 
-Execute(); 
+    
 }
 }`, context.FileName, functions, otherStatements)
 
 	return converted, nil
 }
+
 
 func handleFunctions(rules []json.RawMessage) string {
 	var result string
@@ -73,7 +78,7 @@ func handleFunctions(rules []json.RawMessage) string {
 		json.Unmarshal(rule, &raw)
 		
 		// Check if this rule is a function (based on heuristic)
-		if raw.RuleType == "FuncStatement" {
+		if raw.RuleType == "FuncStatement" || raw.RuleType=="SubStatement" || raw.RuleType == "DeclareVariable" {
 			inter, err := ConvertRule(rule)
 			if err == nil {
 				result += inter + "\n" // Add the function separately
@@ -88,7 +93,7 @@ func ConvertRule(rawMsg json.RawMessage) (string, error) {
 	raw := models.Rule{}
 	err := json.Unmarshal([]byte(rawMsg), &raw)
 	if err != nil {
-		error := errors.New("Error: Error unmarshalling json")
+		error := errors.New("error: Error unmarshalling json")
 		log.Println(error)
 		return "", error
 	}

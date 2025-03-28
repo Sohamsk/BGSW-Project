@@ -238,7 +238,7 @@ func SubStmtHandler(content json.RawMessage) string {
 	sb.Reset()
 	sb.WriteString(strings.Trim(str, ","))
 	sb.WriteString(") {")
-	sb.WriteString(handleBody(sub.SubBody))
+	sb.WriteString(handleBody(sub.SubBody, true))
 	sb.WriteString("}")
 	return sb.String()
 }
@@ -322,7 +322,7 @@ func DoLoopStmtHandler(content json.RawMessage) string {
 		sb.WriteString("do")
 	}
 	sb.WriteString("{")
-	sb.WriteString(handleBody(loop.Body))
+	sb.WriteString(handleBody(loop.Body,true))
 	sb.WriteString("}")
 	if !loop.BeforeLoop {
 		sb.WriteString("while(")
@@ -349,7 +349,7 @@ func IfThenElseStmtHandler(content json.RawMessage) string {
 	sb.WriteString("if (")
 	sb.WriteString(ProcessCondition(ifStmt.Condition)) // Using handleBody for Condition
 	sb.WriteString(") {\n")
-	sb.WriteString(handleBody(ifStmt.IfBlock)) // Using handleBody for IfBlock
+	sb.WriteString(handleBody(ifStmt.IfBlock, true)) // Using handleBody for IfBlock
 	sb.WriteString("\n}")
 
 	return sb.String()
@@ -369,7 +369,7 @@ func ElseIfHandler(content json.RawMessage) string {
 	sb.WriteString("else if (")
 	sb.WriteString(ProcessCondition(elseIfStmt.Condition)) // Using handleBody for Condition
 	sb.WriteString(") {\n")
-	sb.WriteString(handleBody(elseIfStmt.ElseIfBlock)) // Using handleBody for ElseIfBlock
+	sb.WriteString(handleBody(elseIfStmt.ElseIfBlock, true)) // Using handleBody for ElseIfBlock
 	sb.WriteString("\n}")
 
 	return sb.String()
@@ -387,10 +387,11 @@ func ElseHandler(content json.RawMessage) string {
 
 	// Handle the `ElseRule`
 	sb.WriteString("else {\n")
-	sb.WriteString(handleBody(elseStmt.Body)) // Using handleBody for ElseBlock
+	sb.WriteString(handleBody(elseStmt.Body, true)) // Using handleBody for ElseBlock
 	sb.WriteString("\n}")
 	return sb.String()
 }
+
 func ForNextRule(content json.RawMessage) string {
 	forNext := models.ForNext{}
 	err := json.Unmarshal(content, &forNext)
@@ -417,7 +418,7 @@ func ForNextRule(content json.RawMessage) string {
 	var sb strings.Builder
 	sb.WriteString(loop)
 	sb.WriteString(" {\n")
-	sb.WriteString(handleBody(forNext.Body))
+	sb.WriteString(handleBody(forNext.Body, true))
 	sb.WriteString("\n}")
 
 	return sb.String()
@@ -612,7 +613,7 @@ func ForEachRule(content json.RawMessage) string {
 	var sb strings.Builder
 	sb.WriteString(loop)
 	sb.WriteString(" {\n")
-	sb.WriteString(handleBody(forEach.Body))
+	sb.WriteString(handleBody(forEach.Body, true))
 	sb.WriteString("\n}")
 
 	return sb.String()

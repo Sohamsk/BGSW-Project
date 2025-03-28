@@ -4,8 +4,6 @@ Function Mult(ByVal Factor1 As Integer, Factor2 As Integer) as Integer
 	Mult = Factor1 * Factor2
 End Function 
 
-Public Function Foo(a$, b&, c!, d#, e@, f$()) As Boolean
-	Dim asFoo$()
+Public Function Foo(a$, b&, c!, d#, e@, f$()) As String
+	Foo=True
 End Function
-
-Mult 3, 4

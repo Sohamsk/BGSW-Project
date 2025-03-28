@@ -829,6 +829,10 @@ letterrange
 lineLabel
     : ambiguousIdentifier COLON
     ;
+booleanLiteral
+    : TRUE
+    | FALSE
+    ;
 
 literal
     : COLORLITERAL
@@ -838,12 +842,13 @@ literal
     | integerLiteral
     | octalLiteral
     | STRINGLITERAL
+    | booleanLiteral
     | TRUE
     | FALSE
     | NOTHING
     | NULL_
     ;
-
+    
 publicPrivateVisibility
     : PRIVATE
     | PUBLIC
