@@ -22,7 +22,7 @@ func handleBody(rules []json.RawMessage, fromSub bool) string {
 		json.Unmarshal(rule, &raw)
 		
 		// Skip functions in Execute()
-		if raw.RuleType == "FuncStatement" || raw.RuleType=="SubStatement" {
+		if raw.RuleType == "FuncStatement" || raw.RuleType=="SubStatement" || raw.RuleType=="EnumerationRule"{
 			continue
 		}
 		if !fromSub && raw.RuleType == "DeclareVariable" {
@@ -49,7 +49,7 @@ func Convert(raw string, symtab map[string]string) (string, error) {
 	}
 
 	// Separate functions and statements
-	functions := handleFunctions(context.Body)  
+	functions := handleoutsidestmts(context.Body)  
 	otherStatements := handleBody(context.Body, false) 
 
 	// Build the C# class with functions outside execute
@@ -63,7 +63,7 @@ public static void Execute() {
 } 
 
 public static void Main(string[] args) { 
-    
+
 }
 }`, context.FileName, functions, otherStatements)
 
@@ -71,14 +71,14 @@ public static void Main(string[] args) {
 }
 
 
-func handleFunctions(rules []json.RawMessage) string {
+func handleoutsidestmts(rules []json.RawMessage) string {
 	var result string
 	for _, rule := range rules {
 		raw := models.Rule{}
 		json.Unmarshal(rule, &raw)
 		
 		// Check if this rule is a function (based on heuristic)
-		if raw.RuleType == "FuncStatement" || raw.RuleType=="SubStatement" || raw.RuleType == "DeclareVariable" {
+		if raw.RuleType == "FuncStatement" || raw.RuleType=="SubStatement" || raw.RuleType == "DeclareVariable" || raw.RuleType=="EnumerationRule"{
 			inter, err := ConvertRule(rule)
 			if err == nil {
 				result += inter + "\n" // Add the function separately

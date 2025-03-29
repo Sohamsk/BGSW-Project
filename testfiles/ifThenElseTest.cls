@@ -1,3 +1,4 @@
+sub something()
 Dim IsVisible As Boolean
 Dim MyBool As Boolean
 
@@ -12,4 +13,4 @@ ElseIf MyBool Then
 Else
     MyBool = False
 End If
-
+end sub

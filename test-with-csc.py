@@ -208,8 +208,8 @@ def main():
     # Optional output and temp directories
     parser.add_argument("-o", "--output", type=str, default="output", 
                         help="Output directory for converted C# files (default: output)")
-    parser.add_argument("-t", "--temp", type=str, default="compilation_results", 
-                        help="Temporary directory for compilation logs (default: compilation_results)")
+    parser.add_argument("-t", "--temp", type=str, default="output/compilation_results", 
+                        help="Temporary directory for compilation logs (default:output/compilation_results)")
     
     # Parse arguments
     args = parser.parse_args()

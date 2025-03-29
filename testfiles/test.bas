@@ -7,6 +7,7 @@
 'End Sub
 
 Public Sub Test2()
+    Dim i as Integer : i=0
     Do
         Beep
     Loop Until i >= 1
@@ -15,4 +16,3 @@ Public Sub Test2()
         Beep
     Loop
 End Sub
-

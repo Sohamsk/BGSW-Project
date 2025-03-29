@@ -44,25 +44,27 @@ func main() {
 
 	totalDuration := time.Since(startTotal)
 
-	fmt.Printf("VB6 - File: %s\n", filepath.Base(vb6File))
-	fmt.Printf("  Total LOC: %d, Comment LOC: %d, Code LOC: %d\n", vb6Total, vb6Comments, vb6Total-vb6Comments)
+	fmt.Printf("\n==================== Conversion Summary ====================\n")
 
-	fmt.Printf("C# - File: %s\n", filepath.Base(csharpFile))
-	fmt.Printf("  Total LOC: %d, Single-line Comments: %d, Multi-line Comments: %d, Code LOC: %d, Final Result: %.2f%%\n",
-		csharpTotal, csharpSingleComments, csharpMultiComments, csharpCodeLOC, csharpFinalResult)
+// VB6 File Details
+fmt.Printf("\n📂 VB6 File: %s\n", filepath.Base(vb6File))
+fmt.Printf("   📌 Total LOC: %-6d | 📝 Comment LOC: %-6d | 💻 Code LOC: %-6d\n", vb6Total, vb6Comments, vb6Total-vb6Comments)
 
-	// Display JSON File Information
-	fmt.Printf("JSON - File: %s\n", filepath.Base(jsonFile))
+// C# File Details
+fmt.Printf("\n🚀 C# File: %s\n", filepath.Base(csharpFile))
+fmt.Printf("   📌 Total LOC: %-6d | 📝 Single-line Comments: %-6d | 📝 Multi-line Comments: %-6d\n", 
+          csharpTotal, csharpSingleComments, csharpMultiComments)
+fmt.Printf("   💻 Code LOC: %-6d | ✅ Final Result: %.2f%%\n", csharpCodeLOC, csharpFinalResult)
 
-	
-	
+// JSON File Details
+fmt.Printf("\n📂 JSON File: %s\n", filepath.Base(jsonFile))
 
-	// Time measurements
-	fmt.Printf("\nTime Measurements:\n")
-	fmt.Printf("  Parsing and Conversion Duration: %v\n", parsingDuration)
-	fmt.Printf("  Total Conversion Duration: %v\n", totalDuration)
+// Time Measurements
+fmt.Printf("\n⏳ Time Measurements:\n")
+fmt.Printf("   ⏱️ Parsing and Conversion Duration: %v\n", parsingDuration)
+fmt.Printf("   ⏱️ Total Conversion Duration      : %v\n", totalDuration)
+fmt.Printf("\n===========================================================\n")
 }
-
 
 func generateCSharpAndJSONFile(vb6File string) (string, string) {
 	input, err := antlr.NewFileStream(vb6File)
