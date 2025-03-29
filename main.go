@@ -51,7 +51,7 @@ fmt.Printf("\n📂 VB6 File: %s\n", filepath.Base(vb6File))
 fmt.Printf("   📌 Total LOC: %-6d | 📝 Comment LOC: %-6d | 💻 Code LOC: %-6d\n", vb6Total, vb6Comments, vb6Total-vb6Comments)
 
 // C# File Details
-fmt.Printf("\n🚀 C# File: %s\n", filepath.Base(csharpFile))
+fmt.Printf("\n📂 C# File: %s\n", filepath.Base(csharpFile))
 fmt.Printf("   📌 Total LOC: %-6d | 📝 Single-line Comments: %-6d | 📝 Multi-line Comments: %-6d\n", 
           csharpTotal, csharpSingleComments, csharpMultiComments)
 fmt.Printf("   💻 Code LOC: %-6d | ✅ Final Result: %.2f%%\n", csharpCodeLOC, csharpFinalResult)
