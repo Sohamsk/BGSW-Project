@@ -1,0 +1,83 @@
+site_name: VB6-C# Tool
+site_description: Documentation for the VB6 to C# Migration Tool
+site_author: Project Team
+
+name: Deploy MkDocs
+on:
+  push:
+    branches:
+      - main # Change if using another branch
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v3
+        with:
+          python-version: "3.12"
+
+      - name: Install MkDocs
+        run: pip install mkdocs mkdocs-material
+
+      - name: Deploy MkDocs
+        run: mkdocs gh-deploy --force
+
+theme:
+  name: material
+  palette:
+    # Dark mode like React docs
+    scheme: slate
+    primary: indigo
+    accent: blue
+  features:
+    - navigation.instant
+    - navigation.tracking
+    - navigation.sections
+    - navigation.expand
+    - navigation.indexes
+    - navigation.top
+    - search.suggest
+    - search.highlight
+    - content.code.copy
+    - content.code.annotate
+  icon:
+    repo: fontawesome/brands/github
+
+# Extensions for better looking docs
+markdown_extensions:
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.tabbed:
+      alternate_style: true
+  - tables
+  - toc:
+      permalink: true
+
+# Navigation structure
+nav:
+  - Home: index.md
+  - Documentation:
+      - Overview: docs.md
+    # Add other pages here
+
+# Additional plugins for better functionality
+plugins:
+  - search
+  - minify:
+      minify_html: true
+
+# Repository info (if your project is on GitHub)
+repo_url: https://github.com/yourusername/your-repo
+repo_name: VB6 to C# Migration Tool
+
+extra_css:
+  - stylesheets/extra.css

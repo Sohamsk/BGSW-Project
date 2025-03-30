@@ -1,1 +1,0 @@
-class subTest {public void Mult(short Factor1,short Factor2) {object Product;}}
