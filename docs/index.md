@@ -19,4 +19,7 @@ This documentation provides comprehensive information about the VB6 to C# Migrat
 
 To get started with the migration tool, check out:
 
-- [Documentation](docs.md)
+- [Introduction](docs.md)
+- [Workflow](workflow.md)
+- [steps to build and run the tool](steps.md)
+- [pending components](docs.md)

@@ -1,3 +1,34 @@
+/* Import Poppins font */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
+/* Apply Poppins to the entire site */
+html, body {
+    font-family: 'Poppins', sans-serif;
+}
+
+/* Additional styling for headers */
+h1, h2, h3, h4, h5, h6 {
+    font-weight: 600;
+}
+
+/* Enhance paragraph readability */
+p {
+    font-size: 16px;
+    line-height: 1.6;
+    font-weight: 400;
+}
+
+/* Customize navigation menu */
+.md-nav__link {
+    font-weight: 500;
+}
+
+/* Improve button appearance */
+.md-button {
+    font-family: 'Poppins', sans-serif;
+    font-weight: 500;
+}
+
 :root {
   --md-primary-fg-color: #61dafb;
   --md-primary-fg-color--light: #61dafb;
@@ -5,9 +36,7 @@
   --md-accent-fg-color: #61dafb;
 }
 
-.md-header {
-  background-color: #20232a;
-}
+
 
 .md-content a {
   color: #61dafb;
@@ -17,4 +46,116 @@
   background-color: rgba(97, 218, 251, 0.1);
   border-radius: 3px;
   padding: 0.2em 0.4em;
+}
+.md-header {
+  box-shadow: 0 2px 4px rgba(207, 162, 162, 0.3);
+  transition: background-color 0.2s, color 0.2s, box-shadow 0.2s;
+}
+
+/* Add gradient background to tabs */
+.md-tabs {
+  background-image: linear-gradient(to right, var(--md-primary-fg-color--dark), var(--md-primary-fg-color));
+  transition: background-image 0.3s;
+}
+
+/* Enhance tab hover effect */
+.md-tabs__link {
+  opacity: 0.8;
+  transition: opacity 0.2s, transform 0.2s;
+}
+
+.md-tabs__link:hover {
+  opacity: 1;
+  transform: translateY(-2px);
+}
+
+.md-tabs__link--active {
+  opacity: 1;
+  font-weight: bold;
+}
+
+/* Animate navigation items on hover */
+.md-nav__item {
+  transition: background-color 0.2s;
+}
+
+.md-nav__item:hover {
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+/* Style the active navigation item */
+.md-nav__item--active {
+  background-color: rgba(0, 0, 0, 0.03);
+}
+
+/* Add subtle animation to navigation expansion */
+.md-nav__icon {
+  transition: transform 0.2s;
+}
+
+.md-nav__item--expanded .md-nav__icon {
+  transform: rotate(90deg);
+}
+/* Hide inner contents in sidebar */
+.md-nav--secondary {
+  display: none !important;
+}
+/* Reduce footer height */
+.md-footer {
+  min-height: auto;
+}
+
+/* Make the navigation footer more compact */
+.md-footer-nav {
+  padding: auto;
+}
+
+.md-footer-nav__link {
+  padding: 0.5rem 1rem;
+}
+
+/* Reduce padding in the footer meta section */
+.md-footer-meta {
+  padding: 0.3rem;
+}
+
+/* Make the "Made with" text smaller */
+.md-footer-copyright {
+  font-size: 0.6rem;
+  padding: 0.3rem;
+}
+
+/* Make the navigation arrows and text smaller */
+.md-footer-nav__button {
+  padding: 0.1rem;
+}
+
+.md-footer-nav__title {
+  font-size: 0.8rem;
+  padding: 0.3rem;
+}
+
+/* Reduce padding in navigation items */
+.md-footer-nav__inner {
+  padding: 0;
+}
+/* Updated logo selectors for newer versions of Material for MkDocs */
+.md-logo {
+  padding: 0.2rem;
+}
+
+.md-logo img {
+  height: 4rem !important;  /* Adjust the height as needed */
+  width: auto !important;
+}
+
+/* For versions 7+ of Material for MkDocs */
+.md-header__button.md-logo {
+  padding: 0rem;
+}
+
+.md-header__button.md-logo img,
+.md-header__button.md-logo svg {
+  height: 2rem !important;  /* Adjust the height as needed */
+  width: auto !important;
 }

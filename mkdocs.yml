@@ -1,33 +1,28 @@
-site_name: VB6-C# Tool
+site_name: VB6 to C# Migration Tool
 site_description: Documentation for the VB6 to C# Migration Tool
 site_author: Project Team
-
 name: Deploy MkDocs
 on:
   push:
     branches:
       - main # Change if using another branch
-
 jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
-
       - name: Set up Python
         uses: actions/setup-python@v3
         with:
           python-version: "3.12"
-
       - name: Install MkDocs
         run: pip install mkdocs mkdocs-material
-
       - name: Deploy MkDocs
         run: mkdocs gh-deploy --force
-
 theme:
   name: material
+  logo: images/logo.png
   palette:
     # Dark mode like React docs
     scheme: slate
@@ -44,9 +39,26 @@ theme:
     - search.highlight
     - content.code.copy
     - content.code.annotate
+    # Enhanced navbar features
+    - header.autohide  # Hide header on scroll
+    - navigation.tabs.sticky  # Make tabs sticky
+    - navigation.footer  # Add footer navigation
   icon:
     repo: fontawesome/brands/github
-
+    # Add icons for navigation items
+    admonition:
+      note: fontawesome/solid/note-sticky
+      abstract: fontawesome/solid/book
+      info: fontawesome/solid/circle-info
+      tip: fontawesome/solid/bullhorn
+      success: fontawesome/solid/check
+      question: fontawesome/solid/circle-question
+      warning: fontawesome/solid/triangle-exclamation
+      failure: fontawesome/solid/bomb
+      danger: fontawesome/solid/skull
+      bug: fontawesome/solid/robot
+      example: fontawesome/solid/flask
+      quote: fontawesome/solid/quote-left
 # Extensions for better looking docs
 markdown_extensions:
   - admonition
@@ -61,23 +73,25 @@ markdown_extensions:
   - tables
   - toc:
       permalink: true
-
-# Navigation structure
+      title: On this page
+# Navigation structure with enhanced icons
 nav:
   - Home: index.md
-  - Documentation:
-      - Overview: docs.md
-    # Add other pages here
-
+  - 📖 Documentation:
+      - 🔍 Introduction: docs.md
+      - ⚙️ Workflow: workflow.md
+      - 🛠️ Steps to build: steps.md
+      - 🚧 Pending components: pendingcomp.md
+  - Credits: credit.md    
 # Additional plugins for better functionality
 plugins:
   - search
   - minify:
       minify_html: true
-
 # Repository info (if your project is on GitHub)
-repo_url: https://github.com/yourusername/your-repo
-repo_name: VB6 to C# Migration Tool
-
+repo_url: https://github.com/Sohamsk/BGSW-Project
+repo_name: code
+# Custom CSS for navbar enhancement
 extra_css:
-  - stylesheets/extra.css
+  - style.css
+
