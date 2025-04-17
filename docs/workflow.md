@@ -76,22 +76,22 @@ The current implementation supports the following constructs:
 
 The vb_cs_types map defines the conversion of VB6 data types to C# equivalents.
 
-| VB6 Type  | C# Type  |
-| --------- | -------- |
-| boolean   | bool     |
-| byte      | byte     |
-| currency  | decimal  |
-| date      | DateTime |
-| double    | double   |
-| integer   | int      |
-| long      | long     |
-| object    | object   |
-| single    | float    |
-| string    | string   |
-| variant   | object   |
-| byte()    | byte[]   |
-| integer() | short[]  |
-| long()    | int[]    |
+| VB6 Type   | C# Type   |
+|------------|-----------|
+| boolean    | bool      |
+| byte       | byte      |
+| currency   | decimal   |
+| date       | DateTime  |
+| double     | double    |
+| integer    | int       |
+| long       | long      |
+| object     | object    |
+| single     | float     |
+| string     | string    |
+| variant    | object    |
+| byte()     | byte[]    |
+| integer()  | short[]   |
+| long()     | int[]     |
 ---
 
 
