@@ -1,6 +1,7 @@
 site_name: VB6 to C# Migration Tool
 site_description: Documentation for the VB6 to C# Migration Tool
 site_author: Project Team
+site_url: https://sohamsk.github.io/BGSW-Project/
 name: Deploy MkDocs
 on:
   push:
