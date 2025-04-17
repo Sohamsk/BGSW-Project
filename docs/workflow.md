@@ -12,15 +12,19 @@ This project is a prototype of a VB6 to C# source-to-source converter. It utiliz
 
 #### 3.1.2 Converter Package
 
-####1.converter.go:
-  - Reads the generated JSON from the listener package.
-  - Converts JSON into mapped Go structs defined in models.go.
-  - Invokes specific conversion handlers from funcMap.go to generate equivalent C# code.
-  - Outputs the C# code to a file.
-####2.funcMap.go:
-  - Maintains mappings of VB6 construct names to handler functions. Each handler is responsible for converting its respective construct.
-####3.models.go:
-  - Defines Go data structures for unmarshaling the JSON representation of VB6 constructs.
+1. **converter.go**
+   - Reads the generated JSON from the `listener` package.
+   - Converts JSON into mapped Go structs defined in `models.go`.
+   - Invokes specific conversion handlers from `funcMap.go` to generate equivalent C# code.
+   - Outputs the C# code to a file.
+
+2. **funcMap.go**
+   - Maintains mappings of VB6 construct names to handler functions.
+   - Each handler is responsible for converting its respective construct.
+
+3. **models.go**
+   - Defines Go data structures for unmarshaling the JSON representation of VB6 constructs.
+
 
 ---
 ### 🔹Supported VB6 Constructs
