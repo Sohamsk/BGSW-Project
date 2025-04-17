@@ -5,7 +5,7 @@ name: Deploy MkDocs
 on:
   push:
     branches:
-      - main # Change if using another branch
+      - docs # Change if using another branch
 jobs:
   deploy:
     runs-on: ubuntu-latest
