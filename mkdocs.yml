@@ -2,25 +2,6 @@ site_name: VB6 to C# Migration Tool
 site_description: Documentation for the VB6 to C# Migration Tool
 site_author: Project Team
 site_url: https://sohamsk.github.io/BGSW-Project/
-name: Deploy MkDocs
-on:
-  push:
-    branches:
-      - docs # Change if using another branch
-jobs:
-  deploy:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
-      - name: Set up Python
-        uses: actions/setup-python@v3
-        with:
-          python-version: "3.12"
-      - name: Install MkDocs
-        run: pip install mkdocs mkdocs-material
-      - name: Deploy MkDocs
-        run: mkdocs gh-deploy --force
 theme:
   name: material
   logo: images/logo.png
