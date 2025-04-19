@@ -16,11 +16,17 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.11'  # or your preferred version
+          python-version: '3.11'
 
-      - name: Install MkDocs and theme
-        run: |
-          pip install mkdocs mkdocs-material mkdocs-minify-plugin # add other plugins here if needed
+      - name: Install dependencies
+        run: pip install mkdocs mkdocs-material mkdocs-minify-plugin
 
       - name: Deploy to GitHub Pages
-        run: mkdocs gh-deploy --force
+        env:
+          GIT_COMMITTER_NAME: github-actions
+          GIT_COMMITTER_EMAIL: github-actions@github.com
+          GH_TOKEN: ${{ secrets.GH_DEPLOY_TOKEN }}
+        run: |
+          git config --global user.name "$GIT_COMMITTER_NAME"
+          git config --global user.email "$GIT_COMMITTER_EMAIL"
+          mkdocs gh-deploy --force --remote-name origin --remote-branch gh-pages
