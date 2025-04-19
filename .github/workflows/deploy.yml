@@ -3,30 +3,27 @@ name: Deploy MkDocs to GitHub Pages
 on:
   push:
     branches:
-      - docs
+      - docs   # This triggers when you push to the docs branch
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout docs branch
-        uses: actions/checkout@v4
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
+      - uses: actions/checkout@v3
+        with:
+          ref: docs   # Explicitly check out the docs branch
+      
+      - name: Setup Python
+        uses: actions/setup-python@v4
         with:
           python-version: '3.11'
-
+          
       - name: Install dependencies
-        run: pip install mkdocs mkdocs-material mkdocs-minify-plugin
-
-      - name: Deploy to GitHub Pages
-        env:
-          GIT_COMMITTER_NAME: github-actions
-          GIT_COMMITTER_EMAIL: github-actions@github.com
-          GH_TOKEN: ${{ secrets.GH_DEPLOY_TOKEN }}
         run: |
-          git config --global user.name "$GIT_COMMITTER_NAME"
-          git config --global user.email "$GIT_COMMITTER_EMAIL"
-          mkdocs gh-deploy --force --remote-name origin --remote-branch gh-pages
+          python -m pip install --upgrade pip
+          pip install mkdocs mkdocs-material mkdocs-minify-plugin
+          
+      - name: Deploy
+        run: mkdocs gh-deploy --force
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_DEPLOY_TOKEN }}
