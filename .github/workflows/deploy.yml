@@ -20,7 +20,7 @@ jobs:
 
       - name: Install MkDocs and theme
         run: |
-          pip install mkdocs mkdocs-material  # add other plugins here if needed
+          pip install mkdocs mkdocs-material mkdocs-minify-plugin # add other plugins here if needed
 
       - name: Deploy to GitHub Pages
         run: mkdocs gh-deploy --force
