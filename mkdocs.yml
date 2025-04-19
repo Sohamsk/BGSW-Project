@@ -70,9 +70,6 @@ plugins:
   - search
   - minify:
       minify_html: true
-# Repository info (if your project is on GitHub)
-repo_url: https://github.com/Sohamsk/BGSW-Project
-repo_name: code
 # Custom CSS for navbar enhancement
 extra_css:
   - style.css
