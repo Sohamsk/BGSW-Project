@@ -1,9 +1,5 @@
-sub test_6
-For i = 1 To 3
-    For Each item In collection
-        For j = 1 To 2 Step 1
-            Print i, j, item
-        Next j
-    Next item
-Next i
-end sub
+With myObject
+    .Property1 = "Value1"
+    .Property2 = "Value2"
+    .Method1
+End With

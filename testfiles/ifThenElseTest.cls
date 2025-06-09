@@ -1,16 +1,17 @@
 sub something()
 Dim IsVisible As Boolean
 Dim MyBool As Boolean
+Dim myVar As Boolean
 
-IsVisible = True
-MyBool = True
+IsVisible = true
+MyBool = true
 
 If IsVisible Then
     Beep
-    IsVisible = False
+    IsVisible = false
 ElseIf MyBool Then
-  myVar = True
+  myVar = true
 Else
-    MyBool = False
+    MyBool = false
 End If
 end sub

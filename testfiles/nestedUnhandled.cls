@@ -3,14 +3,20 @@ Public Property Get UserName() As String
 End Property
 Private Sub Class_Initialize()
     '##ReplaceStatement frmLogin = New frmLoginWin
+    Dim myVar as Boolean
+    Dim IsVisible as Boolean
+    Dim MyBool as Boolean
 
+    myVar=true
+    IsVisible=true
+    MyBool=true
     Set frmLogin = New frmLoginWin
     If IsVisible Then
     Beep
-    IsVisible = False
+    IsVisible = false
     ElseIf MyBool Then
-    myVar = True
+    myVar = true
     Else
-        MyBool = False
+        MyBool = false
     End If
 End Sub

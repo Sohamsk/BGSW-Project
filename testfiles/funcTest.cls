@@ -4,6 +4,6 @@ Function Mult(ByVal Factor1 As Integer, Factor2 As Integer) as Integer
 	Mult = Factor1 * Factor2
 End Function 
 
-Public Function Foo(a$, b&, c!, d#, e@, f$()) As String
-	Foo=True
+Public Function Foo(a$, b&, c!, d#, e@, f$()) As Boolean
+	Foo=true
 End Function

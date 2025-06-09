@@ -1,5 +1,3 @@
-With myObject
-    .Property1 = "Value1"
-    .Property2 = "Value2"
-    .Method1
-End With
+Dim b as string:b="pius"
+Dim c as string:c="shah"
+Print "a" , b, c,
