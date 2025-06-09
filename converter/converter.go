@@ -22,7 +22,7 @@ func handleBody(rules []json.RawMessage, fromSub bool) string {
 		json.Unmarshal(rule, &raw)
 		
 		// Skip functions in Execute()
-		if raw.RuleType == "FuncStatement" || raw.RuleType=="SubStatement" || raw.RuleType=="EnumerationRule"{
+		if raw.RuleType == "FuncStatement" || raw.RuleType=="SubStatement" || raw.RuleType=="EnumerationRule" || raw.RuleType=="PropertyGetStatement" || raw.RuleType=="PropertySetStatement" || raw.RuleType=="PropertyLetStatement" {
 			continue
 		}
 		if !fromSub && raw.RuleType == "DeclareVariable" {
@@ -78,7 +78,7 @@ func handleoutsidestmts(rules []json.RawMessage) string {
 		json.Unmarshal(rule, &raw)
 		
 		// Check if this rule is a function (based on heuristic)
-		if raw.RuleType == "FuncStatement" || raw.RuleType=="SubStatement" || raw.RuleType == "DeclareVariable" || raw.RuleType=="EnumerationRule"{
+		if raw.RuleType == "FuncStatement" || raw.RuleType=="SubStatement" || raw.RuleType == "DeclareVariable" || raw.RuleType=="EnumerationRule" || raw.RuleType=="PropertyGetStatement" || raw.RuleType=="PropertySetStatement" || raw.RuleType=="PropertyLetStatement"{
 			inter, err := ConvertRule(rule)
 			if err == nil {
 				result += inter + "\n" // Add the function separately
